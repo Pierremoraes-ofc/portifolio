@@ -2880,26 +2880,1017 @@ pr_lib.notify(source, {
     ]
   },
   pr_3dsound: {
-    name:'PR 3D Sound',code:'pr_3dsound',repo:'https://github.com/Pierremoraes-ofc/pr_3dsound',
-    category:{pt:'Hobby • Spatial Audio',en:'Hobby • Spatial Audio'},
-    lead:{pt:'Engine de áudio espacial para FiveM com emitters persistentes, URLs e arquivos locais, reprodução 2D/3D, attach em entities, streaming por proximidade, sincronização autoritativa, HRTF quando CORS permite e oclusão acústica.',en:'Spatial-audio engine for FiveM with persistent emitters, URLs/local files, 2D/3D playback, entity attachment, proximity streaming, authoritative synchronization, HRTF where CORS permits and acoustic occlusion.'},
-    facts:[['Version','4.0.0'],['Spatial','HRTF / PannerNode'],['Streaming','Proximity'],['Native','GTA sound bridge']],
-    sections:[
-      {id:'sources',title:{pt:'Fontes de áudio',en:'Audio sources'},text:{pt:'Suporta arquivos locais, URLs diretas HTTP(S), YouTube/SoundCloud via player compatível e sons nativos GTA em camada separada. URLs diretas podem entrar na cadeia WebAudio quando CORS permite.',en:'Supports local files, direct HTTP(S) URLs, YouTube/SoundCloud through compatible players and GTA native audio through a separate layer. Direct URLs can enter the WebAudio chain when CORS allows.'}},
-      {id:'hrtf',title:{pt:'HRTF real',en:'Real HRTF'},code:`HTMLAudioElement
-  → MediaElementSource
-  → PannerNode(HRTF)
-  → Low-pass
-  → Gain`,text:{pt:'Quando a origem permite WebAudio/CORS, o PannerNode executa espacialização HRTF. Em fallback HTML5/Howler ainda há distância e oclusão, mas sem HRTF real.',en:'When origin allows WebAudio/CORS, PannerNode performs HRTF spatialization. HTML5/Howler fallback still provides distance/occlusion but not true HRTF.'}},
-      {id:'streaming',title:{pt:'Emitters persistentes',en:'Persistent emitters'},text:{pt:'Emitters server-side mantêm startedAt, seekBase, paused, pausedOffset, volume, radius, loop e destino. Jogadores que entram no raio depois recebem o timestamp correto em vez de reiniciar o áudio.',en:'Server emitters retain startedAt, seekBase, paused, pausedOffset, volume, radius, loop and destination. Players entering radius later receive correct timestamp instead of restarting audio.'}},
-      {id:'attach',title:{pt:'Attach em entities',en:'Entity attachment'},text:{pt:'Um emitter pode acompanhar veículo, objeto ou ped usando Network ID. O client tenta resolver a entity novamente quando ela ainda não está streamada. O fluxo respeita routing bucket quando disponível.',en:'An emitter can follow vehicle, object or ped using Network ID. Client retries entity resolution when not yet streamed. Flow respects routing buckets when available.'}},
-      {id:'occlusion',title:{pt:'Oclusão acústica',en:'Acoustic occlusion'},text:{pt:'Raycasts e heurísticas de veículos/interiores reduzem volume e, em URLs WebAudio diretas, também aplicam low-pass real. Estado de portas/janelas, veículos fechados e transições MLO participam do cálculo.',en:'Raycasts plus vehicle/interior heuristics attenuate volume and, for direct WebAudio URLs, apply a real low-pass filter. Door/window state, closed vehicles and MLO transitions participate in the result.'}},
-      {id:'server-api',title:{pt:'Exports server-side',en:'Server exports'},bullets:{pt:['Play / PlayUrl / PlayUrlPos / PlayUrlAttached','AttachToEntity / DetachEntity / UpdateCoords','Pause / Resume / Stop / StopAll','SetVolume / SetVolumeMax / SetDistance / SetLoop / SetTimestamp','FadeIn / FadeOut','SoundExists / GetAllSounds'],en:['Play / PlayUrl / PlayUrlPos / PlayUrlAttached','AttachToEntity / DetachEntity / UpdateCoords','Pause / Resume / Stop / StopAll','SetVolume / SetVolumeMax / SetDistance / SetLoop / SetTimestamp','FadeIn / FadeOut','SoundExists / GetAllSounds']}},
-      {id:'client-api',title:{pt:'Exports client-side',en:'Client exports'},bullets:{pt:['PlayLocal / PlayLocal2D','PlayUrl2D / PlayUrl3D / PlayAttached','Pause / Resume / Stop','SetVolume / SetDistance','FadeIn / FadeOut','SoundExists / IsPlaying / IsPaused / GetInfo / GetAllSounds'],en:['PlayLocal / PlayLocal2D','PlayUrl2D / PlayUrl3D / PlayAttached','Pause / Resume / Stop','SetVolume / SetDistance','FadeIn / FadeOut','SoundExists / IsPlaying / IsPaused / GetInfo / GetAllSounds']}},
-      {id:'security',title:{pt:'Segurança e controle compartilhado',en:'Security & shared control'},text:{pt:'Eventos client→server de controle são bloqueados por padrão. Controle compartilhado deve preferir exports server-side; eventos autorizados podem ser liberados por convar/ACE. URLs e caminhos locais passam por validações de formato/tamanho.',en:'Client→server control events are blocked by default. Shared control should prefer server exports; authorized event control can be enabled through convar/ACE. URLs and local paths are validated for format/size.'}}
+    "name": "PR 3D Sound",
+    "code": "pr_3dsound",
+    "repo": "https://github.com/Pierremoraes-ofc/pr_3dsound",
+    "category": {
+      "pt": "Hobby • Spatial Audio",
+      "en": "Hobby • Spatial Audio"
+    },
+    "lead": {
+      "pt": "Engine de áudio espacial para FiveM com arquivos locais, URLs diretas, HLS, YouTube, SoundCloud, emitters persistentes, streaming por proximidade, attach em entities, sincronização autoritativa, HRTF real quando CORS permite, oclusão acústica e uma ponte separada para sons nativos do GTA.",
+      "en": "Spatial audio engine for FiveM with local files, direct URLs, HLS, YouTube, SoundCloud, persistent emitters, proximity streaming, entity attachment, authoritative synchronization, real HRTF when CORS permits, acoustic occlusion and a separate bridge for GTA native sounds."
+    },
+    "facts": [
+      [
+        "Version",
+        "4.0.0"
+      ],
+      [
+        "Spatial",
+        "WebAudio HRTF"
+      ],
+      [
+        "Streaming",
+        "Proximity + hysteresis"
+      ],
+      [
+        "Sources",
+        "Local / HTTP / HLS / YT / SC"
+      ],
+      [
+        "Native",
+        "GTA sound bridge"
+      ],
+      [
+        "Server IDs",
+        "> 100000"
+      ]
+    ],
+    "sections": [
+      {
+        "id": "overview",
+        "title": {
+          "pt": "Visão geral",
+          "en": "Overview"
+        },
+        "text": {
+          "pt": "O PR 3D Sound separa reprodução local de áudio e estado compartilhado de emitters. Sons posicionais criados no servidor permanecem registrados mesmo quando ninguém está no raio. O servidor decide quem deve ouvir, qual timestamp cada listener deve receber e quando um som deve entrar ou sair do client.",
+          "en": "PR 3D Sound separates local playback from shared emitter state. Server-created positional sounds remain registered even when nobody is inside their range. The server decides who should listen, which timestamp each listener receives and when a sound streams in or out."
+        },
+        "cards": [
+          [
+            "Áudio 2D",
+            "Playback sem posição espacial para um player ou grupo elegível."
+          ],
+          [
+            "Áudio 3D fixo",
+            "Emitter persistente preso a coordenadas do mundo."
+          ],
+          [
+            "Attach",
+            "Emitter acompanha Network ID de veículo, objeto ou ped."
+          ],
+          [
+            "HRTF",
+            "PannerNode em modo HRTF para URL direta com WebAudio/CORS."
+          ],
+          [
+            "Oclusão",
+            "Raycast, veículo e MLO modulam volume e low-pass."
+          ],
+          [
+            "Sincronização",
+            "Pause, resume, seek, loop, volume e distância vivem no estado autoritativo."
+          ]
+        ]
+      },
+      {
+        "id": "architecture",
+        "title": {
+          "pt": "Arquitetura",
+          "en": "Architecture"
+        },
+        "text": {
+          "pt": "A implementação combina Lua no client/server com NUI JavaScript. Lua cuida de estado, proximidade, entities, raycasts e regras; SoundPlayer.js faz a reprodução e espacialização no browser.",
+          "en": "The implementation combines client/server Lua with JavaScript NUI. Lua handles state, proximity, entities, raycasts and rules; SoundPlayer.js performs playback and spatialization in the browser."
+        },
+        "code": "SERVER\n  Sounds{}\n  ├─ emitter state\n  ├─ listener set\n  ├─ timestamp / pause\n  ├─ proximity streaming\n  └─ routing bucket\n        ↓ client events\nCLIENT LUA\n  ├─ local registry\n  ├─ entity attachment\n  ├─ distance attenuation\n  ├─ raycast / vehicle / MLO occlusion\n  └─ listener position\n        ↓ SendNUIMessage\nNUI / SoundPlayer.js\n  ├─ Howler\n  ├─ HTMLAudioElement\n  ├─ HLS.js\n  ├─ YouTube / SoundCloud players\n  └─ WebAudio HRTF / filter / gain"
+      },
+      {
+        "id": "installation",
+        "title": {
+          "pt": "Instalação",
+          "en": "Installation"
+        },
+        "text": {
+          "pt": "O resource é standalone. Basta garantir o ensure e deixar client/test_commands.lua desabilitado em produção. Arquivos locais ficam em html/sounds/ e podem ser organizados em subpastas.",
+          "en": "The resource is standalone. Ensure it in server.cfg and keep client/test_commands.lua disabled in production. Local files live under html/sounds/ and may be organized into subfolders."
+        },
+        "code": "ensure pr_3dsound\n\n# client/test_commands.lua permanece comentado no fxmanifest em produção\n\n# estrutura sugerida\npr_3dsound/\n└── html/sounds/\n    ├── ambient/\n    │   └── city.ogg\n    ├── dealership/\n    │   └── showroom.mp3\n    └── pr_carkeys/\n        └── lock.ogg"
+      },
+      {
+        "id": "sources",
+        "title": {
+          "pt": "Fontes de áudio suportadas",
+          "en": "Supported audio sources"
+        },
+        "table": {
+          "headers": [
+            "Fonte",
+            "3D",
+            "HRTF real",
+            "Seek/sync",
+            "Observação"
+          ],
+          "rows": [
+            [
+              "Arquivo local",
+              "Sim",
+              "Howler/Panner",
+              "Sim",
+              "Servido pela própria NUI."
+            ],
+            [
+              "URL direta MP3/OGG/WEBA",
+              "Sim",
+              "Sim, se CORS permitir",
+              "Sim quando seekable",
+              "Melhor opção para áudio espacial preciso."
+            ],
+            [
+              "HLS (.m3u8)",
+              "2D/3D",
+              "Pode usar pipeline espacial",
+              "Depende do stream",
+              "HLS.js/MSE com retries limitados."
+            ],
+            [
+              "YouTube",
+              "2D/3D simulado",
+              "Não",
+              "Widget-dependent",
+              "Iframe cross-origin impede PannerNode."
+            ],
+            [
+              "SoundCloud",
+              "2D/3D simulado",
+              "Não",
+              "Widget-dependent",
+              "Iframe/widget cross-origin."
+            ],
+            [
+              "GTA native audio",
+              "Nativo",
+              "Não aplicável",
+              "Nativo",
+              "Usa PlaySound* do jogo, separado do WebAudio."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "local-files",
+        "title": {
+          "pt": "Arquivos locais",
+          "en": "Local files"
+        },
+        "text": {
+          "pt": "Play() server-side reproduz um arquivo dentro de html/sounds em coordenadas fixas. resourceName permite prefixar uma subpasta sem precisar concatenar manualmente no consumer.",
+          "en": "Server-side Play() plays a file under html/sounds at fixed coordinates. resourceName can prefix a subfolder without manual path concatenation in the consumer."
+        },
+        "code": "-- html/sounds/dealership/showroom.ogg\nexports['pr_3dsound']:Play(\n    vector3(-55.2, -1097.7, 26.4),\n    'showroom.ogg',\n    0.75,            -- volume\n    35.0,            -- radius\n    'dealer_music',  -- uniqueId\n    'dealership',    -- resourceName / subpasta\n    true             -- loop\n)"
+      },
+      {
+        "id": "url-2d",
+        "title": {
+          "pt": "URL 2D",
+          "en": "2D URL"
+        },
+        "text": {
+          "pt": "PlayUrl() cria uma fonte não-posicional. sourcePlayer = -1 torna todos os players elegíveis; um source específico restringe o som àquele player.",
+          "en": "PlayUrl() creates non-positional playback. sourcePlayer = -1 makes all players eligible; a specific source limits playback to that player."
+        },
+        "code": "-- tocar apenas para o player\nexports['pr_3dsound']:PlayUrl(\n    source,\n    'ui_radio_preview',\n    'https://cdn.example.com/preview.mp3',\n    0.55,\n    false\n)\n\n-- tocar para todos\nexports['pr_3dsound']:PlayUrl(\n    -1,\n    'announcement',\n    'https://cdn.example.com/announcement.mp3',\n    0.8,\n    false\n)"
+      },
+      {
+        "id": "url-3d",
+        "title": {
+          "pt": "URL 3D em posição fixa",
+          "en": "Fixed-position 3D URL"
+        },
+        "text": {
+          "pt": "PlayUrlPos() é o principal export para caixas de som, rádios ambientais, lojas, eventos e ambientes. O emitter continua existindo no servidor e novos listeners entram já sincronizados.",
+          "en": "PlayUrlPos() is the primary export for speakers, ambient radios, stores, events and world audio. The emitter stays alive server-side and new listeners stream in already synchronized."
+        },
+        "code": "exports['pr_3dsound']:PlayUrlPos(\n    -1,\n    'radio_praca',\n    'https://cdn.example.com/radio.mp3',\n    0.8,\n    vector3(215.0, -810.0, 30.0),\n    45.0,\n    true\n)"
+      },
+      {
+        "id": "routing-bucket",
+        "title": {
+          "pt": "Routing bucket",
+          "en": "Routing bucket"
+        },
+        "text": {
+          "pt": "PlayUrlPos aceita routingBucket opcional. Quando definido, apenas players no mesmo bucket são elegíveis. Em emitters attached, o servidor atualiza o bucket a partir da entity quando consegue resolvê-la.",
+          "en": "PlayUrlPos accepts an optional routingBucket. When set, only players in the same bucket are eligible. Attached emitters refresh their bucket from the entity whenever the server can resolve it."
+        },
+        "code": "local bucket = GetPlayerRoutingBucket(source)\n\nexports['pr_3dsound']:PlayUrlPos(\n    -1,\n    'private_room_radio',\n    url,\n    0.7,\n    coords,\n    30.0,\n    true,\n    bucket\n)"
+      },
+      {
+        "id": "attached",
+        "title": {
+          "pt": "Som preso a veículo/entity",
+          "en": "Entity-attached sound"
+        },
+        "text": {
+          "pt": "PlayUrlAttached() cria diretamente um emitter associado a um Network ID. O server acompanha as coordenadas e o client resolve/re-resolve a entity no scope do OneSync.",
+          "en": "PlayUrlAttached() creates an emitter associated with a Network ID. The server follows coordinates and the client resolves/re-resolves the entity inside OneSync scope."
+        },
+        "code": "local netId = NetworkGetNetworkIdFromEntity(vehicle)\n\nexports['pr_3dsound']:PlayUrlAttached(\n    -1,\n    ('car_radio_%s'):format(netId),\n    'https://cdn.example.com/music.mp3',\n    0.8,\n    netId,\n    35.0,\n    true\n)"
+      },
+      {
+        "id": "attach-existing",
+        "title": {
+          "pt": "Attach/Detach de um emitter existente",
+          "en": "Attach/detach an existing emitter"
+        },
+        "text": {
+          "pt": "AttachToEntity pode transformar um emitter já existente em attached e também aceita offset. DetachEntity captura a última posição conhecida e deixa o som parado naquele ponto.",
+          "en": "AttachToEntity can convert an existing emitter into an attached emitter and accepts an offset. DetachEntity captures the last known position and leaves the sound playing at that location."
+        },
+        "code": "exports['pr_3dsound']:AttachToEntity(\n    'radio_praca',\n    NetworkGetNetworkIdFromEntity(vehicle),\n    { x = 0.0, y = -0.7, z = 0.4 }\n)\n\n-- mais tarde: o som continua nas últimas coords conhecidas\nexports['pr_3dsound']:DetachEntity('radio_praca')"
+      },
+      {
+        "id": "car-radio",
+        "title": {
+          "pt": "Exemplo completo — rádio de veículo",
+          "en": "Complete example — vehicle radio"
+        },
+        "text": {
+          "pt": "Um sistema de rádio pode usar um ID determinístico por Network ID, manter loop e alterar volume/radius sem recriar o emitter. Ao destruir/desligar o rádio, Stop remove o emitter e todos os listeners.",
+          "en": "A vehicle-radio system can use a deterministic ID per Network ID, keep looping and change volume/radius without recreating the emitter. Stop removes the emitter and all listeners."
+        },
+        "code": "local function startVehicleRadio(vehicle, url)\n    local netId = NetworkGetNetworkIdFromEntity(vehicle)\n    local soundId = ('radio:vehicle:%d'):format(netId)\n\n    exports['pr_3dsound']:PlayUrlAttached(\n        -1, soundId, url, 0.65, netId, 28.0, true\n    )\n\n    return soundId\nend\n\nlocal function setVehicleRadioVolume(soundId, volume)\n    exports['pr_3dsound']:SetVolume(soundId, volume)\nend\n\nlocal function stopVehicleRadio(soundId)\n    exports['pr_3dsound']:FadeOut(soundId, 700)\n    SetTimeout(750, function()\n        exports['pr_3dsound']:Stop(soundId)\n    end)\nend"
+      },
+      {
+        "id": "shop-radio",
+        "title": {
+          "pt": "Exemplo — música ambiente em loja",
+          "en": "Example — store ambience"
+        },
+        "text": {
+          "pt": "Para lojas, concessionárias ou clubes, use emitter fixo, loop e uniqueId estável. A histerese evita play/stop constante quando o player fica exatamente na borda do raio.",
+          "en": "For stores, dealerships or clubs, use a fixed emitter, loop and stable uniqueId. Hysteresis prevents repeated play/stop while a player stands around the radius edge."
+        },
+        "code": "local SHOP_RADIO = 'dealer:showroom:radio'\n\nexports['pr_3dsound']:PlayUrlPos(\n    -1,\n    SHOP_RADIO,\n    'https://cdn.example.com/showroom.ogg',\n    0.45,\n    vector3(-47.4, -1097.1, 26.4),\n    24.0,\n    true\n)\n\n-- horário de fechamento\nexports['pr_3dsound']:FadeOut(SHOP_RADIO, 1500)"
+      },
+      {
+        "id": "hrtf",
+        "title": {
+          "pt": "Pipeline HRTF real",
+          "en": "Real HRTF pipeline"
+        },
+        "text": {
+          "pt": "Para URL direta 3D, SoundPlayer.js tenta criar HTMLAudioElement + MediaElementSource + PannerNode(HRTF) + low-pass + Gain. O Panner usa rolloffFactor 0 porque a atenuação de distância já é calculada no Lua; assim evita dupla queda de volume.",
+          "en": "For direct 3D URLs, SoundPlayer.js attempts HTMLAudioElement + MediaElementSource + PannerNode(HRTF) + low-pass + Gain. Panner rolloffFactor is 0 because Lua already computes distance attenuation, avoiding double attenuation."
+        },
+        "code": "HTMLAudioElement\n      ↓\nMediaElementSource\n      ↓\nPannerNode\n  panningModel = 'HRTF'\n  distanceModel = 'linear'\n  rolloffFactor = 0\n      ↓\nBiquadFilter(lowpass)\n      ↓\nGainNode\n      ↓\nAudioContext.destination"
+      },
+      {
+        "id": "cors",
+        "title": {
+          "pt": "CORS e fallback",
+          "en": "CORS & fallback"
+        },
+        "text": {
+          "pt": "Para conectar uma URL externa ao WebAudio, o host precisa permitir CORS. Sem isso, o resource tenta uma rota compatível de reprodução; distância/volume/oclusão ainda podem funcionar, mas o áudio não passa pelo PannerNode HRTF real.",
+          "en": "To route an external URL through WebAudio, its host must allow CORS. Without it the resource attempts a compatible fallback path; distance/volume/occlusion can still work, but audio cannot use real HRTF PannerNode spatialization."
+        },
+        "code": "Access-Control-Allow-Origin: *\n\n# ou permita explicitamente a origem usada pela NUI"
+      },
+      {
+        "id": "hls",
+        "title": {
+          "pt": "HLS / streams",
+          "en": "HLS / streams"
+        },
+        "text": {
+          "pt": "SoundPlayer.js detecta URLs HLS e usa HLS.js quando o CEF não fornece HLS nativo. O código possui retry limitado de erros de rede para evitar loop infinito de manifestLoadError. Streams live podem não aceitar seek.",
+          "en": "SoundPlayer.js detects HLS URLs and uses HLS.js when CEF lacks native HLS support. Network retries are bounded to avoid infinite manifestLoadError loops. Live streams may not support seeking."
+        },
+        "code": "exports['pr_3dsound']:PlayUrlPos(\n    -1,\n    'live_station',\n    'https://stream.example.com/live/index.m3u8',\n    0.65,\n    vector3(0.0, 0.0, 72.0),\n    40.0,\n    true\n)"
+      },
+      {
+        "id": "youtube-soundcloud",
+        "title": {
+          "pt": "YouTube e SoundCloud",
+          "en": "YouTube & SoundCloud"
+        },
+        "text": {
+          "pt": "Essas fontes usam iframe/widget cross-origin. O browser não permite capturar o áudio interno e conectar ao PannerNode. Elas continuam podendo receber volume por distância e oclusão simulada, mas não HRTF verdadeiro.",
+          "en": "These sources use cross-origin iframe/widgets. The browser cannot capture their internal audio and connect it to PannerNode. They can still receive distance-based volume and simulated occlusion, but not true HRTF."
+        },
+        "note": {
+          "pt": "Para caixas de som, rádio em carro ou ambientes onde direção espacial precisa ser convincente, prefira URL direta MP3/OGG/WEBA ou HLS compatível.",
+          "en": "For speakers, vehicle radios or environments where directional audio matters, prefer direct MP3/OGG/WEBA URLs or compatible HLS."
+        }
+      },
+      {
+        "id": "streaming",
+        "title": {
+          "pt": "Streaming por proximidade",
+          "en": "Proximity streaming"
+        },
+        "text": {
+          "pt": "O servidor mantém Sounds{} e percorre players elegíveis em intervalo configurável. Para entrar, o player precisa estar dentro de radius; para sair, o limite vira radius + hysteresis, reduzindo flapping na borda.",
+          "en": "The server maintains Sounds{} and evaluates eligible players at a configurable interval. Entering requires being within radius; exiting uses radius + hysteresis to reduce flapping at the edge."
+        },
+        "code": "entrar no áudio:\n  distance <= radius\n\njá está ouvindo:\n  permanece até distance > radius + hysteresis\n\n# defaults\npr_3dsound_stream_interval  = 1000 ms\npr_3dsound_stream_hysteresis = 8.0"
+      },
+      {
+        "id": "late-join",
+        "title": {
+          "pt": "Late join e reentrada no raio",
+          "en": "Late join & radius re-entry"
+        },
+        "text": {
+          "pt": "Quando um listener recebe o emitter depois, buildOptions() envia startAt calculado pelo relógio autoritativo. Arquivos seekable retomam no ponto correspondente, em vez de começarem do zero.",
+          "en": "When a listener receives an emitter later, buildOptions() sends an authoritative startAt. Seekable files resume at the corresponding position instead of restarting."
+        },
+        "code": "startAt = seekBase + ((GetGameTimer() - startedAt) / 1000)\n\n-- se pausado\nstartAt = pausedOffset"
+      },
+      {
+        "id": "pause-sync",
+        "title": {
+          "pt": "Pause/Resume autoritativo",
+          "en": "Authoritative pause/resume"
+        },
+        "text": {
+          "pt": "Pause captura o offset atual e marca paused. Resume recria startedAt a partir desse offset. O client possui mensagens pauseAt/resumeAt para alinhar seek + estado de reprodução de forma atômica.",
+          "en": "Pause captures current playback offset and marks the emitter paused. Resume rebuilds startedAt from that offset. Client supports pauseAt/resumeAt messages to atomically align seeking and playback state."
+        },
+        "code": "exports['pr_3dsound']:Pause('radio_praca')\n\n-- ... depois\nexports['pr_3dsound']:Resume('radio_praca')\n\n-- reposicionar playback\nexports['pr_3dsound']:SetTimestamp('radio_praca', 125.5)"
+      },
+      {
+        "id": "controls",
+        "title": {
+          "pt": "Controles de emitter",
+          "en": "Emitter controls"
+        },
+        "table": {
+          "headers": [
+            "Export",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "Pause(id)",
+              "Pausa preservando offset autoritativo."
+            ],
+            [
+              "Resume(id)",
+              "Retoma do offset preservado."
+            ],
+            [
+              "Stop(id)",
+              "Remove um emitter."
+            ],
+            [
+              "StopAll()",
+              "Remove todos os emitters gerenciados."
+            ],
+            [
+              "UpdateCoords(id, coords)",
+              "Move emitter e remove attachment."
+            ],
+            [
+              "SetVolume(id, volume)",
+              "Altera volume base 0..1."
+            ],
+            [
+              "SetVolumeMax(id, volume)",
+              "Atualiza limite máximo enviado ao client."
+            ],
+            [
+              "SetDistance(id, radius)",
+              "Altera o raio e força reavaliação de listeners."
+            ],
+            [
+              "SetLoop(id, bool)",
+              "Atualiza loop."
+            ],
+            [
+              "SetTimestamp(id, seconds)",
+              "Reposiciona playback autoritativo."
+            ],
+            [
+              "FadeIn(id, duration, targetVolume)",
+              "Fade até o volume alvo."
+            ],
+            [
+              "FadeOut(id, duration)",
+              "Fade para zero; não equivale necessariamente a Stop."
+            ],
+            [
+              "SoundExists(id)",
+              "Verifica presença do uniqueId."
+            ],
+            [
+              "GetAllSounds()",
+              "Snapshot/estado dos emitters."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "dynamic-movement",
+        "title": {
+          "pt": "Mover um emitter manualmente",
+          "en": "Move an emitter manually"
+        },
+        "text": {
+          "pt": "UpdateCoords é útil para fontes móveis que não possuem Network ID ou quando o consumer quer controlar o ponto manualmente. Ao chamar UpdateCoords em um emitter attached, o attachment é limpo.",
+          "en": "UpdateCoords is useful for moving sources without a Network ID or when a consumer controls the position manually. Calling it on an attached emitter clears attachment."
+        },
+        "code": "CreateThread(function()\n    while exports['pr_3dsound']:SoundExists('drone_audio') do\n        local coords = getDronePosition()\n        exports['pr_3dsound']:UpdateCoords('drone_audio', coords)\n        Wait(250)\n    end\nend)"
+      },
+      {
+        "id": "entity-grace",
+        "title": {
+          "pt": "Grace de entity no OneSync",
+          "en": "OneSync entity grace"
+        },
+        "text": {
+          "pt": "Um Network ID pode desaparecer temporariamente em troca de ownership/scope. O servidor mantém uma janela de graça antes de stream-out de listeners existentes; novos listeners aguardam a entity voltar a resolver.",
+          "en": "A Network ID may disappear temporarily during ownership/scope transitions. The server keeps a grace window before streaming existing listeners out, while new listeners wait until the entity resolves again."
+        },
+        "table": {
+          "headers": [
+            "Convar",
+            "Default",
+            "Função"
+          ],
+          "rows": [
+            [
+              "pr_3dsound_entity_grace",
+              "2500 ms",
+              "Janela curta sem cortar listeners existentes."
+            ],
+            [
+              "pr_3dsound_entity_timeout",
+              "10000 ms",
+              "Timeout maior para lifecycle de entity missing."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "occlusion",
+        "title": {
+          "pt": "Oclusão acústica",
+          "en": "Acoustic occlusion"
+        },
+        "text": {
+          "pt": "O client combina raycast suavizado, estado de veículo e interiores/MLO. O multiplicador final reduz volume; em direct URL WebAudio também reduz a frequência do low-pass, deixando paredes e carrocerias perceptíveis como abafamento.",
+          "en": "Client combines smoothed raycasts, vehicle state and interiors/MLO. The final multiplier attenuates volume; for direct WebAudio URLs it also lowers low-pass frequency, making walls and vehicle bodies sound muffled."
+        },
+        "table": {
+          "headers": [
+            "Situação",
+            "Multiplicador atual"
+          ],
+          "rows": [
+            [
+              "Parede grossa",
+              "0.20"
+            ],
+            [
+              "Parede fina/heurística",
+              "0.50"
+            ],
+            [
+              "Fonte em veículo fechado",
+              "0.15"
+            ],
+            [
+              "Janela aberta/quebrada da fonte",
+              "0.35"
+            ],
+            [
+              "1 porta aberta da fonte",
+              "0.60"
+            ],
+            [
+              "2 portas abertas da fonte",
+              "0.70"
+            ],
+            [
+              "Porta-malas / 3+ portas",
+              "1.00"
+            ],
+            [
+              "Listener dentro de veículo fechado",
+              "0.15"
+            ],
+            [
+              "Janela listener aberta/quebrada",
+              "0.50"
+            ],
+            [
+              "Porta listener aberta",
+              "0.85"
+            ],
+            [
+              "MLO: dentro x fora",
+              "0.55"
+            ],
+            [
+              "MLO: interiores diferentes",
+              "0.55 × 0.55"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "occlusion-loop",
+        "title": {
+          "pt": "Raycast e suavização",
+          "en": "Raycast & smoothing"
+        },
+        "text": {
+          "pt": "O raycast não roda todo frame. CFG usa intervalo de 400 ms e smoothing 0.72 para evitar mudanças bruscas. Isso reduz custo e evita que uma parede cause volume serrilhado quando o player/câmera oscila.",
+          "en": "Raycasts do not run every frame. CFG uses 400 ms interval and 0.72 smoothing to avoid abrupt transitions, reducing cost and jagged volume changes as player/camera moves."
+        },
+        "code": "RAYCAST_ENABLED     = true\nRAYCAST_INTERVAL_MS = 400\nRAYCAST_SMOOTH      = 0.72\nRAYCAST_FLAGS       = 1 + 8"
+      },
+      {
+        "id": "vehicle-occlusion",
+        "title": {
+          "pt": "Som dentro e fora de veículos",
+          "en": "Vehicle acoustic model"
+        },
+        "text": {
+          "pt": "O código olha portas, janelas, porta-malas e se fonte/listener estão no mesmo veículo. Duas cabines fechadas recebem um piso específico para evitar volume excessivamente baixo por multiplicação dupla.",
+          "en": "The code considers doors, windows, trunk and whether source/listener share the same vehicle. Two closed cabins use a floor value to avoid excessive attenuation from multiplying both sides."
+        },
+        "note": {
+          "pt": "Se fonte e listener estão no mesmo veículo, a oclusão da carroceria é removida. Isso torna rádio interno coerente para ocupantes do mesmo carro.",
+          "en": "If source and listener are inside the same vehicle, body occlusion is removed, which keeps in-car radio coherent for occupants."
+        }
+      },
+      {
+        "id": "mlo",
+        "title": {
+          "pt": "Interiores e MLO",
+          "en": "Interiors & MLO"
+        },
+        "text": {
+          "pt": "O client usa interior IDs e heurísticas de portal. Um listener dentro e fonte fora recebem atenuação; dois interiores diferentes recebem multiplicação mais forte; no mesmo interior, distâncias maiores podem aplicar portal multiplier.",
+          "en": "The client uses interior IDs and portal heuristics. Inside/outside transitions attenuate sound, different interiors attenuate more heavily, and longer distances inside the same interior can apply portal multiplier."
+        }
+      },
+      {
+        "id": "client-local",
+        "title": {
+          "pt": "Áudio local client-side",
+          "en": "Local client-side audio"
+        },
+        "text": {
+          "pt": "Exports client-side criam sons apenas naquele client. Eles são ideais para UI, feedback privado e efeitos que não precisam de estado compartilhado.",
+          "en": "Client exports create sounds only for that client. They are ideal for UI, private feedback and effects that do not require shared state."
+        },
+        "code": "-- arquivo local 3D no ponto atual do player\nlocal id = exports['pr_3dsound']:PlayLocal(\n    'ui/scan.ogg',\n    0.8,\n    12.0,\n    false\n)\n\n-- arquivo local 2D\nlocal id2 = exports['pr_3dsound']:PlayLocal2D('ui/click.ogg', 0.4, false)\n\n-- URL 3D local\nlocal id3 = exports['pr_3dsound']:PlayUrl3D(\n    'https://cdn.example.com/effect.mp3',\n    0.6,\n    20.0,\n    false\n)"
+      },
+      {
+        "id": "client-attached",
+        "title": {
+          "pt": "Attach local client-side",
+          "en": "Local client attachment"
+        },
+        "code": "local netId = NetworkGetNetworkIdFromEntity(vehicle)\n\nlocal localSoundId = exports['pr_3dsound']:PlayAttached(\n    'https://cdn.example.com/engine-whine.mp3',\n    0.45,\n    netId,\n    18.0,\n    true\n)\n\nexports['pr_3dsound']:SetVolume(localSoundId, 0.25)\nexports['pr_3dsound']:FadeOut(localSoundId, 800)"
+      },
+      {
+        "id": "client-api",
+        "title": {
+          "pt": "API client-side",
+          "en": "Client-side API"
+        },
+        "table": {
+          "headers": [
+            "Export",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "SoundExists(uniqueId)",
+              "Verifica registro local."
+            ],
+            [
+              "IsPlaying(uniqueId)",
+              "Estado playing."
+            ],
+            [
+              "IsPaused(uniqueId)",
+              "Estado paused."
+            ],
+            [
+              "GetInfo(uniqueId)",
+              "Retorna estrutura do som local."
+            ],
+            [
+              "GetAllSounds()",
+              "Tabela de sons locais."
+            ],
+            [
+              "PlayLocal(file, volume, radius, loop)",
+              "Arquivo local 3D."
+            ],
+            [
+              "PlayLocal2D(file, volume, loop)",
+              "Arquivo local não-posicional."
+            ],
+            [
+              "PlayUrl2D(url, volume, loop)",
+              "URL 2D local."
+            ],
+            [
+              "PlayUrl3D(url, volume, radius, loop)",
+              "URL 3D local."
+            ],
+            [
+              "PlayAttached(url, volume, netId, radius, loop)",
+              "URL presa a entity no client."
+            ],
+            [
+              "Stop(uniqueId)",
+              "Para som local."
+            ],
+            [
+              "Pause(uniqueId) / Resume(uniqueId)",
+              "Controle local."
+            ],
+            [
+              "SetVolume(uniqueId, volume)",
+              "Volume local."
+            ],
+            [
+              "SetDistance(uniqueId, dist)",
+              "Raio local."
+            ],
+            [
+              "FadeIn(uniqueId, duration, targetVolume)",
+              "Fade local."
+            ],
+            [
+              "FadeOut(uniqueId, duration)",
+              "Fade local."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "server-api",
+        "title": {
+          "pt": "API server-side",
+          "en": "Server-side API"
+        },
+        "table": {
+          "headers": [
+            "Export",
+            "Assinatura conceitual"
+          ],
+          "rows": [
+            [
+              "Play",
+              "Play(coords, soundName, volume, radius, uniqueId, resourceName, loop)"
+            ],
+            [
+              "PlayUrl",
+              "PlayUrl(sourcePlayer, name, url, volume, loop)"
+            ],
+            [
+              "PlayUrlPos",
+              "PlayUrlPos(sourcePlayer, name, url, volume, coords, radius, loop, routingBucket)"
+            ],
+            [
+              "PlayUrlAttached",
+              "PlayUrlAttached(sourcePlayer, name, url, volume, entityNetId, radius, loop)"
+            ],
+            [
+              "AttachToEntity",
+              "AttachToEntity(uniqueId, entityNetId, offset)"
+            ],
+            [
+              "DetachEntity",
+              "DetachEntity(uniqueId)"
+            ],
+            [
+              "Pause / Resume / Stop",
+              "Controle por uniqueId."
+            ],
+            [
+              "StopAll",
+              "Remove todos os sons server-managed."
+            ],
+            [
+              "UpdateCoords",
+              "UpdateCoords(uniqueId, coords)"
+            ],
+            [
+              "SetVolume / SetVolumeMax",
+              "Volume base/limite."
+            ],
+            [
+              "SetDistance",
+              "SetDistance(uniqueId, radius)"
+            ],
+            [
+              "SetLoop",
+              "SetLoop(uniqueId, bool)"
+            ],
+            [
+              "SetTimestamp",
+              "SetTimestamp(uniqueId, seconds)"
+            ],
+            [
+              "FadeIn / FadeOut",
+              "Fades compartilhados."
+            ],
+            [
+              "SoundExists / GetAllSounds",
+              "Introspecção do registry."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "native-overview",
+        "title": {
+          "pt": "Ponte de sons nativos GTA",
+          "en": "GTA native sound bridge"
+        },
+        "text": {
+          "pt": "client/native_sound.lua e server/native_sound.lua são independentes do WebAudio. Eles usam APIs nativas GTA para audioName/audioRef e podem tocar em entity ou coordenadas. Também aceitam sequência de nomes, audioBank, timeout, intervalo, range e regras de oclusão.",
+          "en": "client/native_sound.lua and server/native_sound.lua are separate from WebAudio. They use GTA native audioName/audioRef APIs and can play from entities or coordinates. They also support name sequences, audioBank, timeout, interval, range and occlusion rules."
+        }
+      },
+      {
+        "id": "native-local",
+        "title": {
+          "pt": "Exemplo — som nativo local",
+          "en": "Example — local native sound"
+        },
+        "code": "exports['pr_3dsound']:PlayLocalNativeSoundFromCoords({\n    audioName = 'NAV_UP_DOWN',\n    audioRef = 'HUD_FRONTEND_DEFAULT_SOUNDSET',\n    coords = GetEntityCoords(PlayerPedId()),\n    range = 20.0,\n    clientRangeCheck = true\n})"
+      },
+      {
+        "id": "native-sequence",
+        "title": {
+          "pt": "Sequência de sons nativos",
+          "en": "Native sound sequence"
+        },
+        "text": {
+          "pt": "audioName pode ser string ou array. interval/delayBetweenSounds define o tempo entre elementos. retainSoundIds controla se IDs nativos precisam ser mantidos pelo helper.",
+          "en": "audioName can be a string or array. interval/delayBetweenSounds sets spacing between items. retainSoundIds controls native sound ID retention."
+        },
+        "code": "exports['pr_3dsound']:PlayNativeSoundFromEntity({\n    entity = vehicle,\n    audioName = {\n        'NAV_UP_DOWN',\n        'SELECT'\n    },\n    audioRef = 'HUD_FRONTEND_DEFAULT_SOUNDSET',\n    interval = 250,\n    timeout = 2500,\n    retainSoundIds = false\n})"
+      },
+      {
+        "id": "native-occlusion",
+        "title": {
+          "pt": "Oclusão nos sons nativos",
+          "en": "Native-sound occlusion"
+        },
+        "text": {
+          "pt": "Native audio não passa pelo low-pass do WebAudio. O helper pode fazer raycast antes de tocar e então silenciar, trocar audioName/audioRef ou pular a reprodução conforme a configuração.",
+          "en": "Native audio does not pass through WebAudio low-pass. The helper may raycast before playback and then mute, swap audioName/audioRef or skip playback according to configuration."
+        },
+        "code": "exports['pr_3dsound']:PlayNativeSoundFromCoords({\n    audioName = 'BEEP_RED',\n    audioRef = 'DLC_HEIST_HACKING_SNAKE_SOUNDS',\n    coords = sourceCoords,\n    range = 35.0,\n    occlusion = true,\n    occlusionMode = 'mute',\n    skipOnOcclusion = true,\n\n    -- alternativa: trocar o som quando obstruído\n    occludedAudioName = 'NAV_UP_DOWN',\n    occludedAudioRef = 'HUD_FRONTEND_DEFAULT_SOUNDSET'\n})"
+      },
+      {
+        "id": "native-shared",
+        "title": {
+          "pt": "Som nativo compartilhado",
+          "en": "Shared native audio"
+        },
+        "text": {
+          "pt": "Server exports ForAll selecionam listeners elegíveis. Para entity/coords, o server não precisa transmitir cegamente para todos: ele pode selecionar players por range. Requests client-side compartilhados também possuem limites de raio, distância e cooldown.",
+          "en": "Server ForAll exports select eligible listeners. For entity/coords playback the server can select players by range instead of blindly broadcasting. Client shared requests also enforce radius, source-distance and cooldown limits."
+        },
+        "table": {
+          "headers": [
+            "Proteção",
+            "Valor atual"
+          ],
+          "rows": [
+            [
+              "MAX_CLIENT_RADIUS",
+              "80.0"
+            ],
+            [
+              "MAX_CLIENT_SOURCE_DISTANCE",
+              "80.0"
+            ],
+            [
+              "CLIENT_REQUEST_COOLDOWN",
+              "250 ms"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "native-api",
+        "title": {
+          "pt": "Exports de áudio nativo",
+          "en": "Native-audio exports"
+        },
+        "table": {
+          "headers": [
+            "Lado",
+            "Exports"
+          ],
+          "rows": [
+            [
+              "Client",
+              "PlaySound / PlaySoundFromEntity / PlaySoundFromCoords"
+            ],
+            [
+              "Client aliases",
+              "PlayNativeSound / PlayNativeSoundFromEntity / PlayNativeSoundFromCoords"
+            ],
+            [
+              "Client local",
+              "PlayLocalNativeSound / PlayLocalNativeSoundFromEntity / PlayLocalNativeSoundFromCoords"
+            ],
+            [
+              "Client shared",
+              "PlaySharedNativeSoundFromEntity / PlaySharedNativeSoundFromCoords"
+            ],
+            [
+              "Server",
+              "PlaySound / PlaySoundFromEntity / PlaySoundFromCoords"
+            ],
+            [
+              "Server aliases",
+              "PlayNativeSound / PlayNativeSoundFromEntity / PlayNativeSoundFromCoords"
+            ],
+            [
+              "Server all",
+              "PlaySoundForAll / PlaySoundFromEntityForAll / PlaySoundFromCoordsForAll"
+            ],
+            [
+              "Server all aliases",
+              "PlayNativeSoundForAll / PlayNativeSoundFromEntityForAll / PlayNativeSoundFromCoordsForAll"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "security",
+        "title": {
+          "pt": "Segurança",
+          "en": "Security"
+        },
+        "text": {
+          "pt": "A forma recomendada de controlar áudio compartilhado é chamar exports server-side dentro de resources confiáveis. No código atual, eventos client→server de controle ficam bloqueados por padrão e só passam quando pr_3dsound_allow_client_events=1 ou o player possui a ACE configurada por pr_3dsound_client_ace.",
+          "en": "Recommended shared-audio control uses server-side exports from trusted resources. Current code blocks client→server control events by default unless pr_3dsound_allow_client_events=1 or the player has the ACE configured by pr_3dsound_client_ace."
+        },
+        "code": "# default atual\nsetr pr_3dsound_allow_client_events 0\nsetr pr_3dsound_client_ace pr_3dsound.control\n\n# liberar somente uma identidade administrativa\nadd_ace identifier.license:SUA_LICENSE pr_3dsound.control allow"
+      },
+      {
+        "id": "security-note",
+        "title": {
+          "pt": "README x código atual da ACE",
+          "en": "README vs current ACE behavior"
+        },
+        "note": {
+          "pt": "O README ainda cita pr_3dsound.broadcast em alguns trechos de compatibilidade/teste. O server/server.lua v4.0.0 atual usa CLIENT_ACE = pr_3dsound.control por padrão para guarded client events. Esta documentação segue o código atual.",
+          "en": "The README still mentions pr_3dsound.broadcast in some compatibility/test sections. Current server/server.lua v4.0.0 defaults CLIENT_ACE to pr_3dsound.control for guarded client events. This documentation follows current code."
+        }
+      },
+      {
+        "id": "validation",
+        "title": {
+          "pt": "Validação de entrada",
+          "en": "Input validation"
+        },
+        "text": {
+          "pt": "O servidor limita name, URL, paths, volume e radius. URL precisa ser http/https e ter até 2048 chars; path local rejeita '..', paths absolutos e strings acima de 256 chars; unique name aceita até 128 chars; volume é clamped em 0..1 e radius em 1..MAX_RADIUS.",
+          "en": "Server validates names, URLs, local paths, volume and radius. URL must be http/https and <= 2048 chars; local paths reject '..', absolute paths and >256 chars; names allow <=128 chars; volume is clamped to 0..1 and radius to 1..MAX_RADIUS."
+        }
+      },
+      {
+        "id": "convars",
+        "title": {
+          "pt": "Convars de runtime",
+          "en": "Runtime convars"
+        },
+        "table": {
+          "headers": [
+            "Convar",
+            "Default",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "pr_3dsound_stream_interval",
+              "1000",
+              "Intervalo mínimo de streaming server-side; código limita a >=200 ms."
+            ],
+            [
+              "pr_3dsound_stream_hysteresis",
+              "8.0",
+              "Margem adicional para stream-out."
+            ],
+            [
+              "pr_3dsound_max_radius",
+              "1000.0",
+              "Raio máximo aceito por emitter server-side."
+            ],
+            [
+              "pr_3dsound_entity_timeout",
+              "10000",
+              "Timeout de entity missing."
+            ],
+            [
+              "pr_3dsound_entity_grace",
+              "2500",
+              "Grace para ownership/scope."
+            ],
+            [
+              "pr_3dsound_allow_client_events",
+              "0",
+              "Compatibilidade: libera eventos client→server."
+            ],
+            [
+              "pr_3dsound_client_ace",
+              "pr_3dsound.control",
+              "ACE usada para autorização."
+            ],
+            [
+              "pr_3dsound_debug",
+              "0",
+              "Debug client-side."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "performance",
+        "title": {
+          "pt": "Performance e boas práticas",
+          "en": "Performance & best practices"
+        },
+        "cards": [
+          [
+            "Server streaming",
+            "O servidor decide quem precisa receber cada emitter em vez de mandar todos os sons para todos os players."
+          ],
+          [
+            "Histerese",
+            "Reduz criação/destruição repetitiva na borda do raio."
+          ],
+          [
+            "Raycast 400 ms",
+            "Oclusão não é recalculada por frame."
+          ],
+          [
+            "Lua attenuation",
+            "Distância fica no Lua; Panner não duplica rolloff."
+          ],
+          [
+            "Entity retry",
+            "Attach tolera scope/ownership transitório sem recriar o som imediatamente."
+          ],
+          [
+            "Unique IDs",
+            "IDs server-side internos começam acima de 100000 para não colidir com sons locais."
+          ]
+        ]
+      },
+      {
+        "id": "production-patterns",
+        "title": {
+          "pt": "Padrões recomendados em produção",
+          "en": "Production patterns"
+        },
+        "bullets": {
+          "pt": [
+            "Prefira exports server-side para qualquer áudio compartilhado.",
+            "Use uniqueId determinístico por objeto lógico: radio:shop:12, radio:vehicle:<netId>, alarm:door:45.",
+            "Use URL direta com CORS quando espacialização precisa ser convincente.",
+            "Para YouTube/SoundCloud, trate HRTF como indisponível.",
+            "Não use radius maior que o necessário; deixe proximity streaming trabalhar a seu favor.",
+            "Não habilite client/test_commands.lua em produção.",
+            "Aplique FadeOut antes de Stop quando quiser transição suave.",
+            "Use AttachToEntity/PlayUrlAttached em vez de atualizar coords manualmente quando existir Network ID confiável.",
+            "Use native sound bridge para sons GTA/UI onde WebAudio não é necessário."
+          ],
+          "en": [
+            "Prefer server-side exports for shared audio.",
+            "Use deterministic unique IDs per logical object.",
+            "Use direct CORS-enabled URLs when convincing spatialization matters.",
+            "Treat YouTube/SoundCloud HRTF as unavailable.",
+            "Keep radius no larger than necessary.",
+            "Do not enable client/test_commands.lua in production.",
+            "FadeOut before Stop for smooth transitions.",
+            "Prefer entity attachment when a reliable Network ID exists.",
+            "Use native sound bridge for GTA/UI sounds when WebAudio is unnecessary."
+          ]
+        }
+      }
     ]
   },
-
   pr_elevator: {
     name:'PR Elevator',code:'pr_elevator',repo:'https://github.com/Pierremoraes-ofc/pr_elevator',
     category:{pt:'Hobby • World Interaction',en:'Hobby • World Interaction'},
