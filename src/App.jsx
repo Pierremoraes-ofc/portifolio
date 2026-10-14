@@ -10,6 +10,25 @@ const PROFILE = {
 
 const PROJECTS = [
   {
+    name: 'Smart Office Hybrid 4.0',
+    repo: 'https://github.com/Pierremoraes-ofc/Smart-Office-Hybrid-4.0',
+    code: 'smart_office_hybrid_4',
+    tags: ['PHP', 'MySQL', 'Groq AI', 'Chart.js', 'KPI'],
+    pt: 'Dashboard universal orientado a dados com gráficos analíticos, KPIs, insights e consultas assistidas por IA. O projeto conecta modelos SQL a uma camada de inteligência usando PHP, MySQL e Groq AI.',
+    en: 'Universal data-driven dashboard with analytical charts, KPIs, insights and AI-assisted queries. The project connects SQL models to an intelligence layer using PHP, MySQL and Groq AI.',
+  },
+  {
+    name: 'Master — Windows Forms',
+    repo: 'https://github.com/Pierremoraes-ofc/Master-Windows-Form-CSharp-',
+    code: 'master_windows_forms',
+    tags: ['C#', '.NET 10', 'WinForms', 'WinAPI', 'Desktop'],
+    pt: 'Aplicação desktop em C#/.NET 10 com Windows Forms, manipulação de mouse e teclado via WinAPI, remapeamento de entradas, interface modular, temas, notificações e sistema de idiomas por JSON.',
+    en: 'Desktop application built with C#/.NET 10 and Windows Forms, featuring WinAPI mouse/keyboard input, input remapping, modular UI, themes, notifications and JSON-based localization.',
+  },
+];
+
+const HOBBY_PROJECTS = [
+  {
     name: 'PR Bridge',
     repo: 'https://github.com/Pierremoraes-ofc/pr_bridge',
     code: 'pr_bridge',
@@ -21,7 +40,7 @@ const PROJECTS = [
     name: 'PR Mileage',
     repo: 'https://github.com/Pierremoraes-ofc/pr_mileage',
     code: 'pr_mileage',
-    tags: ['Simulation', 'State Bags', 'SQL', 'Vehicle Systems'],
+    tags: ['FiveM', 'Simulation', 'State Bags', 'Vehicle Systems'],
     pt: 'Simulação veicular com odômetro persistente, State Bags, vida útil por componente, sintomas progressivos de desgaste e integração para oficinas e concessionárias.',
     en: 'Vehicle simulation with persistent odometer data, State Bags, per-component service life, progressive wear symptoms and workshop/dealership integrations.',
   },
@@ -29,7 +48,7 @@ const PROJECTS = [
     name: 'PR Car Keys',
     repo: 'https://github.com/Pierremoraes-ofc/pr_carkeys',
     code: 'pr_carkeys',
-    tags: ['Gameplay', 'Security', 'State Bags', 'Lua'],
+    tags: ['FiveM', 'Gameplay', 'Security', 'State Bags'],
     pt: 'Sistema robusto de chaves veiculares com barcode por chave, bolsas, hotwire, carjack, ignição, expiração e validação server-side.',
     en: 'Robust vehicle-key system with per-key barcodes, key bags, hotwire, carjack, ignition state, expiration and server-side validation.',
   },
@@ -37,25 +56,17 @@ const PROJECTS = [
     name: 'PR 3D Sound',
     repo: 'https://github.com/Pierremoraes-ofc/pr_3dsound',
     code: 'pr_3dsound',
-    tags: ['WebAudio', 'HRTF', 'FiveM', 'Audio'],
+    tags: ['FiveM', 'WebAudio', 'HRTF', 'Audio'],
     pt: 'Engine de áudio espacial com HRTF, emissores persistentes, streaming por proximidade, attach em entidades, oclusão e ponte de sons nativos do GTA.',
     en: 'Spatial-audio engine with HRTF, persistent emitters, proximity streaming, entity attachment, occlusion and a GTA native-sound bridge.',
-  },
-  {
-    name: 'Smart Office Hybrid 4.0',
-    repo: 'https://github.com/Pierremoraes-ofc/Smart-Office-Hybrid-4.0',
-    code: 'smart_office',
-    tags: ['AI', 'Data', 'KPI', 'Dashboards'],
-    pt: 'Projeto acadêmico para análise de dados empresariais com gráficos, KPIs, insights, consultas assistidas por IA e recomendações conectadas ao banco de dados.',
-    en: 'Academic business-data platform with charts, KPIs, insights, AI-assisted querying and recommendations connected directly to company data.',
   },
   {
     name: 'PR Elevator',
     repo: 'https://github.com/Pierremoraes-ofc/pr-elevator',
     code: 'pr_elevator',
     tags: ['FiveM', 'Lua', 'Interaction', 'Systems'],
-    pt: 'Sistema de elevadores voltado para experiências FiveM com integração ao ecossistema PR e fluxo de interação desacoplado.',
-    en: 'Elevator system for FiveM experiences with PR ecosystem integration and a decoupled interaction flow.',
+    pt: 'Sistema de elevadores para FiveM com integração ao ecossistema PR e fluxo de interação desacoplado.',
+    en: 'Elevator system for FiveM with PR ecosystem integration and a decoupled interaction flow.',
   },
 ];
 
@@ -68,9 +79,13 @@ const COPY = {
     intro: 'Desenvolvo software, integrações e sistemas com foco em arquitetura limpa, performance, automação e experiências de uso consistentes.',
     aboutTitle: 'Sobre',
     aboutText:
-      'Formado em Análise e Desenvolvimento de Sistemas, atuo com desenvolvimento de aplicações, APIs, bancos relacionais, automação, Linux, Git/GitHub e integração entre sistemas. Gosto de transformar problemas complexos em soluções simples de manter, evoluir e reutilizar.',
-    projectsTitle: 'Projetos selecionados',
-    projectsText: 'Uma seleção de projetos que representam arquitetura, integração, simulação, áudio, dados e experiência de desenvolvimento.',
+      'Desenvolvedor de Software formado em Análise e Desenvolvimento de Sistemas, com experiência prática em aplicações, APIs, integração de sistemas, bancos de dados, automação e desenvolvimento e suporte a servidores de games.',
+    projectsTitle: 'Projetos & Hobby',
+    projectsText: 'Projetos profissionais/acadêmicos separados dos sistemas que desenvolvo como hobby para jogos e FiveM.',
+    professionalProjects: 'Projetos',
+    professionalProjectsText: 'Projetos de software, dados e aplicações que representam minha formação e desenvolvimento profissional.',
+    hobbyProjects: 'Hobby',
+    hobbyProjectsText: 'Sistemas experimentais e ferramentas que desenvolvo por interesse em jogos, simulação e arquitetura FiveM.',
     stackTitle: 'Stack & competências',
     stackText: 'Tecnologias que utilizo no desenvolvimento de aplicações, ferramentas, integrações e produtos.',
     journeyTitle: 'Experiência & formação',
@@ -95,9 +110,13 @@ const COPY = {
     intro: 'I build software, integrations and systems focused on clean architecture, performance, automation and consistent user experiences.',
     aboutTitle: 'About',
     aboutText:
-      'Graduate in Systems Analysis and Development with hands-on experience in applications, APIs, relational databases, automation, Linux, Git/GitHub and systems integration. I enjoy turning complex problems into solutions that are easier to maintain, evolve and reuse.',
-    projectsTitle: 'Selected projects',
-    projectsText: 'A selection of projects representing architecture, integrations, simulation, audio, data and developer experience.',
+      'Software Developer with a degree in Systems Analysis and Development and hands-on experience in applications, APIs, systems integration, databases, automation, and game-server development and support.',
+    projectsTitle: 'Projects & Hobby',
+    projectsText: 'Professional/academic projects separated from the game and FiveM systems I build as a hobby.',
+    professionalProjects: 'Projects',
+    professionalProjectsText: 'Software, data and application projects representing my education and professional development.',
+    hobbyProjects: 'Hobby',
+    hobbyProjectsText: 'Experimental systems and tooling I build around games, simulation and FiveM architecture.',
     stackTitle: 'Stack & skills',
     stackText: 'Technologies I use across applications, tooling, integrations and product development.',
     journeyTitle: 'Experience & education',
@@ -329,20 +348,55 @@ function App() {
 
         <section id="projects" ref={(el) => { sectionsRef.current[3] = el; }} className="section content-section">
           <SectionHeading index="03" title={d.projectsTitle} text={d.projectsText} />
-          <div className="projects-grid">
-            {PROJECTS.map((project, index) => (
-              <a className="project-card" href={project.repo} target="_blank" rel="noreferrer" key={project.name}>
-                <div className="project-top">
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <Icon name="external" size={18} />
-                </div>
-                <code>{project.code}</code>
-                <h3>{project.name}</h3>
-                <p>{project[locale === 'pt-BR' ? 'pt' : 'en']}</p>
-                <div className="project-tags">{project.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-                <strong className="project-link">{d.openProject}<Icon name="chevron" size={14} /></strong>
-              </a>
-            ))}
+
+          <div className="project-group">
+            <header className="project-group-heading">
+              <span>03.1</span>
+              <div>
+                <h3>{d.professionalProjects}</h3>
+                <p>{d.professionalProjectsText}</p>
+              </div>
+            </header>
+            <div className="projects-grid projects-grid--featured">
+              {PROJECTS.map((project, index) => (
+                <a className="project-card project-card--featured" href={project.repo} target="_blank" rel="noreferrer" key={project.name}>
+                  <div className="project-top">
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <Icon name="external" size={18} />
+                  </div>
+                  <code>{project.code}</code>
+                  <h3>{project.name}</h3>
+                  <p>{project[locale === 'pt-BR' ? 'pt' : 'en']}</p>
+                  <div className="project-tags">{project.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+                  <strong className="project-link">{d.openProject}<Icon name="chevron" size={14} /></strong>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="project-group project-group--hobby">
+            <header className="project-group-heading">
+              <span>03.2</span>
+              <div>
+                <h3>{d.hobbyProjects}</h3>
+                <p>{d.hobbyProjectsText}</p>
+              </div>
+            </header>
+            <div className="projects-grid">
+              {HOBBY_PROJECTS.map((project, index) => (
+                <a className="project-card" href={project.repo} target="_blank" rel="noreferrer" key={project.name}>
+                  <div className="project-top">
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <Icon name="external" size={18} />
+                  </div>
+                  <code>{project.code}</code>
+                  <h3>{project.name}</h3>
+                  <p>{project[locale === 'pt-BR' ? 'pt' : 'en']}</p>
+                  <div className="project-tags">{project.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+                  <strong className="project-link">{d.openProject}<Icon name="chevron" size={14} /></strong>
+                </a>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -354,7 +408,7 @@ function App() {
               <div className="timeline-body">
                 <span>{d.experience}</span>
                 <h3>Tribunal de Justiça do Estado do Rio de Janeiro</h3>
-                <p>{locale === 'pt-BR' ? 'Processos administrativos, suporte técnico, ferramentas digitais e organização de fluxos de trabalho.' : 'Administrative processes, technical support, digital tools and workflow organization.'}</p>
+                <p>{locale === 'pt-BR' ? 'Auxiliar administrativo. Organização de processos e rotinas administrativas com utilização de ferramentas informatizadas.' : 'Administrative Assistant. Organization of administrative processes and workflows using digital tools.'}</p>
               </div>
             </article>
             <article>
@@ -371,6 +425,14 @@ function App() {
                 <span>{locale === 'pt-BR' ? 'Formação complementar' : 'Additional education'}</span>
                 <h3>Cloud Foundations</h3>
                 <p>{locale === 'pt-BR' ? 'Fundamentos de computação em nuvem e serviços AWS.' : 'Cloud-computing fundamentals and AWS services.'}</p>
+              </div>
+            </article>
+            <article>
+              <div className="timeline-date">2006</div>
+              <div className="timeline-body">
+                <span>{locale === 'pt-BR' ? 'Formação complementar' : 'Additional education'}</span>
+                <h3>{locale === 'pt-BR' ? 'Curso OEM' : 'OEM Course'}</h3>
+                <p>{locale === 'pt-BR' ? 'Microsoft Office Avançado; Montagem e Manutenção de Computadores.' : 'Advanced Microsoft Office; Computer Assembly and Maintenance.'}</p>
               </div>
             </article>
           </div>
