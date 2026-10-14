@@ -107,6 +107,52 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
 
               {section.text && <p className="documentation-lead">{section.text[pt ? 'pt' : 'en']}</p>}
 
+              {section.note && (
+                <div className="documentation-note">
+                  <strong>{pt ? 'Observação' : 'Note'}</strong>
+                  <p>{section.note[pt ? 'pt' : 'en']}</p>
+                </div>
+              )}
+
+              {section.gallery && (
+                <div className="documentation-gallery">
+                  {section.gallery.map(([label, src]) => (
+                    <a href={src} target="_blank" rel="noreferrer" key={src}>
+                      <img src={src} alt={label} loading="lazy" />
+                      <span>{label}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {section.steps && (
+                <ol className="documentation-steps">
+                  {section.steps[pt ? 'pt' : 'en'].map((item, stepIndex) => (
+                    <li key={item}>
+                      <span>{String(stepIndex + 1).padStart(2, '0')}</span>
+                      <p>{item}</p>
+                    </li>
+                  ))}
+                </ol>
+              )}
+
+              {section.table && (
+                <div className="documentation-table-wrap">
+                  <table className="documentation-table">
+                    <thead>
+                      <tr>{section.table.headers.map((header) => <th key={header}>{header}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {section.table.rows.map((row, rowIndex) => (
+                        <tr key={`${rowIndex}-${row.join('-')}`}>
+                          {row.map((cell, cellIndex) => <td key={`${cellIndex}-${cell}`}>{cell}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
               {section.cards && (
                 <div className="documentation-cards">
                   {section.cards.map(([title, description]) => (
