@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PROJECT_DOCS } from './projectDocsData';
+import PrBridgeLibrary from './PrBridgeLibrary';
 
 function Arrow({ left = false }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={left ? 'm15 18-6-6 6-6' : 'm9 18 6-6-6-6'} /></svg>;
@@ -15,7 +16,12 @@ function GithubIcon() {
 
 export default function ProjectDocumentation({ projectKey, locale, onBack }) {
   const doc = PROJECT_DOCS[projectKey];
-  const [active, setActive] = useState(doc?.sections?.[0]?.id || 'overview');
+  const extraSections = projectKey === 'pr_bridge' ? [
+    { id: 'bridge-interfaces', title: { pt: 'Interfaces & perfis', en: 'Interfaces & profiles' } },
+    { id: 'bridge-api', title: { pt: 'Catálogo de funções', en: 'Function catalog' } },
+  ] : [];
+  const allSections = [...(doc?.sections || []), ...extraSections];
+  const [active, setActive] = useState(allSections[0]?.id || 'overview');
   const pt = locale === 'pt-BR';
 
   const labels = useMemo(() => ({
@@ -26,20 +32,20 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
   }), [pt]);
 
   useEffect(() => {
-    setActive(doc?.sections?.[0]?.id || 'overview');
+    setActive(allSections[0]?.id || 'overview');
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [projectKey, doc]);
 
   useEffect(() => {
     if (!doc) return undefined;
-    const elements = doc.sections.map((section) => document.getElementById(`doc-${section.id}`)).filter(Boolean);
+    const elements = allSections.map((section) => document.getElementById(`doc-${section.id}`)).filter(Boolean);
     const observer = new IntersectionObserver((entries) => {
       const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (visible?.target?.dataset?.docSection) setActive(visible.target.dataset.docSection);
     }, { rootMargin: '-18% 0px -65%', threshold: [0.05, 0.2, 0.5] });
     elements.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
-  }, [doc]);
+  }, [doc, projectKey]);
 
   if (!doc) {
     return <div className="documentation-empty"><button onClick={onBack}>{labels.back}</button></div>;
@@ -58,7 +64,7 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
 
         <div className="documentation-index-label">{labels.index}</div>
         <nav>
-          {doc.sections.map((section, index) => (
+          {allSections.map((section, index) => (
             <button key={section.id} className={active === section.id ? 'active' : ''} onClick={() => goTo(section.id)}>
               <span>{String(index + 1).padStart(2, '0')}</span>
               <strong>{section.title[pt ? 'pt' : 'en']}</strong>
@@ -118,6 +124,8 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
               {section.code && <pre className="documentation-code"><code>{section.code}</code></pre>}
             </section>
           ))}
+
+          {projectKey === 'pr_bridge' && <PrBridgeLibrary locale={locale} />}
 
           <section className="documentation-source">
             <span>SOURCE REVIEW</span>
