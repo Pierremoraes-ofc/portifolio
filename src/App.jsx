@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import ProjectDocumentation from './ProjectDocumentation';
 
 const PROFILE = {
   name: 'Pierre Moraes',
@@ -93,7 +94,7 @@ const COPY = {
     contactTitle: 'Vamos construir algo?',
     contactText: 'Estou aberto a conversar sobre desenvolvimento de software, integrações, ferramentas, aplicações web e sistemas para FiveM.',
     nav: ['Início', 'Sobre', 'Stack', 'Projetos', 'Experiência', 'Contato'],
-    openProject: 'Abrir repositório',
+    openProject: 'Abrir documentação',
     experience: 'Experiência',
     education: 'Formação',
     current: 'Atual',
@@ -124,7 +125,7 @@ const COPY = {
     contactTitle: 'Build something together?',
     contactText: 'I am open to conversations about software development, integrations, tooling, web applications and FiveM systems.',
     nav: ['Home', 'About', 'Stack', 'Projects', 'Experience', 'Contact'],
-    openProject: 'Open repository',
+    openProject: 'Open documentation',
     experience: 'Experience',
     education: 'Education',
     current: 'Present',
@@ -167,6 +168,10 @@ function App() {
   const [active, setActive] = useState('home');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [docProject, setDocProject] = useState(() => {
+    const match = window.location.hash.match(/^#docs\/([^/]+)$/);
+    return match?.[1] || null;
+  });
   const sectionsRef = useRef([]);
   const d = COPY[locale];
   const sections = useMemo(() => [
@@ -184,6 +189,8 @@ function App() {
   }, [locale]);
 
   useEffect(() => {
+    if (docProject) return undefined;
+
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -196,12 +203,39 @@ function App() {
 
     sectionsRef.current.forEach((section) => section && observer.observe(section));
     return () => observer.disconnect();
+  }, [docProject]);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const match = window.location.hash.match(/^#docs\/([^/]+)$/);
+      setDocProject(match?.[1] || null);
+    };
+
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMobileOpen(false);
   };
+
+  const openDocumentation = (projectCode) => {
+    window.location.hash = `docs/${projectCode}`;
+    setDocProject(projectCode);
+  };
+
+  const closeDocumentation = () => {
+    setDocProject(null);
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#projects`);
+    requestAnimationFrame(() => {
+      document.getElementById('projects')?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    });
+  };
+
+  if (docProject) {
+    return <ProjectDocumentation projectKey={docProject} locale={locale} onBack={closeDocumentation} />;
+  }
 
   const Sidebar = ({ mobile = false }) => (
     <aside className={mobile ? 'sidebar sidebar--mobile' : 'sidebar'}>
@@ -359,17 +393,17 @@ function App() {
             </header>
             <div className="projects-grid projects-grid--featured">
               {PROJECTS.map((project, index) => (
-                <a className="project-card project-card--featured" href={project.repo} target="_blank" rel="noreferrer" key={project.name}>
+                <button className="project-card project-card--featured" type="button" onClick={() => openDocumentation(project.code)} key={project.name}>
                   <div className="project-top">
                     <span>{String(index + 1).padStart(2, '0')}</span>
-                    <Icon name="external" size={18} />
+                    <Icon name="book" size={18} />
                   </div>
                   <code>{project.code}</code>
                   <h3>{project.name}</h3>
                   <p>{project[locale === 'pt-BR' ? 'pt' : 'en']}</p>
                   <div className="project-tags">{project.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
                   <strong className="project-link">{d.openProject}<Icon name="chevron" size={14} /></strong>
-                </a>
+                </button>
               ))}
             </div>
           </div>
@@ -384,17 +418,17 @@ function App() {
             </header>
             <div className="projects-grid">
               {HOBBY_PROJECTS.map((project, index) => (
-                <a className="project-card" href={project.repo} target="_blank" rel="noreferrer" key={project.name}>
+                <button className="project-card" type="button" onClick={() => openDocumentation(project.code)} key={project.name}>
                   <div className="project-top">
                     <span>{String(index + 1).padStart(2, '0')}</span>
-                    <Icon name="external" size={18} />
+                    <Icon name="book" size={18} />
                   </div>
                   <code>{project.code}</code>
                   <h3>{project.name}</h3>
                   <p>{project[locale === 'pt-BR' ? 'pt' : 'en']}</p>
                   <div className="project-tags">{project.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
                   <strong className="project-link">{d.openProject}<Icon name="chevron" size={14} /></strong>
-                </a>
+                </button>
               ))}
             </div>
           </div>
