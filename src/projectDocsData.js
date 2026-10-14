@@ -892,53 +892,1048 @@ pr_lib.notify(source, {
   },
 
   pr_mileage: {
-    name:'PR Mileage',code:'pr_mileage',repo:'https://github.com/Pierremoraes-ofc/pr_mileage',
-    category:{pt:'Hobby • Vehicle Simulation',en:'Hobby • Vehicle Simulation'},
-    lead:{pt:'Simulador de odômetro e desgaste mecânico para FiveM. Persiste quilometragem, replica vehicleMileage por State Bag e transforma peças instaladas em componentes com vida útil, histórico, sintomas e impacto físico.',en:'FiveM odometer and mechanical-wear simulator. It persists mileage, replicates vehicleMileage through State Bags and turns installed parts into components with service life, history, symptoms and physical impact.'},
-    facts:[['Version','2.3.2'],['Parts','62'],['Wear effects','16'],['Runtime','DB + State Bags']],
-    sections:[
-      {id:'odometer',title:{pt:'Odômetro real',en:'Real odometer'},text:{pt:'A quilometragem é derivada da distância entre posições sucessivas do veículo, com amostragem moderada e condições físicas para evitar falsos incrementos. O valor é persistido para veículos registrados e replicado na entity.',en:'Mileage is derived from distance between successive vehicle positions, sampled at a moderate interval with physical guards. It is persisted for registered vehicles and replicated on the entity.'},code:`local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-local km = Entity(vehicle).state.vehicleMileage
-
--- API
-local displayed = exports['pr_mileage']:getMileage()`},
-      {id:'wear',title:{pt:'Matemática de desgaste',en:'Wear math'},code:`current_km   = floor(vehicle_km) - floor(installed_km)
-remaining_km = max(durability - current_km, 0)
-percent      = (remaining_km / durability) * 100`,text:{pt:'A peça envelhece pela quilometragem percorrida desde a instalação. Substituir a peça grava um novo installed_km e sorteia uma nova durabilidade dentro da faixa definida.',en:'A part ages from mileage traveled since installation. Replacing it records a new installed_km and rolls new durability within its configured range.'}},
-      {id:'parts',title:{pt:'Peças e sintomas',en:'Parts & symptoms'},cards:[['Engine','Óleo, filtros, ignição, correias, bombas e sensores.'],['Cooling','Bomba d’água, mangueiras e falhas com vapor/saúde do motor.'],['Suspension','Amortecedor, mola, buchas, braços, pivôs e estabilizadora.'],['Tyres','Perfis common, street, sport, race, semislick, slick, drift e touring.'],['Brakes','Discos, pastilhas, fluido e stages de performance.'],['Sensors','MAF, MAP, IAT, TPS, APP, CKP, CMP, O2, EGT e outros.']]},
-      {id:'create-part',title:{pt:'Criando uma peça',en:'Creating a part'},code:`Parts.Items['pastilha_ceramica_custom'] = {
-    labelItem = 'Pastilha Cerâmica Custom',
-    durability = { min = 28000, max = 42000 },
-    symptoms = {
-        {
-            threshold = 0.25,
-            label = 'Frenagem perdendo eficiência',
-            effects = {
-                { type = 'handling_float', params = {
-                    field = 'fBrakeForce',
-                    value = 0.52,
-                    speed = 10
-                }}
-            }
+    "name": "PR Mileage",
+    "code": "pr_mileage",
+    "repo": "https://github.com/Pierremoraes-ofc/pr_mileage",
+    "category": {
+      "pt": "Hobby • Vehicle Simulation",
+      "en": "Hobby • Vehicle Simulation"
+    },
+    "lead": {
+      "pt": "Simulador veicular de odômetro, histórico mecânico e desgaste progressivo para FiveM. O sistema mede a distância realmente percorrida, mantém o odômetro em banco/State Bag, registra cada peça por placa com quilometragem de instalação e durabilidade própria e transforma o desgaste em sintomas físicos, visuais e mecânicos.",
+      "en": "FiveM vehicle simulator for odometer data, mechanical history and progressive component wear. It measures actual traveled distance, keeps mileage in database/State Bags, records each installed part by plate with installation mileage and individual durability, and turns wear into physical, visual and mechanical symptoms."
+    },
+    "facts": [
+      [
+        "Version",
+        "2.3.2"
+      ],
+      [
+        "Parts",
+        "62"
+      ],
+      [
+        "Wear effects",
+        "16"
+      ],
+      [
+        "Runtime",
+        "DB + State Bags"
+      ],
+      [
+        "Mileage loop",
+        "1 s"
+      ],
+      [
+        "Wear loop",
+        "5 s"
+      ],
+      [
+        "Frameworks",
+        "ND / ox_core / ESX / QBX / QB"
+      ]
+    ],
+    "sections": [
+      {
+        "id": "overview",
+        "title": {
+          "pt": "Visão geral",
+          "en": "Overview"
+        },
+        "text": {
+          "pt": "O PR Mileage não trata quilometragem apenas como um número para HUD. O odômetro é a base de uma camada de simulação mecânica: o veículo acumula distância, a quilometragem fica disponível em runtime pela State Bag vehicleMileage, peças registradas guardam em que KM foram instaladas e a vida restante é calculada a partir do uso real do carro.",
+          "en": "PR Mileage does not treat mileage as a HUD-only number. Odometer data drives a mechanical simulation layer: the vehicle accumulates real distance, runtime mileage is exposed through the vehicleMileage State Bag, installed parts remember the odometer at installation and remaining life is derived from actual use."
+        },
+        "cards": [
+          [
+            "Odômetro real",
+            "Distância é calculada pelo deslocamento entre coordenadas sucessivas do veículo, não por um contador artificial de tempo."
+          ],
+          [
+            "State Bag",
+            "vehicleMileage replica o odômetro atual para HUDs, peças e outros resources sem polling SQL contínuo."
+          ],
+          [
+            "Peças por placa",
+            "vehicle_parts mantém uma linha por plate + part com stage, installed_km, durability, installer e datas."
+          ],
+          [
+            "Durabilidade individual",
+            "Cada instalação sorteia uma vida útil entre durability.min e durability.max."
+          ],
+          [
+            "Sintomas progressivos",
+            "Uma peça pode apresentar vários sintomas em diferentes percentuais de vida restante."
+          ],
+          [
+            "Física e imersão",
+            "Falhas podem alterar handling, direção, motor, pneus, luzes, RPM, câmera, partículas e forças físicas."
+          ]
+        ]
+      },
+      {
+        "id": "architecture",
+        "title": {
+          "pt": "Arquitetura do sistema",
+          "en": "System architecture"
+        },
+        "text": {
+          "pt": "O resource separa rastreamento do odômetro, persistência de peças e aplicação dos sintomas. Essa divisão evita salvar desgaste de cada peça a cada tick: o desgaste é derivado de vehicle_km - installed_km.",
+          "en": "The resource separates odometer tracking, part persistence and symptom application. This avoids saving every component wear value every tick: wear is derived from vehicle_km - installed_km."
+        },
+        "code": "VEÍCULO EM MOVIMENTO\n        ↓\nclient/client.lua\nmede distância real\n        ↓\nState Bag: vehicleMileage\n        ↓\nserver/server.lua\nDB (veículo do player) / RAM (veículo de rua)\n        ↓\nclient/cl_parts.lua\ncarrega vehicle_parts\n        ↓\ncurrent_km = vehicle_km - installed_km\n        ↓\nclient/cl_wear.lua\nresolve sintoma ativo\n        ↓\nhandling / motor / partículas / pneus / direção / câmera"
+      },
+      {
+        "id": "installation",
+        "title": {
+          "pt": "Instalação e dependências",
+          "en": "Installation & dependencies"
+        },
+        "text": {
+          "pt": "O fxmanifest atual declara oxmysql e ox_lib como dependências. main.lua detecta automaticamente o framework ativo para descobrir a tabela de veículos e a coluna de proprietário.",
+          "en": "The current fxmanifest declares oxmysql and ox_lib as dependencies. main.lua automatically detects the active framework to determine the owned-vehicle table and owner column."
+        },
+        "table": {
+          "headers": [
+            "Framework detectado",
+            "Tabela de veículos",
+            "Coluna do proprietário"
+          ],
+          "rows": [
+            [
+              "ND_Core",
+              "player_vehicles",
+              "citizenid"
+            ],
+            [
+              "ox_core",
+              "vehicles",
+              "charId"
+            ],
+            [
+              "es_extended",
+              "owned_vehicles",
+              "owner"
+            ],
+            [
+              "qbx-core",
+              "player_vehicles",
+              "citizenid"
+            ],
+            [
+              "qb-core",
+              "player_vehicles",
+              "citizenid"
+            ],
+            [
+              "Fallback",
+              "player_vehicles",
+              "citizenid"
+            ]
+          ]
+        },
+        "code": "ensure oxmysql\nensure ox_lib\nensure pr_mileage"
+      },
+      {
+        "id": "odometer",
+        "title": {
+          "pt": "Como o odômetro é calculado",
+          "en": "How the odometer is calculated"
+        },
+        "text": {
+          "pt": "O loop do odômetro roda a cada segundo, apenas para o motorista. A distância em metros entre a posição anterior e a atual é convertida para quilômetros. O sistema só soma distância quando o veículo está com todas as rodas no chão e fora d'água.",
+          "en": "The odometer loop runs once per second and only for the driver. Distance in meters between previous and current position is converted to kilometers. Distance only accumulates while the vehicle is on all wheels and outside water."
+        },
+        "steps": {
+          "pt": [
+            "Verifica se existe veículo em cache e se o player ocupa o banco do motorista.",
+            "Ignora classes configuradas em Config.IgnoredClasses.",
+            "Resolve a origem da placa: DB para veículo persistente, RAM para veículo de rua ou nova placa.",
+            "Calcula #(lastLocation - GetEntityCoords(vehicle)).",
+            "Converte metros para quilômetros.",
+            "Atualiza vehicleMileage quando o valor arredondado para 0,1 km muda.",
+            "Envia novo save ao servidor quando a diferença atinge Config.SaveThreshold."
+          ],
+          "en": [
+            "Verify cached vehicle and driver seat.",
+            "Skip classes configured in Config.IgnoredClasses.",
+            "Resolve plate origin: DB, street RAM or a new plate.",
+            "Calculate #(lastLocation - GetEntityCoords(vehicle)).",
+            "Convert meters into kilometers.",
+            "Update vehicleMileage whenever the 0.1 km rounded value changes.",
+            "Save server-side when Config.SaveThreshold is reached."
+          ]
+        },
+        "code": "local dist = #(lastLocation - GetEntityCoords(vehicle))\ncurrentMileage = currentMileage + (dist / 1000.0)\n\nlocal rounded = tonumber(string.format('%.1f', currentMileage))\nEntity(vehicle).state:set('vehicleMileage', rounded, true)"
+      },
+      {
+        "id": "persistence",
+        "title": {
+          "pt": "DB, State Bags e veículos de rua",
+          "en": "DB, State Bags & street vehicles"
+        },
+        "text": {
+          "pt": "Veículos pertencentes a players salvam mileage na tabela detectada do framework. Veículos de rua, que não existem nessa tabela, recebem histórico temporário em RAM no servidor. A State Bag mantém o valor mais recente na entity e o SQL possui proteção contra regressão de odômetro.",
+          "en": "Player-owned vehicles persist mileage in the framework vehicle table. Street vehicles not present there keep session history in server RAM. The State Bag carries the latest entity value and SQL prevents odometer regression."
+        },
+        "table": {
+          "headers": [
+            "Camada",
+            "Responsabilidade",
+            "Persistência"
+          ],
+          "rows": [
+            [
+              "vehicles.mileage",
+              "Odômetro de veículos registrados",
+              "Banco"
+            ],
+            [
+              "vehicleMileage",
+              "Odômetro atual da entity",
+              "State Bag replicada"
+            ],
+            [
+              "worldVehicles",
+              "KM de placas sem registro persistente",
+              "RAM do servidor"
+            ],
+            [
+              "vehicle_parts",
+              "Histórico de peças instaladas",
+              "Banco"
+            ]
+          ]
+        },
+        "note": {
+          "pt": "writeToDB() só atualiza quando o novo mileage é maior que o salvo. Isso evita que um client com estado antigo faça o odômetro voltar.",
+          "en": "writeToDB() only updates when the new mileage is greater than the stored value, preventing stale clients from rolling the odometer backward."
         }
-    }
-}`},
-      {id:'effects',title:{pt:'Motor de efeitos',en:'Effects engine'},bullets:{pt:['particle','shake_cam','apply_force','engine_health','undriveable','engine_on','stall','tyre_burst','vehicle_lights','indicator','rpm_override','steering_scale','lateral_force','handling_float','power_mult','torque_mult'],en:['particle','shake_cam','apply_force','engine_health','undriveable','engine_on','stall','tyre_burst','vehicle_lights','indicator','rpm_override','steering_scale','lateral_force','handling_float','power_mult','torque_mult']}},
-      {id:'dealership',title:{pt:'Concessionária e peças de fábrica',en:'Dealership & factory parts'},text:{pt:'Após registrar a propriedade do veículo, zere o odômetro, instale o pacote de peças com installed_km=0 e marque a entity como fresh quando ela for entregue ao comprador.',en:'After persisting ownership, reset mileage, install the factory parts with installed_km=0 and mark the entity fresh when delivered.'},code:`exports['pr_mileage']:resetMileage(plate)
-
-for _, part in ipairs(FACTORY_PARTS) do
-    exports['pr_mileage']:installPart(
-        plate, part.name, part.stage, 0, ownerId
-    )
-end
-
--- client, after spawn
-exports['pr_mileage']:markFresh(vehicle)`},
-      {id:'used-cars',title:{pt:'Veículos usados',en:'Used vehicles'},text:{pt:'Ao instalar uma peça nova em um carro usado, passe o odômetro atual como installed_km. Assim uma peça nova em um carro de 120.000 km nasce com 0 km de desgaste, e não com 120.000 km.',en:'When fitting a new component to a used vehicle, pass current odometer as installed_km. A new part on a 120,000 km car then starts with 0 km wear rather than inheriting 120,000 km.'}},
-      {id:'api',title:{pt:'API principal',en:'Main API'},bullets:{pt:['getMileage / getMileageByEntity / getMileageByPlate','resetMileage / setMileage','GetVehicleParts / GetParts / GetPartsStatus','installPart / removePart / reloadParts','setExternalParts / clearExternalParts','markFresh'],en:['getMileage / getMileageByEntity / getMileageByPlate','resetMileage / setMileage','GetVehicleParts / GetParts / GetPartsStatus','installPart / removePart / reloadParts','setExternalParts / clearExternalParts','markFresh']}}
+      },
+      {
+        "id": "fresh-street",
+        "title": {
+          "pt": "Veículo zero KM e quilometragem de rua",
+          "en": "Zero-KM & street mileage"
+        },
+        "text": {
+          "pt": "Veículos marcados como fresh começam em 0 km. Placas novas que não pertencem a player recebem uma quilometragem aleatória por classe, tornando carros de rua mais críveis. Hooks atuais incluem eventos de ESX garages, compra ESX, QBCore spawn, qb-garages, ox_garage e o evento pr_mileage:fresh.",
+          "en": "Vehicles marked fresh start at 0 km. New street plates receive class-based randomized mileage for believable world vehicles. Current hooks include ESX garages/purchase, QBCore spawn, qb-garages, ox_garage and pr_mileage:fresh."
+        },
+        "code": "-- marcar manualmente a entity recém-entregue\nexports['pr_mileage']:markFresh(vehicle)\n\n-- alternativa\nTriggerEvent('pr_mileage:fresh', vehicle)\n\n-- server: zerar a placa persistente\nexports['pr_mileage']:resetMileage(plate)"
+      },
+      {
+        "id": "wear-math",
+        "title": {
+          "pt": "Matemática do desgaste",
+          "en": "Wear mathematics"
+        },
+        "text": {
+          "pt": "A tabela vehicle_parts não precisa receber atualização contínua do desgaste. Basta registrar a quilometragem da instalação e a durabilidade total. O estado atual é reconstruído usando o odômetro do carro.",
+          "en": "vehicle_parts does not need continuous wear writes. It stores installation mileage and total durability; current condition is reconstructed from vehicle odometer."
+        },
+        "code": "current_km   = floor(vehicle_km) - floor(installed_km)\nremaining_km = max(durability - current_km, 0)\nratio        = remaining_km / durability\npercent      = ratio * 100",
+        "table": {
+          "headers": [
+            "Exemplo",
+            "Valor"
+          ],
+          "rows": [
+            [
+              "Odômetro atual",
+              "80.000 km"
+            ],
+            [
+              "Peça instalada em",
+              "60.000 km"
+            ],
+            [
+              "KM rodados pela peça",
+              "20.000 km"
+            ],
+            [
+              "Durabilidade sorteada",
+              "50.000 km"
+            ],
+            [
+              "KM restantes",
+              "30.000 km"
+            ],
+            [
+              "Vida restante",
+              "60%"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "status",
+        "title": {
+          "pt": "Status e thresholds",
+          "en": "Status & thresholds"
+        },
+        "text": {
+          "pt": "WearConfig separa o status de saúde da aplicação física de sintomas. Com a configuração atual, 100% é Boa, entre 30% e abaixo de 100% é Razoável e abaixo de 30% é Ruim.",
+          "en": "WearConfig separates health labels from physical symptom activation. With the current settings, 100% is Good, 30% to below 100% is Fair and below 30% is Bad."
+        },
+        "table": {
+          "headers": [
+            "Faixa",
+            "Status",
+            "Efeitos físicos"
+          ],
+          "rows": [
+            [
+              "100%",
+              "Boa",
+              "Não"
+            ],
+            [
+              "30% até 99,9%",
+              "Razoável",
+              "Não"
+            ],
+            [
+              "Abaixo de 30%",
+              "Ruim",
+              "Pode ativar sintomas"
+            ]
+          ]
+        },
+        "note": {
+          "pt": "O resolver atual de sintomas só considera definições cujo threshold seja menor que 0.30. Portanto, um sintoma definido em threshold = 0.40 pode existir como informação de configuração, mas não será aplicado fisicamente pelo cl_wear.lua atual.",
+          "en": "The current symptom resolver only considers definitions with threshold below 0.30. A symptom configured at threshold = 0.40 may exist in configuration, but current cl_wear.lua will not physically apply it."
+        }
+      },
+      {
+        "id": "parts-catalog",
+        "title": {
+          "pt": "Catálogo atual de 62 peças",
+          "en": "Current 62-part catalog"
+        },
+        "text": {
+          "pt": "config/parts_consumable.lua contém 62 definições. O catálogo mistura sensores, consumíveis, manutenção, suspensão, pneus, freios, turbo e componentes especiais.",
+          "en": "config/parts_consumable.lua contains 62 definitions spanning sensors, consumables, maintenance, suspension, tyres, brakes, turbo and special components."
+        },
+        "table": {
+          "headers": [
+            "Grupo",
+            "Exemplos"
+          ],
+          "rows": [
+            [
+              "Sensores",
+              "sensor_maf, sensor_map, sensor_iat, sensor_tps, sensor_ckp, sensor_cmp, sensor_ect, sensor_o2_pre, sensor_egt"
+            ],
+            [
+              "Motor/manutenção",
+              "oleo_motor, filtro_oleo, filtro_ar, filtro_combustivel, vela_ignicao, bobina_ignicao, correia_dentada"
+            ],
+            [
+              "Arrefecimento",
+              "bomba_agua, mangueiras_radiador, ventoinha_airforce_fan_quebrada"
+            ],
+            [
+              "Suspensão",
+              "amortecedor, mola, bucha, bandeja, pivo, barra_estabilizadora, bieleta"
+            ],
+            [
+              "Pneus",
+              "tire_common, tire_street, tire_sport, tire_race, tire_semislick, tire_slick, tire_drift, tire_touring"
+            ],
+            [
+              "Freios",
+              "brake_level_1..4, disco_freio, fluido_freio, pastilha_freio"
+            ],
+            [
+              "Performance",
+              "turbo_garret_1..4, nitro_kit, bobina_pro_race"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "create-part",
+        "title": {
+          "pt": "Criando uma peça do zero",
+          "en": "Creating a part from scratch"
+        },
+        "text": {
+          "pt": "Para participar do desgaste interno, a peça precisa existir em Parts.Items. labelItem é o nome humano, durability define a faixa de vida útil em KM e symptoms descreve os estados de falha. O stage não fica na definição: ele é informado quando a peça é instalada.",
+          "en": "To participate in internal wear simulation, a part must exist in Parts.Items. labelItem is the human label, durability defines its KM service-life range and symptoms describes failure states. stage is supplied at installation rather than stored in the definition."
+        },
+        "code": "Parts.Items['filtro_ar_premium'] = {\n    labelItem = 'Filtro de Ar Premium',\n\n    -- A vida final é sorteada no momento da instalação\n    durability = {\n        min = 18000,\n        max = 26000\n    },\n\n    symptoms = {}\n}"
+      },
+      {
+        "id": "symptom-basic",
+        "title": {
+          "pt": "Criando um sintoma para uma peça",
+          "en": "Creating a symptom"
+        },
+        "text": {
+          "pt": "threshold representa a porcentagem RESTANTE que ativa o sintoma. Ex.: 0.25 significa 25% de vida restante ou menos. Como o resolver atual só aplica thresholds abaixo de 0.30, use valores como 0.25, 0.15, 0.05 para sintomas físicos.",
+          "en": "threshold represents REMAINING life ratio. 0.25 means 25% life remaining or less. Since the current resolver only applies thresholds below 0.30, values such as 0.25, 0.15 and 0.05 are appropriate for physical symptoms."
+        },
+        "code": "Parts.Items['filtro_ar_premium'] = {\n    labelItem = 'Filtro de Ar Premium',\n    durability = { min = 18000, max = 26000 },\n\n    symptoms = {\n        {\n            threshold = 0.25, -- ativa com <= 25% restante\n            label = 'Filtro saturado',\n            effects = {\n                {\n                    type = 'shake_cam',\n                    params = {\n                        type = 'ROAD_VIBRATION_SHAKE',\n                        speed = 40,\n                        intensity = 0.04\n                    }\n                },\n                {\n                    type = 'stall',\n                    params = { chance = 0.03 }\n                }\n            }\n        }\n    }\n}"
+      },
+      {
+        "id": "symptom-progressive",
+        "title": {
+          "pt": "Exemplo de falha progressiva em 3 estágios",
+          "en": "Three-stage progressive failure"
+        },
+        "text": {
+          "pt": "Uma peça pode ter vários sintomas. O resolver escolhe o sintoma ativo mais severo compatível com a vida restante. No exemplo, a mangueira começa vazando levemente em 25%, piora em 12% e chega à condição crítica em 4%.",
+          "en": "A part may contain multiple symptoms. The resolver selects the most severe active symptom compatible with remaining life. This hose starts leaking at 25%, worsens at 12% and becomes critical at 4%."
+        },
+        "code": "Parts.Items['mangueira_coolant_custom'] = {\n    labelItem = 'Mangueira de Arrefecimento Reforçada',\n    durability = { min = 45000, max = 70000 },\n\n    symptoms = {\n        {\n            threshold = 0.25,\n            label = 'Pequeno vazamento de arrefecimento',\n            effects = {\n                { type = 'particle', params = {\n                    dict = 'core',\n                    name = 'ent_sht_steam',\n                    bone = Parts.VehicleBones.motor,\n                    scale = 0.30\n                }},\n                { type = 'engine_health', params = { value = 800 } }\n            }\n        },\n        {\n            threshold = 0.12,\n            label = 'Vazamento severo',\n            effects = {\n                { type = 'particle', params = {\n                    dict = 'core',\n                    name = 'ent_amb_smoke_engine',\n                    bone = Parts.VehicleBones.motor,\n                    scale = 0.55\n                }},\n                { type = 'engine_health', params = { value = 500 } },\n                { type = 'stall', params = { chance = 0.08 } }\n            }\n        },\n        {\n            threshold = 0.04,\n            label = 'Mangueira rompida — superaquecimento crítico',\n            effects = {\n                { type = 'particle', params = {\n                    dict = 'core',\n                    name = 'ent_amb_smoke_engine',\n                    bone = Parts.VehicleBones.motor,\n                    scale = 0.85\n                }},\n                { type = 'engine_health', params = { value = 180 } },\n                { type = 'stall', params = { chance = 0.35 } }\n            }\n        }\n    }\n}"
+      },
+      {
+        "id": "symptom-brakes",
+        "title": {
+          "pt": "Exemplo — freio perdendo eficiência",
+          "en": "Example — brake degradation"
+        },
+        "text": {
+          "pt": "handling_float permite degradar propriedades reais do CHandlingData. O exemplo reduz fBrakeForce somente acima da velocidade configurada e combina vibração para tornar a falha perceptível.",
+          "en": "handling_float can degrade real CHandlingData properties. This example reduces fBrakeForce only above the configured speed and adds camera vibration for perceptible feedback."
+        },
+        "code": "Parts.Items['pastilha_ceramica_custom'] = {\n    labelItem = 'Pastilha Cerâmica Custom',\n    durability = { min = 28000, max = 42000 },\n    symptoms = {\n        {\n            threshold = 0.25,\n            label = 'Frenagem perdendo eficiência',\n            effects = {\n                { type = 'handling_float', params = {\n                    field = 'fBrakeForce',\n                    value = 0.52,\n                    speed = 10\n                }},\n                { type = 'shake_cam', params = {\n                    type = 'ROAD_VIBRATION_SHAKE',\n                    intensity = 0.04,\n                    speed = 40\n                }}\n            }\n        },\n        {\n            threshold = 0.06,\n            label = 'Pastilha no limite',\n            effects = {\n                { type = 'handling_float', params = {\n                    field = 'fBrakeForce',\n                    value = 0.30,\n                    speed = 5\n                }}\n            }\n        }\n    }\n}"
+      },
+      {
+        "id": "symptom-tyre",
+        "title": {
+          "pt": "Exemplo — pneu com perda de estabilidade e estouro",
+          "en": "Example — tyre instability & blowout"
+        },
+        "text": {
+          "pt": "Pneus podem combinar handling, força lateral e tyre_burst. Quando wheel é nil, o applier escolhe uma roda aleatória entre 0 e 3.",
+          "en": "Tyres can combine handling changes, lateral force and tyre_burst. When wheel is nil the applier selects a random wheel from 0 to 3."
+        },
+        "code": "Parts.Items['tire_endurance_custom'] = {\n    labelItem = 'Pneu Endurance',\n    durability = { min = 55000, max = 80000 },\n    symptoms = {\n        {\n            threshold = 0.20,\n            label = 'Aderência reduzida',\n            effects = {\n                { type = 'handling_float', params = {\n                    field = 'fTractionLossMult',\n                    value = 1.30,\n                    speed = 30\n                }},\n                { type = 'lateral_force', params = {\n                    value = 0.08,\n                    speed = 60\n                }}\n            }\n        },\n        {\n            threshold = 0.03,\n            label = 'Carcaça comprometida',\n            effects = {\n                { type = 'tyre_burst', params = { wheel = nil } },\n                { type = 'lateral_force', params = {\n                    value = 0.20,\n                    speed = 25\n                }}\n            }\n        }\n    }\n}"
+      },
+      {
+        "id": "effects-reference",
+        "title": {
+          "pt": "Referência dos 16 efeitos",
+          "en": "16-effect reference"
+        },
+        "table": {
+          "headers": [
+            "Effect",
+            "Parâmetros principais",
+            "Resultado"
+          ],
+          "rows": [
+            [
+              "particle",
+              "dict, name, bone, scale, offset",
+              "Partícula loopada presa ao bone do veículo"
+            ],
+            [
+              "engine_health",
+              "value",
+              "Limita a saúde do motor ao valor configurado"
+            ],
+            [
+              "power_mult",
+              "value",
+              "Multiplicador/integração de potência; toggle global atual false"
+            ],
+            [
+              "torque_mult",
+              "value",
+              "Multiplicador/integração de torque; toggle global atual false"
+            ],
+            [
+              "undriveable",
+              "value",
+              "Torna o veículo dirigível ou não"
+            ],
+            [
+              "engine_on",
+              "value",
+              "Liga/desliga o motor"
+            ],
+            [
+              "shake_cam",
+              "type, intensity, speed",
+              "Vibração de câmera acima de velocidade mínima"
+            ],
+            [
+              "apply_force",
+              "x, y, z, random, intensity, speed",
+              "Aplica micro-forças/trancos no veículo"
+            ],
+            [
+              "handling_float",
+              "field, value, speed",
+              "Altera um float do CHandlingData"
+            ],
+            [
+              "tyre_burst",
+              "wheel",
+              "Estoura uma roda específica ou aleatória"
+            ],
+            [
+              "vehicle_lights",
+              "state",
+              "Controla faróis 0/1/2"
+            ],
+            [
+              "indicator",
+              "left, right",
+              "Controla indicadores/setas"
+            ],
+            [
+              "rpm_override",
+              "value",
+              "Força RPM usando integração interna/externa"
+            ],
+            [
+              "stall",
+              "chance",
+              "Chance por tick de o motor morrer e tentar religar"
+            ],
+            [
+              "steering_scale",
+              "value",
+              "Limita escala/ângulo da direção"
+            ],
+            [
+              "lateral_force",
+              "value, speed",
+              "Força lateral constante para simular desalinhamento"
+            ]
+          ]
+        },
+        "note": {
+          "pt": "WearConfig.Effects permite desligar qualquer tipo globalmente. No código atual power_mult e torque_mult vêm false para evitar conflito com outros sistemas de performance.",
+          "en": "WearConfig.Effects can globally disable any effect type. Current code ships power_mult and torque_mult as false to avoid conflicts with other performance systems."
+        }
+      },
+      {
+        "id": "bones",
+        "title": {
+          "pt": "Bones para partículas e sintomas",
+          "en": "Vehicle bones for effects"
+        },
+        "text": {
+          "pt": "Parts.VehicleBones centraliza aliases para bones GTA. Em vez de repetir strings, sintomas podem apontar para Parts.VehicleBones.motor, escape, roda, suspensão, porta, farol, tanque, volante etc.",
+          "en": "Parts.VehicleBones centralizes GTA bone aliases. Symptoms can reference Parts.VehicleBones.motor, exhaust, wheels, suspension, doors, headlights, fuel cap, steering wheel and more."
+        },
+        "code": "{ type = 'particle', params = {\n    dict = 'core',\n    name = 'ent_sht_steam',\n    bone = Parts.VehicleBones.motor,\n    scale = 0.45,\n    offset = vector3(0.0, 0.0, 0.05)\n}}"
+      },
+      {
+        "id": "install-part",
+        "title": {
+          "pt": "Instalando e substituindo uma peça",
+          "en": "Installing & replacing a part"
+        },
+        "text": {
+          "pt": "installPart usa UPSERT por plate + part. Se a mesma peça já existe na placa, stage, installed_km, durability, citizen_id e installed_at são renovados. A durabilidade é sorteada novamente a cada instalação.",
+          "en": "installPart performs an upsert by plate + part. Reinstalling the same part renews stage, installed_km, durability, citizen_id and installed_at. Durability is rolled again on each installation."
+        },
+        "code": "-- SERVER — recomendado para oficina, concessionária ou sistema autoritativo\nlocal plate = 'ABC1234'\nlocal currentKm = exports['pr_mileage']:getMileageByPlate(plate) or 0\n\nlocal ok = exports['pr_mileage']:installPart(\n    plate,\n    'pastilha_freio',\n    1,          -- stage\n    currentKm,  -- KM da instalação\n    mechanicId  -- citizen/identifier ou nil\n)\n\n-- CLIENT — usa automaticamente placa/KM do veículo atual\nexports['pr_mileage']:installPart('pastilha_freio', 1, mechanicId)\nexports['pr_mileage']:reloadParts()"
+      },
+      {
+        "id": "workshop",
+        "title": {
+          "pt": "Exemplo de integração com oficina",
+          "en": "Workshop integration example"
+        },
+        "text": {
+          "pt": "A oficina deve validar distância/permissão/item e consumir a peça no próprio resource. Depois, chame installPart server-side com o KM atual. Isso mantém a regra mecânica no PR Mileage e a economia/inventário no sistema da oficina.",
+          "en": "The workshop should validate distance/permission/item and consume inventory in its own resource. Then call server-side installPart with current mileage, leaving mechanical simulation in PR Mileage and economy/inventory in the workshop."
+        },
+        "code": "-- server.lua da oficina\nlocal function replacePart(source, plate, itemName, stage)\n    -- 1. Valide o player, item, veículo e proximidade no seu resource.\n    -- 2. Remova/consuma o item da oficina.\n\n    local vehicleKm = exports['pr_mileage']:getMileageByPlate(plate)\n    if vehicleKm == false then return false, 'mileage_not_found' end\n\n    local installerId = GetPlayerIdentifierByType(tostring(source), 'license')\n\n    local installed = exports['pr_mileage']:installPart(\n        plate,\n        itemName,\n        stage or 1,\n        vehicleKm,\n        installerId\n    )\n\n    return installed == true\nend"
+      },
+      {
+        "id": "dealership-kit",
+        "title": {
+          "pt": "Função de kit de fábrica para concessionária",
+          "en": "Factory-kit helper for dealerships"
+        },
+        "text": {
+          "pt": "O PR Mileage não expõe um export nativo chamado installKit. O padrão abaixo é uma função de integração para ser criada no resource da concessionária usando exports oficiais do PR Mileage. Ela zera o veículo novo e instala todas as peças em 0 km.",
+          "en": "PR Mileage does not expose a native installKit export. The pattern below is a helper you add to the dealership resource using official PR Mileage exports. It resets a brand-new vehicle and installs every factory component at 0 km."
+        },
+        "code": "-- server.lua da concessionária\nlocal FactoryKits = {\n    economy = {\n        { part = 'oleo_motor',         stage = 1 },\n        { part = 'filtro_oleo',        stage = 1 },\n        { part = 'filtro_ar',          stage = 1 },\n        { part = 'filtro_combustivel', stage = 1 },\n        { part = 'vela_ignicao',       stage = 1 },\n        { part = 'bobina_ignicao',     stage = 1 },\n        { part = 'correia_dentada',    stage = 1 },\n        { part = 'bomba_agua',         stage = 1 },\n        { part = 'tire_common',        stage = 1 },\n        { part = 'disco_freio',        stage = 1 },\n        { part = 'pastilha_freio',     stage = 1 },\n        { part = 'fluido_freio',       stage = 1 },\n    },\n\n    sport = {\n        { part = 'oleo_motor',      stage = 1 },\n        { part = 'filtro_oleo',     stage = 1 },\n        { part = 'filtro_ar',       stage = 1 },\n        { part = 'vela_ignicao',    stage = 1 },\n        { part = 'bobina_ignicao',  stage = 1 },\n        { part = 'tire_sport',      stage = 2 },\n        { part = 'brake_level_2',   stage = 2 },\n        { part = 'disco_freio',     stage = 2 },\n        { part = 'pastilha_freio',  stage = 2 },\n        { part = 'fluido_freio',    stage = 2 },\n    }\n}\n\nlocal function installFactoryKit(plate, kitName, ownerId)\n    local kit = FactoryKits[kitName]\n    if not kit then return false, 'invalid_kit' end\n\n    -- IMPORTANTE: a concessionária deve ter INSERTado a placa no banco antes.\n    exports['pr_mileage']:resetMileage(plate)\n\n    for _, entry in ipairs(kit) do\n        local ok = exports['pr_mileage']:installPart(\n            plate,\n            entry.part,\n            entry.stage or 1,\n            0,       -- veículo sai de fábrica em 0 km\n            ownerId\n        )\n\n        if not ok then\n            return false, entry.part\n        end\n    end\n\n    return true\nend"
+      },
+      {
+        "id": "dealership-flow",
+        "title": {
+          "pt": "Fluxo completo de compra 0 KM",
+          "en": "Complete zero-KM purchase flow"
+        },
+        "steps": {
+          "pt": [
+            "A concessionária gera/valida a placa.",
+            "Salva o veículo e o proprietário na tabela do framework.",
+            "Escolhe o kit de fábrica pela versão/modelo.",
+            "Chama resetMileage(plate).",
+            "Instala cada peça com installPart(..., installed_km = 0).",
+            "Spawna a entity para o comprador.",
+            "No client, chama markFresh(vehicle) ou TriggerEvent('pr_mileage:fresh', vehicle).",
+            "O primeiro tick reconhece o veículo como fresh/owned, zera o odômetro e replica vehicleMileage = 0."
+          ],
+          "en": [
+            "Dealership generates/validates the plate.",
+            "Persist vehicle ownership in the framework table.",
+            "Choose a factory kit by model/trim.",
+            "Call resetMileage(plate).",
+            "Install every part with installed_km = 0.",
+            "Spawn the entity for the buyer.",
+            "Client calls markFresh(vehicle) or pr_mileage:fresh.",
+            "The first tick recognizes the fresh owned vehicle, resets odometer and replicates vehicleMileage = 0."
+          ]
+        },
+        "code": "-- server após salvar a compra\nlocal ok, failedPart = installFactoryKit(newPlate, 'sport', buyerCitizenId)\nif not ok then\n    print(('Falha ao preparar kit: %s'):format(failedPart))\nend\n\n-- client quando a entity foi criada/entregue\nexports['pr_mileage']:markFresh(vehicle)"
+      },
+      {
+        "id": "model-kits",
+        "title": {
+          "pt": "Kit diferente por modelo ou categoria",
+          "en": "Kits by model or category"
+        },
+        "text": {
+          "pt": "A concessionária pode mapear cada modelo para um pacote. Isso permite que um compacto saia com componentes comuns e um esportivo já nasça com pneu sport e freio de stage maior.",
+          "en": "Dealerships can map each model to a package so compacts leave with common components while sports models ship with sport tyres and higher-stage brakes."
+        },
+        "code": "local ModelKit = {\n    blista = 'economy',\n    prairie = 'economy',\n    sultan = 'sport',\n    elegy = 'sport'\n}\n\nlocal kitName = ModelKit[vehicleModel] or 'economy'\nlocal ok, err = installFactoryKit(plate, kitName, buyerCitizenId)"
+      },
+      {
+        "id": "used-car",
+        "title": {
+          "pt": "Concessionária de usados",
+          "en": "Used-car dealership"
+        },
+        "text": {
+          "pt": "Em carro usado, não zere o odômetro e não instale peça nova com installed_km = 0. Pegue o KM atual da placa e use esse valor para qualquer componente substituído no momento da venda. Assim um veículo de 120.000 km pode receber uma pastilha nova com 0 km de uso.",
+          "en": "For used cars, do not reset mileage and do not install a new part with installed_km = 0. Read current plate mileage and use it for any component replaced at sale time, allowing a 120,000 km vehicle to receive a brand-new zero-wear brake pad."
+        },
+        "code": "local vehicleKm = exports['pr_mileage']:getMileageByPlate(plate)\nif vehicleKm == false then return end\n\n-- veículo tem 120.000 km, mas a peça começa nova AGORA\nexports['pr_mileage']:installPart(\n    plate,\n    'pastilha_freio',\n    1,\n    vehicleKm,\n    sellerOrMechanicId\n)"
+      },
+      {
+        "id": "statebag-integration",
+        "title": {
+          "pt": "Integrando HUD, painel e telemetria",
+          "en": "HUD/dashboard integration"
+        },
+        "text": {
+          "pt": "vehicleMileage é o contrato mais barato para consumo em runtime. Outros scripts podem ler a State Bag da entity sem consultar SQL a cada frame. Os exports convertem para milhas quando Config.Unit = miles.",
+          "en": "vehicleMileage is the cheapest runtime contract. Other resources can read the entity State Bag without querying SQL every frame. Exports convert to miles when Config.Unit = miles."
+        },
+        "code": "local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)\nif vehicle ~= 0 then\n    local rawKm = Entity(vehicle).state.vehicleMileage\n    local displayKm = exports['pr_mileage']:getMileageByEntity(vehicle)\n\n    SendNUIMessage({\n        action = 'odometer',\n        rawKilometers = rawKm,\n        displayValue = displayKm,\n        unit = exports['pr_mileage']:getUnit()\n    })\nend"
+      },
+      {
+        "id": "external-parts",
+        "title": {
+          "pt": "Usando peças de outro resource",
+          "en": "External parts provider"
+        },
+        "text": {
+          "pt": "Se outro script já possui seu próprio banco/estado de peças, o PR Mileage pode consumir uma tabela externa apenas para calcular desgaste e aplicar sintomas. A chave do partName precisa corresponder a Parts.Items para herdar os sintomas.",
+          "en": "If another resource already owns part persistence/state, PR Mileage can consume an external table only for wear calculations and symptoms. partName must match Parts.Items to inherit its symptom definition."
+        },
+        "code": "-- tabela estática\nexports['pr_mileage']:setExternalParts({\n    ['pastilha_freio'] = {\n        installed_km = 32000,\n        durability = 40000,\n        stage = 1\n    }\n})\n\n-- provider dinâmico\nexports['pr_mileage']:setExternalParts(function()\n    return MyMechanicState.parts\nend)\n\n-- desmontar integração\nexports['pr_mileage']:clearExternalParts()"
+      },
+      {
+        "id": "handling-integration",
+        "title": {
+          "pt": "Convivendo com stance/handling externo",
+          "en": "External stance/handling integration"
+        },
+        "text": {
+          "pt": "config/func_exported.lua funciona como uma ponte para servidores que já possuem outro resource alterando RPM, handling, potência, torque ou suspensão. Cada função possui um boolean que permite trocar a implementação nativa por exports externos.",
+          "en": "config/func_exported.lua acts as a bridge for servers already using another resource to modify RPM, handling, power, torque or suspension. Each function has a boolean that can switch from native behavior to external exports."
+        },
+        "table": {
+          "headers": [
+            "Hook",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "Exported.rpmOverride",
+              "Substituir SetVehicleCurrentRpm"
+            ],
+            [
+              "Exported.handlingFloat",
+              "Substituir SetVehicleHandlingFloat"
+            ],
+            [
+              "Exported.powerMult",
+              "Substituir SetVehicleCheatPowerIncrease"
+            ],
+            [
+              "Exported.torqueMult",
+              "Substituir fDriveInertia"
+            ],
+            [
+              "Exported.setOriginalHandling",
+              "Restaurar o handling por outro resource"
+            ],
+            [
+              "Exported.resetPartsInstalled",
+              "Restaurar componentes/stance customizados"
+            ]
+          ]
+        },
+        "note": {
+          "pt": "O arquivo atual já contém uma chamada de exemplo para pr_stance dentro de Exported.handlingFloat. Ao adaptar, mantenha somente a integração que realmente existe no seu servidor.",
+          "en": "The current file already contains an example pr_stance call inside Exported.handlingFloat. When adapting it, keep only integrations that actually exist on your server."
+        }
+      },
+      {
+        "id": "scanner",
+        "title": {
+          "pt": "Scanner OBD / diagnóstico",
+          "en": "OBD scanner / diagnostics"
+        },
+        "text": {
+          "pt": "O repositório contém um módulo de scanner com DUI, prop, câmera, interação com bonnet, leitura de mileage e GetVehicleParts. Ele prepara labels, percentuais/status e telemetria como body health, engine health, fuel e velocidade teórica.",
+          "en": "The repository contains a DUI scanner module with prop/camera interaction at the bonnet, mileage lookup and GetVehicleParts. It prepares labels, percentage/status and telemetry such as body health, engine health, fuel and theoretical top speed."
+        },
+        "cards": [
+          [
+            "DisplayMode",
+            "progress mostra percentual; stats usa StatusLabels/StatusThresholds."
+          ],
+          [
+            "ScanDuration",
+            "Config.Scanner.ScanDuration controla a duração da animação/tela de loading."
+          ],
+          [
+            "Blacklist",
+            "Config.BacklistItemDesgaste remove peças específicas da lista diagnóstica."
+          ],
+          [
+            "Targets",
+            "Código do scanner tenta ox_target, depois qb-target e por fim interação [E]."
+          ],
+          [
+            "DUI",
+            "O resultado é desenhado em uma textura ligada ao prop do scanner."
+          ],
+          [
+            "Telemetria",
+            "Pode mostrar placa, modelo, body/engine health, fuel e top speed."
+          ]
+        ],
+        "note": {
+          "pt": "O fxmanifest.lua v2.3.2 atual não lista scanner/scanner.lua ou scanner/camera.lua em client_scripts. Portanto, os arquivos existem no repositório, mas não são carregados pelo manifest mostrado na main atual sem integração adicional.",
+          "en": "Current v2.3.2 fxmanifest does not list scanner/scanner.lua or scanner/camera.lua in client_scripts. The source files exist, but they are not loaded by the current main manifest without additional integration."
+        }
+      },
+      {
+        "id": "server-api",
+        "title": {
+          "pt": "API server-side",
+          "en": "Server-side API"
+        },
+        "table": {
+          "headers": [
+            "Export",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "getMileageByPlate(plate)",
+              "Obtém o odômetro pela placa na unidade configurada."
+            ],
+            [
+              "getMileageByEntity(entity)",
+              "Lê vehicleMileage da State Bag da entity."
+            ],
+            [
+              "getUnit() / GetUnit()",
+              "Retorna kilometers ou miles."
+            ],
+            [
+              "GetMileage(plate)",
+              "Retorna mileage + unidade."
+            ],
+            [
+              "plateExists(plate)",
+              "Verifica se a placa pertence à tabela persistente."
+            ],
+            [
+              "plateRegistered(plate)",
+              "Verifica se há mileage conhecido em DB/RAM."
+            ],
+            [
+              "resetMileage(plate)",
+              "Zera odômetro em DB ou RAM."
+            ],
+            [
+              "setMileage(plate, value)",
+              "Define odômetro na unidade configurada."
+            ],
+            [
+              "getTopMileage(limit)",
+              "Ranking de maior quilometragem persistente."
+            ],
+            [
+              "getPlayerVehiclesMileage(source|identifier)",
+              "Lista veículos/KM do owner."
+            ],
+            [
+              "getWorldVehicles()",
+              "Snapshot dos veículos de rua em RAM."
+            ],
+            [
+              "GetPartsPercent(plate, part, vehicleKm)",
+              "Percentual restante da peça."
+            ],
+            [
+              "GetPartsMileage(plate, part, vehicleKm)",
+              "KM restantes da peça."
+            ],
+            [
+              "GetPartsStatus(plate, part, vehicleKm)",
+              "Boa/Razoável/Ruim."
+            ],
+            [
+              "GetParts(plate, part, vehicleKm)",
+              "Objeto completo da peça."
+            ],
+            [
+              "GetVehicleParts(plate, vehicleKm)",
+              "Todas as peças da placa."
+            ],
+            [
+              "installPart(plate, part, stage, vehicleKm, citizenId)",
+              "Instala/substitui peça."
+            ],
+            [
+              "removePart(plate, part)",
+              "Remove peça."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "client-api",
+        "title": {
+          "pt": "API client-side",
+          "en": "Client-side API"
+        },
+        "table": {
+          "headers": [
+            "Export",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "getMileage()",
+              "KM do veículo que o player está dirigindo."
+            ],
+            [
+              "getMileageByEntity(entity)",
+              "Mileage de qualquer entity veículo local."
+            ],
+            [
+              "getMileageByPlate(plate)",
+              "Prioriza State Bag; fallback para callback server."
+            ],
+            [
+              "GetMileage(plate)",
+              "Alias que também retorna unidade."
+            ],
+            [
+              "getVehiclePlate()",
+              "Placa do veículo atual."
+            ],
+            [
+              "getCurrentVehicle()",
+              "Handle da entity atual."
+            ],
+            [
+              "getVehicleClass()",
+              "Classe numérica GTA."
+            ],
+            [
+              "getVehicleClassName()",
+              "Nome amigável da classe."
+            ],
+            [
+              "isDriving()",
+              "Confirma banco do motorista."
+            ],
+            [
+              "isOwnedVehicle()",
+              "Indica se a origem resolvida é persistente."
+            ],
+            [
+              "markFresh(vehicle)",
+              "Marca a entity como veículo 0 km."
+            ],
+            [
+              "resetCurrentMileage()",
+              "Zera veículo atual e sincroniza."
+            ],
+            [
+              "GetPartsPercent(part)",
+              "Percentual da peça carregada."
+            ],
+            [
+              "GetPartsMileage(part)",
+              "KM restantes."
+            ],
+            [
+              "GetPartsStatus(part)",
+              "Status da peça."
+            ],
+            [
+              "GetParts(part)",
+              "Info completa."
+            ],
+            [
+              "GetVehicleParts()",
+              "Todas as peças carregadas."
+            ],
+            [
+              "installPart(part, stage, citizenId)",
+              "Instala no veículo atual."
+            ],
+            [
+              "removePart(part)",
+              "Remove do veículo atual."
+            ],
+            [
+              "reloadParts()",
+              "Recarrega peças do banco."
+            ],
+            [
+              "setExternalParts(source)",
+              "Adiciona provider externo."
+            ],
+            [
+              "clearExternalParts()",
+              "Remove provider externo."
+            ],
+            [
+              "getCurrentPlate()",
+              "Placa rastreada pelo módulo de peças."
+            ],
+            [
+              "startWearEffects(callback)",
+              "Usa um estado externo no motor de sintomas."
+            ],
+            [
+              "stopWearEffects()",
+              "Interrompe efeitos externos."
+            ],
+            [
+              "applyEffect(type, params, partName)",
+              "Aplica um effect manualmente."
+            ],
+            [
+              "stopPartParticle(partName)",
+              "Para partícula de uma peça."
+            ],
+            [
+              "getPartDefinition(partName)",
+              "Retorna Parts.Items[partName]."
+            ],
+            [
+              "getAllParts()",
+              "Retorna o catálogo completo."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "part-object",
+        "title": {
+          "pt": "Objeto retornado por GetParts",
+          "en": "GetParts return object"
+        },
+        "code": "{\n    id = 42,\n    plate = 'ABC1234',\n    part = 'pastilha_freio',\n    stage = 1,\n    installed_km = 60000,\n    durability = 40000,\n    current_km = 20000,\n    remaining_km = 20000,\n    percent = 50.0,\n    status = 'Razoável',\n    citizen_id = 'installer-id',\n    installed_at = '2026-10-13 12:30:00'\n}"
+      },
+      {
+        "id": "commands",
+        "title": {
+          "pt": "Comandos de teste e manutenção",
+          "en": "Test & maintenance commands"
+        },
+        "table": {
+          "headers": [
+            "Comando",
+            "Objetivo"
+          ],
+          "rows": [
+            [
+              "/km",
+              "Mostra o mileage do veículo atual."
+            ],
+            [
+              "/kmplaca [placa]",
+              "Consulta uma placa."
+            ],
+            [
+              "/installpeca [nome] [stage]",
+              "Instala peça no veículo atual para teste/manutenção."
+            ],
+            [
+              "/removepeca [nome]",
+              "Remove uma peça."
+            ],
+            [
+              "/reloadpecas",
+              "Recarrega peças persistidas."
+            ],
+            [
+              "/pecas",
+              "Lista estado das peças carregadas."
+            ],
+            [
+              "/givescanner / /scantest / /scanstop",
+              "Ferramentas presentes no módulo scanner."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "performance",
+        "title": {
+          "pt": "Performance e boas práticas",
+          "en": "Performance & best practices"
+        },
+        "text": {
+          "pt": "A arquitetura evita loops pesados e escrita contínua de cada peça. O odômetro amostra 1 vez por segundo; WearConfig.TickInterval é 5000 ms; State Bags servem leituras em runtime; current_km é derivado; e efeitos são limpos/restaurados ao trocar de veículo ou quando deixam de ser aplicáveis.",
+          "en": "The architecture avoids heavy loops and constant per-part writes. Odometer samples once per second; WearConfig.TickInterval is 5000 ms; State Bags serve runtime reads; current_km is derived; and effects are cleaned/restored when switching vehicles or when no longer applicable."
+        },
+        "cards": [
+          [
+            "1 s",
+            "Tick do odômetro apenas quando há veículo/motorista válido."
+          ],
+          [
+            "5 s",
+            "Tick padrão do motor de desgaste."
+          ],
+          [
+            "1 km",
+            "SaveThreshold padrão para mileage server-side."
+          ],
+          [
+            "Derived state",
+            "current_km e remaining_km são calculados, não persistidos a cada tick."
+          ],
+          [
+            "State Bag",
+            "Outros scripts leem mileage sem abrir SQL por frame."
+          ],
+          [
+            "Cleanup",
+            "Partículas, shake e handling são restaurados no ciclo de limpeza."
+          ]
+        ]
+      }
     ]
   },
-
   pr_carkeys: {
     name:'PR Car Keys',code:'pr_carkeys',repo:'https://github.com/Pierremoraes-ofc/pr_carkeys',
     category:{pt:'Hobby • Vehicle Access',en:'Hobby • Vehicle Access'},
