@@ -1935,32 +1935,950 @@ pr_lib.notify(source, {
     ]
   },
   pr_carkeys: {
-    name:'PR Car Keys',code:'pr_carkeys',repo:'https://github.com/Pierremoraes-ofc/pr_carkeys',
-    category:{pt:'Hobby • Vehicle Access',en:'Hobby • Vehicle Access'},
-    lead:{pt:'Sistema de chaves veiculares físicas com barcode único por via, tipos permanentes/temporários, bolsas, ignição, hotwire, carjack, expiração e validação server-side, usando DB para persistência e State Bags para sincronização de estado do veículo.',en:'Physical vehicle-key system with per-copy unique barcodes, permanent/temporary types, bags, ignition, hotwire, carjack, expiration and server-side validation, using DB persistence and State Bags for vehicle-state sync.'},
-    facts:[['Version','1.3.1'],['Integration','PR Bridge'],['Identity','Unique barcode'],['Runtime','DB + State Bags']],
-    sections:[
-      {id:'keys',title:{pt:'Modelo de chaves',en:'Key model'},cards:[['carkey_permanent','Chave original permanente.'],['carkey_copy','Cópia permanente com barcode próprio.'],['carkey_temp','Chave/acesso temporário.'],['carkey_single','Chave temporizada com expires_at.']]},
-      {id:'metadata',title:{pt:'Metadata física',en:'Physical metadata'},text:{pt:'Cada item pode carregar barcode, plate, modelo, code, sound, motor, distance, expires_at e owner. O barcode identifica a via física específica mesmo quando várias chaves apontam para a mesma placa.',en:'Each item can carry barcode, plate, model, code, sound, motor, distance, expires_at and owner. Barcode identifies a specific physical copy even when multiple keys target the same plate.'}},
-      {id:'ignition',title:{pt:'Chave na ignição',en:'Key in ignition'},text:{pt:'Ao ligar o motor, a chave pode sair do inventário/bolsa e ficar registrada na ignição. Quando o motor é desligado ela é reconstruída com a mesma metadata e devolvida, evitando duplicação.',en:'When engine starts, the key can leave inventory/bag and live in the ignition registry. When engine stops it is rebuilt with the same metadata and returned, avoiding duplication.'}},
-      {id:'bags',title:{pt:'Bolsas de chaves',en:'Key bags'},cards:[['carkey_bag','10 slots; container individual por barcode.'],['carkey_bag_large','25 slots; container maior, também identificado por barcode.']]},
-      {id:'hotwire',title:{pt:'Hotwire seguro',en:'Secure hotwire'},text:{pt:'O servidor cria uma sessão vinculada a source + netId + plate. O client executa o minigame e devolve o token; só então o servidor revalida contexto e concede acesso temporário.',en:'Server creates a session bound to source + netId + plate. Client runs the minigame and returns the token; server then revalidates context before granting temporary access.'},code:`driver seat
-  ↓
-request session
-  ↓
-source + netId + plate + token
-  ↓
-PR Bridge minigame
-  ↓
-server revalidation
-  ↓
-temporary access`},
-      {id:'carjack',title:{pt:'Carjack de NPC',en:'NPC carjack'},text:{pt:'O fluxo considera mira, arma/classe, reação do NPC, fuga, busca da chave, tempo e cooldown. O resultado pode ser acesso temporário ou permanente conforme configuração.',en:'Flow considers aim, weapon/class, NPC reaction, fleeing, key search, timing and cooldown. Result can be temporary or permanent access depending on configuration.'}},
-      {id:'expiration',title:{pt:'Expiração',en:'Expiration'},text:{pt:'Chaves temporizadas vencidas são removidas do inventário, bolsas e ignição. Se a chave expirada estiver mantendo acesso de ignição, o estado relacionado é limpo e o motor pode ser forçado a desligar.',en:'Expired timed keys are removed from inventory, bags and ignition. If an expired key is sustaining ignition access, related state is cleared and engine may be forced off.'}},
-      {id:'api',title:{pt:'API',en:'API'},bullets:{pt:['BuyOriginalKey / CopyKey','GiveTempKey / RemoveTempKey','CreateTempKeyItem / CreateTimedKeyItem','RemoveKeysForOwnerPlate','HasVehicleAccess / IsPlayerPolice','SetLockState / GiveKeys / GetKeys','Client: HaveKey / HavePermanentKey / HaveTempKey'],en:['BuyOriginalKey / CopyKey','GiveTempKey / RemoveTempKey','CreateTempKeyItem / CreateTimedKeyItem','RemoveKeysForOwnerPlate','HasVehicleAccess / IsPlayerPolice','SetLockState / GiveKeys / GetKeys','Client: HaveKey / HavePermanentKey / HaveTempKey']}}
+    "name": "PR Car Keys",
+    "code": "pr_carkeys",
+    "repo": "https://github.com/Pierremoraes-ofc/pr_carkeys",
+    "category": {
+      "pt": "Hobby • Vehicle Access & Keys",
+      "en": "Hobby • Vehicle Access & Keys"
+    },
+    "lead": {
+      "pt": "Sistema físico e persistente de chaves veiculares para FiveM, com identidade individual por barcode, tipos de chave permanentes e temporários, bolsas, ignição real, hotwire, carjack, confisco policial, expiração automática, som 3D, bloqueio de portas e validação server-side. O banco persiste a configuração de cada chave e State Bags sincronizam estados do veículo em runtime.",
+      "en": "Physical and persistent vehicle-key system for FiveM with per-key barcode identity, permanent and temporary key types, key bags, real ignition flow, hotwire, carjack, police seizure, automatic expiration, 3D lock audio, door-lock control and server-side validation. Database rows persist each key configuration while State Bags synchronize vehicle runtime state."
+    },
+    "facts": [
+      [
+        "Version",
+        "1.3.1"
+      ],
+      [
+        "Key types",
+        "4"
+      ],
+      [
+        "Bags",
+        "10 / 25 slots"
+      ],
+      [
+        "Frameworks",
+        "QB / QBX / ESX / ox_core / ND"
+      ],
+      [
+        "Inventories",
+        "ox_inventory / qb-inventory"
+      ],
+      [
+        "Databases",
+        "oxmysql / ghmattimysql / mysql-async"
+      ],
+      [
+        "Runtime",
+        "DB + State Bags"
+      ]
+    ],
+    "sections": [
+      {
+        "id": "overview",
+        "title": {
+          "pt": "Visão geral",
+          "en": "Overview"
+        },
+        "text": {
+          "pt": "PR Car Keys trata cada chave como um objeto físico independente. Duas chaves da mesma placa podem ter barcodes, alcance, som, configuração de motor, tipo e expiração diferentes. O acesso a um veículo é determinado pela chave física, chaves temporárias registradas, chave deixada na ignição e regras operacionais como acesso policial.",
+          "en": "PR Car Keys treats each key as an independent physical object. Two keys for the same plate can have different barcodes, range, lock sound, engine behavior, type and expiration. Vehicle access is determined by physical keys, registered temporary access, keys left in ignition and operational rules such as police access."
+        },
+        "cards": [
+          [
+            "Barcode único",
+            "Cada via física possui um identificador próprio; cópias da mesma placa continuam sendo objetos distintos."
+          ],
+          [
+            "Persistência",
+            "A tabela pr_carkeys armazena configuração individual de cada barcode."
+          ],
+          [
+            "Runtime seguro",
+            "Validação de acesso ao banco do motorista e ao motor é feita server-side."
+          ],
+          [
+            "Ignition state",
+            "A chave pode sair do inventário e ficar fisicamente registrada no veículo enquanto o motor permanece ligado."
+          ],
+          [
+            "Bolsas",
+            "Chaves podem viver em stashes individuais de bolsas sem perder barcode/configuração."
+          ],
+          [
+            "Gameplay",
+            "Hotwire, carjack e confisco policial integram acesso temporário, animações e minigames."
+          ]
+        ]
+      },
+      {
+        "id": "architecture",
+        "title": {
+          "pt": "Arquitetura",
+          "en": "Architecture"
+        },
+        "text": {
+          "pt": "O sistema separa persistência de chaves, estado temporário de acesso e estado da entity. O banco guarda identidade/configuração; estruturas server-side mantêm chaves temporárias e ignição; o client mantém um cache local de acesso e reage aos estados replicados do veículo.",
+          "en": "The system separates persistent key data, temporary access and entity state. The database stores identity/configuration; server-side structures track temporary keys and ignition; the client keeps local access cache and reacts to replicated vehicle state."
+        },
+        "code": "ITEM / BAG\n   ↓ barcode\npr_carkeys table\n   ↓\nserver cache + validation\n   ↓\nTempKeys / VehiclesWithKeyInside\n   ↓\nclient VehicleState\n   ↓\nlock / engine / hotwire / carjack\n   ↓\nState Bags (ex.: doorslockstate / rev states)"
+      },
+      {
+        "id": "installation",
+        "title": {
+          "pt": "Instalação e providers",
+          "en": "Installation & providers"
+        },
+        "text": {
+          "pt": "O fxmanifest importa @pr_bridge/init.lua e mantém ox_lib opcional/recomendado para menus, progressbars e minigames. Framework, SQL e inventory podem ser detectados automaticamente ou forçados no config.",
+          "en": "The fxmanifest imports @pr_bridge/init.lua and keeps ox_lib optional/recommended for menus, progress bars and minigames. Framework, SQL and inventory providers can be auto-detected or forced in config."
+        },
+        "table": {
+          "headers": [
+            "Camada",
+            "Valores suportados/configuráveis"
+          ],
+          "rows": [
+            [
+              "Framework",
+              "auto, qb-core, qbx_core/qbx-core, es_extended, ox_core, ND_Core"
+            ],
+            [
+              "Inventory",
+              "auto, ox_inventory, qb-inventory"
+            ],
+            [
+              "SQL",
+              "auto, oxmysql, ghmattimysql, mysql-async"
+            ],
+            [
+              "UI/minigame",
+              "ox_lib opcional/recomendado"
+            ],
+            [
+              "3D audio",
+              "pr_3dsound opcional"
+            ]
+          ]
+        },
+        "code": "ensure pr_bridge\nensure pr_carkeys\n\n-- Config\nConfig.Framework = 'auto'\nConfig.Inventory = 'auto'\nConfig.SQL = 'auto'"
+      },
+      {
+        "id": "database",
+        "title": {
+          "pt": "Banco de dados",
+          "en": "Database"
+        },
+        "text": {
+          "pt": "Cada barcode ocupa uma linha em pr_carkeys. Isso significa que configuração e expiração pertencem à chave específica e não apenas ao veículo.",
+          "en": "Each barcode occupies one row in pr_carkeys. Configuration and expiration therefore belong to the specific key rather than only to the vehicle."
+        },
+        "table": {
+          "headers": [
+            "Campo",
+            "Função"
+          ],
+          "rows": [
+            [
+              "barcode",
+              "Identidade única da via física."
+            ],
+            [
+              "citizenid",
+              "Dono/portador associado no registro."
+            ],
+            [
+              "plate",
+              "Veículo associado."
+            ],
+            [
+              "key_type",
+              "permanent, temporary ou single_use."
+            ],
+            [
+              "sound",
+              "Som configurado para lock/unlock."
+            ],
+            [
+              "motor",
+              "Se destrancar deve ligar o motor."
+            ],
+            [
+              "level",
+              "original ou copy."
+            ],
+            [
+              "distance",
+              "Alcance do sinal da chave."
+            ],
+            [
+              "expires_at",
+              "Timestamp de expiração quando aplicável."
+            ],
+            [
+              "created_at",
+              "Data de criação."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "key-types",
+        "title": {
+          "pt": "Tipos de chave",
+          "en": "Key types"
+        },
+        "text": {
+          "pt": "Config.KeyTypes define quatro itens físicos. keyType representa o comportamento de persistência e level diferencia original de cópia.",
+          "en": "Config.KeyTypes defines four physical items. keyType represents persistence behavior while level distinguishes original from copy."
+        },
+        "table": {
+          "headers": [
+            "Item",
+            "Tipo",
+            "Nível",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "carkey_permanent",
+              "permanent",
+              "original",
+              "Chave original permanente."
+            ],
+            [
+              "carkey_copy",
+              "permanent",
+              "copy",
+              "Cópia permanente de uma chave existente."
+            ],
+            [
+              "carkey_temp",
+              "temporary",
+              "copy",
+              "Chave temporária com expiração opcional."
+            ],
+            [
+              "carkey_single",
+              "single_use",
+              "copy",
+              "Chave avulsa/single-use conforme fluxo configurado."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "metadata",
+        "title": {
+          "pt": "Metadata e identidade física",
+          "en": "Physical metadata & identity"
+        },
+        "text": {
+          "pt": "A metadata do item carrega o barcode e dados usados para apresentação/lookup. O barcode é o elo entre item, banco e configurações da chave. Essa modelagem permite duas cópias da mesma placa com comportamentos diferentes.",
+          "en": "Item metadata carries the barcode plus presentation/lookup data. Barcode links inventory item, database row and key configuration. This model allows two copies for the same plate to behave differently."
+        },
+        "code": "metadata = {\n    barcode = 'K3Y9A8C2...',\n    plate = 'ABC1234',\n    label = 'Placa: ABC1234\\nTipo: permanent\\nSerial: K3Y9A8C2...',\n    owner = 'Citizen Name' -- quando showOwner estiver habilitado\n}"
+      },
+      {
+        "id": "key-config",
+        "title": {
+          "pt": "Configuração individual da chave",
+          "en": "Per-key configuration"
+        },
+        "text": {
+          "pt": "As propriedades sound, motor e distance são editáveis individualmente por barcode. O servidor usa whitelist de campos para impedir edição arbitrária da row.",
+          "en": "sound, motor and distance are editable per barcode. Server-side field whitelisting prevents arbitrary database-field edits."
+        },
+        "table": {
+          "headers": [
+            "Campo",
+            "Exemplo",
+            "Efeito"
+          ],
+          "rows": [
+            [
+              "sound",
+              "tranca_1",
+              "Seleciona o som usado ao acionar a chave."
+            ],
+            [
+              "motor",
+              "0 / 1",
+              "Pode ligar o motor automaticamente ao destrancar."
+            ],
+            [
+              "distance",
+              "8.0",
+              "Define até onde a chave encontra/aciona o veículo."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "key-menu",
+        "title": {
+          "pt": "Menu de configuração da chave",
+          "en": "Key configuration menu"
+        },
+        "text": {
+          "pt": "client/cl_menu.lua monta um contexto por barcode. A tela exibe informações da chave e permite trocar som, ativar/desativar motor ao destrancar e alterar distância sem recriar a chave.",
+          "en": "client/cl_menu.lua builds one context per barcode. It displays key information and lets users change sound, toggle engine-on-unlock and change range without recreating the key."
+        },
+        "code": "-- fluxo conceitual\nBolsa / item\n   ↓\nGerenciar chave\n   ↓\npr_carkeys_key_<barcode>\n   ├─ Som\n   ├─ Motor ao destrancar\n   ├─ Distância\n   └─ Registro / barcode"
+      },
+      {
+        "id": "sound-config",
+        "title": {
+          "pt": "Som de tranca 3D",
+          "en": "3D lock audio"
+        },
+        "text": {
+          "pt": "Quando pr_3dsound está iniciado, o lock/unlock pode tocar um som server-side audível por players próximos. Config.Sound define raio, volume, som padrão e lista de arquivos.",
+          "en": "When pr_3dsound is running, lock/unlock can play server-side audio heard by nearby players. Config.Sound defines radius, volume, default sound and available files."
+        },
+        "code": "Config.Sound = {\n    radius = 8.0,\n    volume = 0.8,\n    soundDefault = 'tranca_1',\n    sounds = {\n        { id = 'tranca_1', label = 'Som Padrao', file = 'tranca_1.ogg' },\n        { id = 'tranca_2', label = 'Som Alternativo', file = 'tranca_2.ogg' }\n    }\n}\n\n-- arquivos esperados pelo pr_3dsound:\n-- pr_3dsound/html/sounds/pr_carkeys/tranca_1.ogg"
+      },
+      {
+        "id": "lock-flow",
+        "title": {
+          "pt": "Fluxo de trancar/destrancar",
+          "en": "Lock/unlock flow"
+        },
+        "text": {
+          "pt": "Ao usar uma chave, o client envia barcode e referência do veículo; o servidor valida a row/expiração, resolve os dados da chave e devolve a configuração efetiva. O client encontra o veículo dentro da distância da chave, toca animação, altera locks e sincroniza o estado.",
+          "en": "When a key is used, the client sends barcode and vehicle reference; the server validates the row/expiration, resolves key data and returns effective configuration. The client finds the vehicle within key range, plays the animation, changes locks and synchronizes state."
+        },
+        "steps": {
+          "pt": [
+            "Item contém barcode.",
+            "Client encontra o veículo pela plate dentro da distância padrão.",
+            "Server busca o barcode no cache/banco.",
+            "Server rejeita chave expirada.",
+            "Server devolve plate, distance, sound, motor e key_type.",
+            "Client aplica animação e alterna lock state.",
+            "Estado é sincronizado server-side e doorslockstate é replicado.",
+            "pr_3dsound toca o feedback quando disponível."
+          ],
+          "en": [
+            "Inventory item contains barcode.",
+            "Client finds vehicle by plate within default range.",
+            "Server resolves barcode from cache/database.",
+            "Expired keys are rejected.",
+            "Server returns plate, distance, sound, motor and key_type.",
+            "Client plays key animation and toggles door locks.",
+            "Server synchronizes state and replicates doorslockstate.",
+            "pr_3dsound plays feedback when available."
+          ]
+        }
+      },
+      {
+        "id": "statebags",
+        "title": {
+          "pt": "State Bags e sincronização",
+          "en": "State Bags & synchronization"
+        },
+        "text": {
+          "pt": "A persistência da chave não é feita em cache apenas. DB guarda a chave; State Bags carregam estados runtime do veículo, como doorslockstate e estados temporários usados no efeito de rev/skip ped. Isso separa persistência de identidade da sincronização da entity.",
+          "en": "Key persistence is not cache-only. Database stores the key while State Bags carry vehicle runtime state such as doorslockstate and temporary rev/skip-ped states. This separates persistent identity from entity synchronization."
+        },
+        "code": "-- Exemplo utilizado pelo resource\nSetVehicleDoorsLocked(vehicle, state)\nEntity(vehicle).state:set('doorslockstate', state, true)\n\n-- Estados temporários de efeito também podem ser replicados:\nEntity(vehicle).state:set('pr_carkeys_revving', true, true)"
+      },
+      {
+        "id": "engine-security",
+        "title": {
+          "pt": "Motor e validação server-side",
+          "en": "Engine & server-side validation"
+        },
+        "text": {
+          "pt": "Ligar/desligar motor exige validação de acesso antes de aceitar a ação. Além do toggle manual, existe um watchdog que observa uma transição OFF→ON e consulta validateKeyAccess; se o player não tiver acesso, o motor é desligado novamente.",
+          "en": "Starting/stopping the engine requires access validation. In addition to manual toggle, a watchdog observes OFF→ON transitions and checks validateKeyAccess; unauthorized starts are immediately cancelled."
+        },
+        "code": "local hasAccess = pr_lib.callback.await(\n    'pr_carkeys:server:validateKeyAccess',\n    false,\n    plate\n)\n\nif not hasAccess then\n    SetVehicleEngineOn(vehicle, false, true, true)\n    return\nend"
+      },
+      {
+        "id": "key-in-vehicle",
+        "title": {
+          "pt": "Chave na ignição",
+          "en": "Key in ignition"
+        },
+        "text": {
+          "pt": "Quando Config.KeyInVehicle.enabled está ativo, ligar o veículo desloca a chave física para o registro de ignição. O servidor procura o item real no inventário ou dentro de bolsas, remove a via correta pelo barcode e registra VehiclesWithKeyInside.",
+          "en": "With Config.KeyInVehicle.enabled, starting a vehicle moves the physical key into ignition state. The server locates the real item in inventory or bags, removes the exact barcode and registers VehiclesWithKeyInside."
+        },
+        "code": "VehiclesWithKeyInside[vehNetId] = {\n    plate = plate,\n    barcode = barcode,\n    citizenid = citizenid,\n    itemName = itemName,\n    fromStash = stashId,\n    fromBagItem = bagItemName\n}"
+      },
+      {
+        "id": "engine-exit",
+        "title": {
+          "pt": "Sair com motor ligado",
+          "en": "Leaving with engine running"
+        },
+        "text": {
+          "pt": "Com keepVehicleEngineOn=true, o motor pode permanecer ligado ao sair. A chave continua no carro; outro player que entrar no banco do motorista pode receber indicação de chave disponível e pegá-la. Ao desligar, o sistema tenta reconstruir/devolver a chave ao inventário ou bolsa correspondente.",
+          "en": "With keepVehicleEngineOn=true, engine may remain running after exit. The key stays in the vehicle; another driver can be notified that a key is available and pick it up. When engine stops, the system reconstructs/returns the key to inventory or its originating bag."
+        },
+        "table": {
+          "headers": [
+            "Config",
+            "Padrão",
+            "Função"
+          ],
+          "rows": [
+            [
+              "enabled",
+              "true",
+              "Ativa o conceito de chave física na ignição."
+            ],
+            [
+              "keepVehicleEngineOn",
+              "true",
+              "Mantém motor ligado após sair."
+            ],
+            [
+              "pickupTime",
+              "2000 ms",
+              "Tempo para retirar a chave do veículo."
+            ],
+            [
+              "pickupLabel",
+              "Pegando chave do carro...",
+              "Texto da progressbar."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "bags",
+        "title": {
+          "pt": "Bolsas de chaves",
+          "en": "Key bags"
+        },
+        "text": {
+          "pt": "Cada bolsa recebe barcode próprio por lazy initialization. Esse barcode gera um stash exclusivo, portanto duas bolsas do mesmo item não compartilham conteúdo. O servidor consegue encontrar chaves dentro dessas bolsas durante validações e ignição.",
+          "en": "Each bag receives its own barcode through lazy initialization. That barcode generates a unique stash, so two bags of the same item never share content. Server-side access checks and ignition logic can discover keys inside these bags."
+        },
+        "table": {
+          "headers": [
+            "Item",
+            "Slots",
+            "Peso",
+            "Tempo de abertura"
+          ],
+          "rows": [
+            [
+              "carkey_bag",
+              "10",
+              "5000",
+              "3000 ms"
+            ],
+            [
+              "carkey_bag_large",
+              "25",
+              "15000",
+              "4000 ms"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "bag-flow",
+        "title": {
+          "pt": "Gerenciar bolsa",
+          "en": "Bag management"
+        },
+        "text": {
+          "pt": "Se KeyMetadata.openMenu estiver false, usar a bolsa abre o stash diretamente. Quando true, um menu permite escolher entre abrir o armazenamento e gerenciar as chaves. A listagem de gestão combina metadata do item com dados atuais do banco pelo barcode.",
+          "en": "With KeyMetadata.openMenu=false, using a bag opens its stash directly. When enabled, users can choose between opening storage and managing contained keys. Management combines item metadata with current database data by barcode."
+        },
+        "code": "Config.Default.KeyMetadata = {\n    showOwner = true,\n    openMenu = true\n}\n\n-- Menu:\n-- Bolsa de Chaves\n-- ├─ Abrir bolsa\n-- └─ Gerenciar chaves\n--      └─ <barcode>\n--          ├─ Som\n--          ├─ Motor ao destrancar\n--          └─ Distância"
+      },
+      {
+        "id": "original-key",
+        "title": {
+          "pt": "Emitindo chave original",
+          "en": "Issuing an original key"
+        },
+        "text": {
+          "pt": "BuyOriginalKey é o export apropriado para concessionárias, compra inicial ou emissão oficial. Se duration for omitido, cria uma chave permanente original; se duration for informado, cria uma chave temporária com expiração.",
+          "en": "BuyOriginalKey is intended for dealerships, initial purchase or official issuance. Without duration it creates a permanent original key; with duration it creates an expiring temporary key."
+        },
+        "code": "-- server-side\nlocal result = exports['pr_carkeys']:BuyOriginalKey(\n    source,\n    'ABC1234'\n)\n\nif result.success then\n    print('barcode:', result.barcode)\nelse\n    print('reason:', result.reason)\nend"
+      },
+      {
+        "id": "dealership",
+        "title": {
+          "pt": "Integração com concessionária",
+          "en": "Dealership integration"
+        },
+        "text": {
+          "pt": "O ponto correto é emitir a chave depois que a compra e a propriedade do veículo foram confirmadas. A concessionária continua responsável por pagamento/DB/spawn; PR Car Keys cria a via física e seu registro.",
+          "en": "The key should be issued after vehicle purchase and ownership have been confirmed. The dealership remains responsible for payment/database/spawn; PR Car Keys creates the physical key and its persistent record."
+        },
+        "code": "-- server.lua da concessionária\nlocal function finalizeVehiclePurchase(src, plate, vehicleData)\n    -- 1. validar pagamento\n    -- 2. persistir veículo/owner no resource da concessionária/framework\n    -- 3. só depois emitir a chave\n\n    local key = exports['pr_carkeys']:BuyOriginalKey(src, plate)\n    if not key.success then\n        return false, key.reason\n    end\n\n    return true, {\n        plate = plate,\n        keyBarcode = key.barcode\n    }\nend"
+      },
+      {
+        "id": "used-dealership",
+        "title": {
+          "pt": "Veículos usados e transferência",
+          "en": "Used vehicles & transfer"
+        },
+        "text": {
+          "pt": "Ao vender um veículo usado, a loja pode decidir se preserva as chaves existentes, revoga todas e cria uma nova original, ou copia uma chave válida. RemoveKeysForOwnerPlate existe para limpar chaves vinculadas ao proprietário/placa em fluxos de transferência.",
+          "en": "For used-car sales, a dealership can preserve existing keys, revoke them and issue a new original, or copy a valid key. RemoveKeysForOwnerPlate exists for transfer/revocation flows."
+        },
+        "code": "-- Exemplo de transferência controlada\nexports['pr_carkeys']:RemoveKeysForOwnerPlate(oldOwnerId, plate)\n\nlocal newKey = exports['pr_carkeys']:BuyOriginalKey(newOwnerSource, plate)\nif not newKey.success then\n    return false, newKey.reason\nend"
+      },
+      {
+        "id": "copy-key",
+        "title": {
+          "pt": "Copiando uma chave",
+          "en": "Copying a key"
+        },
+        "text": {
+          "pt": "CopyKey recebe o barcode original. A nova via ganha um barcode novo, level=copy e herda a placa. Chaves single_use não podem ser copiadas.",
+          "en": "CopyKey receives the original barcode. The new physical copy gets a new barcode, level=copy and the same plate. single_use keys cannot be copied."
+        },
+        "code": "local result = exports['pr_carkeys']:CopyKey(\n    source,\n    originalBarcode\n)\n\nif result.success then\n    print(('Nova cópia: %s'):format(result.barcode))\nend"
+      },
+      {
+        "id": "temporary-keys",
+        "title": {
+          "pt": "Chaves e acessos temporários",
+          "en": "Temporary keys & access"
+        },
+        "text": {
+          "pt": "O resource possui tanto acesso temporário em runtime quanto itens físicos temporários. GiveTempKey/RemoveTempKey manipulam acesso temporário; CreateTempKeyItem/CreateTimedKeyItem criam item físico quando o fluxo exige uma chave real.",
+          "en": "The resource supports both runtime temporary access and physical temporary items. GiveTempKey/RemoveTempKey manage temporary access while CreateTempKeyItem/CreateTimedKeyItem create physical keys when the flow requires an actual item."
+        },
+        "code": "-- acesso temporário\nexports['pr_carkeys']:GiveTempKey(source, plate)\n\n-- remover acesso\nexports['pr_carkeys']:RemoveTempKey(source, plate)\n\n-- item físico temporário\nexports['pr_carkeys']:CreateTempKeyItem(source, plate)\n\n-- item com duração/expiração\nexports['pr_carkeys']:CreateTimedKeyItem(source, plate, durationSeconds)"
+      },
+      {
+        "id": "timed-key",
+        "title": {
+          "pt": "Exemplo de valet / empréstimo por tempo",
+          "en": "Timed valet / loan key example"
+        },
+        "text": {
+          "pt": "Uma aplicação prática é criar uma chave temporizada para valet, locadora, oficina ou test-drive. A expiração é persistida no banco; o worker de expiration remove a chave do inventário/bolsa/ignição e elimina o registro.",
+          "en": "Timed keys are useful for valet, rentals, workshops or test drives. Expiration is persisted; the expiration worker removes the key from inventory/bags/ignition and deletes its database row."
+        },
+        "code": "-- 30 minutos de test-drive\nlocal duration = 30 * 60\nlocal result = exports['pr_carkeys']:BuyOriginalKey(\n    source,\n    plate,\n    duration\n)\n\n-- ou use CreateTimedKeyItem quando o fluxo já possui acesso/runtime separado"
+      },
+      {
+        "id": "expiration",
+        "title": {
+          "pt": "Expiração automática",
+          "en": "Automatic expiration"
+        },
+        "text": {
+          "pt": "server/sv_expiration.lua procura rows com expires_at vencido. Antes de apagar a row, tenta remover a chave da ignição, força desligamento quando necessário, procura o barcode em players online/inventários/bolsas e então invalida cache e banco.",
+          "en": "server/sv_expiration.lua searches for expired expires_at rows. Before deleting the row it removes matching ignition state, forces engine shutdown when needed, searches online players/inventories/bags for the barcode, then invalidates cache and database."
+        },
+        "steps": {
+          "pt": [
+            "Localiza barcode expirado no banco.",
+            "Verifica se está em VehiclesWithKeyInside.",
+            "Se estiver, limpa ignição e força engine off.",
+            "Tenta remover do driver/inventário/bolsas.",
+            "Faz fallback procurando players online.",
+            "Apaga row pr_carkeys.",
+            "Invalida cache server-side."
+          ],
+          "en": [
+            "Find expired barcode in database.",
+            "Check VehiclesWithKeyInside.",
+            "Clear ignition and force engine off if needed.",
+            "Try driver/inventory/bag removal.",
+            "Fallback scan through online players.",
+            "Delete pr_carkeys row.",
+            "Invalidate server cache."
+          ]
+        }
+      },
+      {
+        "id": "hotwire",
+        "title": {
+          "pt": "Hotwire",
+          "en": "Hotwire"
+        },
+        "text": {
+          "pt": "Hotwire não concede acesso apenas porque o client venceu um minigame. O servidor cria uma sessão vinculada a source, netId e plate com expiração. O client roda o minigame pelo PR Bridge e a confirmação volta para validação server-side.",
+          "en": "Hotwire does not grant access solely because the client wins a minigame. The server creates an expiring session bound to source, netId and plate. Client runs the PR Bridge minigame and success is returned for server-side validation."
+        },
+        "code": "driver seat sem chave\n    ↓\nrequestHotwireSession\n    ↓\n{ source, netId, plate, expires }\n    ↓\nPR Bridge minigame\n    ↓\nserver validates session/context\n    ↓\ntemporary key / ignition access"
+      },
+      {
+        "id": "minigames",
+        "title": {
+          "pt": "Configuração de minigames",
+          "en": "Minigame configuration"
+        },
+        "text": {
+          "pt": "Config.Minigame separa parâmetros de veículo estacionado e carjack. O provider pode ser ox_lib, glitch-minigame ou mhacking; game define o minigame chamado pelo PR Bridge. O config já expõe parâmetros universais para diversas modalidades.",
+          "en": "Config.Minigame separates parked-vehicle and carjack parameters. Provider can be ox_lib, glitch-minigame or mhacking; game selects the PR Bridge minigame. The config exposes universal parameters for many game modes."
+        },
+        "table": {
+          "headers": [
+            "Grupo",
+            "Exemplos de parâmetros"
+          ],
+          "rows": [
+            [
+              "Core",
+              "rounds, speed, timeLimit, maxFailures, zoneSize"
+            ],
+            [
+              "Skill/Hold",
+              "perfectZoneSize, randomizeZone, keys"
+            ],
+            [
+              "Memory",
+              "gridSize, memorizeTime, answerTime, maxAttempts"
+            ],
+            [
+              "Aim",
+              "targetsToHit, maxMisses, targetLifetime, targetSize"
+            ],
+            [
+              "Sequence",
+              "comboLength, totalStages, keysPerStage, sequenceLength"
+            ],
+            [
+              "Circuit",
+              "difficultyLevel, disconnectChance, reconnect timers"
+            ],
+            [
+              "Rhythm",
+              "lanes, noteSpeed, noteSpawnRate, requiredNotes"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "carjack",
+        "title": {
+          "pt": "Carjack de NPC",
+          "en": "NPC carjack"
+        },
+        "text": {
+          "pt": "O módulo de carjack possui máquina de estados própria para alvo, rendição, reação, fuga, busca da chave e confisco policial. A chance de reação depende da categoria da arma e há blacklist de armas que não podem iniciar roubo.",
+          "en": "The carjack module has its own state machine for target detection, surrender, reaction, escape, key search and police seizure. Reaction chance depends on weapon group and blacklisted weapons cannot start carjack."
+        },
+        "table": {
+          "headers": [
+            "Config",
+            "Padrão atual"
+          ],
+          "rows": [
+            [
+              "aimDistance",
+              "30.0"
+            ],
+            [
+              "npcReactChance",
+              "0.30"
+            ],
+            [
+              "policeFleeChance",
+              "0.30"
+            ],
+            [
+              "minTime",
+              "5000–7000 ms"
+            ],
+            [
+              "cooldown",
+              "5000–10000 ms"
+            ],
+            [
+              "getPermKey",
+              "false"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "carjack-reaction",
+        "title": {
+          "pt": "Reação do NPC e chave perdida",
+          "en": "NPC reaction & lost key"
+        },
+        "text": {
+          "pt": "O NPC pode reagir dirigindo, sair, fugir ou manter a chave. O código mantém estado para fleeingPed/fleeingVehicle/fleeingPlate; quando a chave fica com o NPC, existe fluxo para procurar/saquear a chave posteriormente.",
+          "en": "NPC can react by driving, exiting, fleeing or retaining the key. The code tracks fleeingPed/fleeingVehicle/fleeingPlate and includes a later search/loot flow when the NPC keeps the key."
+        },
+        "code": "fleeingPed\nfleeingVehicle\nfleeingPlate\ncanLootFleeKey\n    ↓\nplayer finds/loots key\n    ↓\npr_carkeys:client:carjackLootKeyResult"
+      },
+      {
+        "id": "police",
+        "title": {
+          "pt": "Polícia e confisco",
+          "en": "Police & seizure"
+        },
+        "text": {
+          "pt": "Jobs policiais configurados podem receber acesso operacional. HasVehicleAccess retorna true para policiais autorizados; o carjack também possui fluxo específico de confisco de NPC e registro de chave temporária em ignição.",
+          "en": "Configured police jobs receive operational access. HasVehicleAccess returns true for authorized officers; carjack also contains a dedicated NPC seizure flow and temporary ignition-key registration."
+        },
+        "code": "Config.Police = {\n    enabled = true,\n    jobs = { 'police', 'sheriff', 'swat' }\n}\n\nif exports['pr_carkeys']:IsPlayerPolice(source) then\n    -- acesso operacional\nend"
+      },
+      {
+        "id": "blacklist",
+        "title": {
+          "pt": "Veículos que não exigem chave",
+          "en": "Vehicles that need no key"
+        },
+        "text": {
+          "pt": "Config.NoKeyNeeded permite excluir modelos do sistema. O config atual inclui bicicletas, evitando que o player precise de uma chave física para esse tipo de veículo.",
+          "en": "Config.NoKeyNeeded excludes models from key enforcement. Current defaults include bicycles so those vehicles do not require physical keys."
+        },
+        "code": "Config.NoKeyNeeded = {\n    [joaat('bmx')] = true,\n    [joaat('cruiser')] = true,\n    [joaat('scorcher')] = true,\n    [joaat('tribike')] = true\n}"
+      },
+      {
+        "id": "garage-spawn",
+        "title": {
+          "pt": "Spawn por garagem",
+          "en": "Garage spawn"
+        },
+        "text": {
+          "pt": "Quando um veículo é spawnado, o sistema precisa inicializar lock/engine/access sem confiar apenas no estado local anterior. A arquitetura usa callbacks e eventos de validação para impedir que um carro recém-spawnado permaneça ligado sem chave válida.",
+          "en": "When a vehicle spawns, lock/engine/access must be initialized without trusting stale local state. The architecture uses validation callbacks/events to prevent a newly spawned car from staying running without valid access."
+        },
+        "note": {
+          "pt": "O README ainda contém a anotação de bug 'ao spawnar veiculo ta iniciando ligado!'. O código atual possui validação de banco do motorista e watchdog de engine, mas a documentação não assume que esse bug esteja totalmente resolvido sem teste em runtime.",
+          "en": "README still contains the bug note 'vehicle starts running on spawn'. Current code has driver-seat validation and an engine watchdog, but this documentation does not claim the bug is fully resolved without runtime validation."
+        }
+      },
+      {
+        "id": "integration-garage",
+        "title": {
+          "pt": "Exemplo de integração com garagem",
+          "en": "Garage integration example"
+        },
+        "text": {
+          "pt": "Uma garagem externa pode sincronizar lock state no spawn e usar HaveKey/HasVehicleAccess para decidir UX. Para ações sensíveis, prefira sempre a verificação server-side.",
+          "en": "An external garage can synchronize lock state on spawn and use HaveKey/HasVehicleAccess for UX decisions. Sensitive actions should still rely on server-side validation."
+        },
+        "code": "-- server\nlocal hasAccess = exports['pr_carkeys']:HasVehicleAccess(source, plate)\nif not hasAccess then\n    exports['pr_carkeys']:SetLockState(vehicle, 2)\nelse\n    exports['pr_carkeys']:SetLockState(vehicle, 1)\nend\n\n-- client (apenas UX/local check)\nif exports['pr_carkeys']:HaveKey(plate) then\n    print('player possui acesso local para esta placa')\nend"
+      },
+      {
+        "id": "api-server",
+        "title": {
+          "pt": "API server-side",
+          "en": "Server-side API"
+        },
+        "table": {
+          "headers": [
+            "Export",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "BuyOriginalKey(src, plate, duration?)",
+              "Cria/entrega chave original permanente ou temporizada."
+            ],
+            [
+              "CopyKey(src, originalBarcode, duration?)",
+              "Cria cópia física de uma chave existente."
+            ],
+            [
+              "GiveTempKey(src, plate)",
+              "Concede acesso temporário."
+            ],
+            [
+              "RemoveTempKey(src, plate)",
+              "Remove acesso temporário."
+            ],
+            [
+              "CreateTempKeyItem(src, plate, ...)",
+              "Cria item físico temporário."
+            ],
+            [
+              "CreateTimedKeyItem(src, plate, duration, ...)",
+              "Cria item físico com expiração."
+            ],
+            [
+              "RemoveTempKeyItem(src, plate, ...)",
+              "Remove item temporário."
+            ],
+            [
+              "RemoveKeysForOwnerPlate(owner, plate)",
+              "Revoga chaves de owner/plate."
+            ],
+            [
+              "IsPlayerPolice(src)",
+              "Verifica papel policial configurado."
+            ],
+            [
+              "HasVehicleAccess(src, plate)",
+              "Validação abrangente de acesso."
+            ],
+            [
+              "SetLockState(vehicle, state)",
+              "Aplica lock e replica doorslockstate."
+            ],
+            [
+              "GiveKeys(src, vehicle)",
+              "Compatibilidade: concede chave temporária pela entity."
+            ],
+            [
+              "GetKeys(src)",
+              "Retorna placas/chaves acessíveis ao player."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "api-client",
+        "title": {
+          "pt": "API client-side",
+          "en": "Client-side API"
+        },
+        "table": {
+          "headers": [
+            "Export",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "HaveKey(plate)",
+              "Verifica qualquer acesso local conhecido para a placa."
+            ],
+            [
+              "HavePermanentKey(plate)",
+              "Verifica chave permanente em cache local."
+            ],
+            [
+              "HaveTempKey(plate)",
+              "Verifica acesso temporário em cache local."
+            ]
+          ]
+        },
+        "note": {
+          "pt": "Esses exports client-side são úteis para UI e conveniência. Para autorizar ações server-side, use HasVehicleAccess no servidor ou os callbacks internos de validação.",
+          "en": "Client exports are useful for UI/convenience. Server-sensitive authorization should use server HasVehicleAccess or internal validation callbacks."
+        }
+      },
+      {
+        "id": "qb-compat",
+        "title": {
+          "pt": "Compatibilidade com vehicle keys existentes",
+          "en": "Compatibility with existing vehicle-key events"
+        },
+        "text": {
+          "pt": "sv_vehicle.lua registra eventos de compatibilidade para ecossistemas existentes, incluindo qb-vehiclekeys e mm_carkeys. Isso facilita migrar scripts que já disparam eventos de aquisição/lock sem reescrever tudo imediatamente.",
+          "en": "sv_vehicle.lua registers compatibility events for existing ecosystems, including qb-vehiclekeys and mm_carkeys, easing migration for scripts that already emit acquire/lock events."
+        },
+        "code": "qb-vehiclekeys:server:setVehLockState\nqb-vehiclekeys:server:AcquireVehicleKeys\nmm_carkeys:server:acquiretempvehiclekeys"
+      },
+      {
+        "id": "create-key-event",
+        "title": {
+          "pt": "Criação avançada de uma chave",
+          "en": "Advanced key creation"
+        },
+        "text": {
+          "pt": "Internamente, createKey aceita plate, barcode, key_type, sound, motor, distance e duration. Em integrações externas é preferível usar BuyOriginalKey/CopyKey porque esses exports cuidam de geração única do barcode e entrega do item.",
+          "en": "Internally createKey accepts plate, barcode, key_type, sound, motor, distance and duration. External integrations should prefer BuyOriginalKey/CopyKey because they handle unique barcode generation and item delivery."
+        },
+        "code": "-- Preferido\nlocal key = exports['pr_carkeys']:BuyOriginalKey(src, plate)\n\n-- Em vez de montar barcode manualmente via evento interno."
+      },
+      {
+        "id": "cache",
+        "title": {
+          "pt": "Cache server-side",
+          "en": "Server-side cache"
+        },
+        "text": {
+          "pt": "As rows são mantidas em cache para reduzir queries repetidas por barcode. Operações de criação, edição, delete e expiração atualizam/invalida esse cache junto com o banco.",
+          "en": "Rows are cached server-side to reduce repeated barcode lookups. Create, update, delete and expiration operations update/invalidate that cache along with database state."
+        }
+      },
+      {
+        "id": "security",
+        "title": {
+          "pt": "Segurança e autoridade",
+          "en": "Security & authority"
+        },
+        "text": {
+          "pt": "Os fluxos sensíveis não confiam apenas no client: hotwire usa sessão, engine valida acesso, lock é sincronizado, key-in-vehicle procura item físico real, expiração remove barcode e carjack faz validações de proximidade/contexto.",
+          "en": "Sensitive flows do not trust the client alone: hotwire uses sessions, engine validates access, locks are synchronized, ignition searches for the real physical item, expiration removes the barcode and carjack checks proximity/context."
+        },
+        "bullets": {
+          "pt": [
+            "validateKeyAccess antes de permitir engine start.",
+            "Watchdog OFF→ON desliga motor em tentativa não autorizada.",
+            "Hotwire vincula sessão a source + netId + plate.",
+            "Campos editáveis da chave são whitelisted.",
+            "Barcode deve existir no banco/cache para uso normal.",
+            "Expiração limpa inventário, bolsa, ignição, cache e row.",
+            "HasVehicleAccess é a verificação server-side recomendada para integrações.",
+            "Carjack/ações em veículo validam proximidade e entidade."
+          ],
+          "en": [
+            "validateKeyAccess before engine start.",
+            "OFF→ON watchdog cancels unauthorized starts.",
+            "Hotwire session binds source + netId + plate.",
+            "Editable key fields are whitelisted.",
+            "Barcode must exist in database/cache for normal use.",
+            "Expiration cleans inventory, bags, ignition, cache and database row.",
+            "HasVehicleAccess is the recommended server-side integration check.",
+            "Vehicle/carjack actions validate proximity and entity."
+          ]
+        }
+      },
+      {
+        "id": "notifications",
+        "title": {
+          "pt": "Notificações e UX",
+          "en": "Notifications & UX"
+        },
+        "text": {
+          "pt": "Config.Notify centraliza mensagens como bolsa aberta, chave usada, veículo trancado, motor ligado, chave expirada, veículo não encontrado e sem permissão. Isso permite adequar o resource ao estilo visual do servidor sem mudar lógica.",
+          "en": "Config.Notify centralizes messages for bag open, key use, lock, engine, expiration, missing vehicle and permission errors, allowing visual customization without changing core logic."
+        }
+      },
+      {
+        "id": "performance",
+        "title": {
+          "pt": "Performance e boas práticas",
+          "en": "Performance & best practices"
+        },
+        "text": {
+          "pt": "O desenho evita consultas SQL a cada frame. O client reconstrói cache em mudanças de inventário/player load, o servidor mantém cache por barcode e State Bags sincronizam locks/efeitos. Threads mais agressivas só ficam ativas em contextos específicos como banco do motorista ou carjack.",
+          "en": "The design avoids per-frame SQL queries. Client cache rebuilds on inventory/player changes, server caches barcodes and State Bags synchronize locks/effects. Tighter loops only run in relevant contexts such as driver seat or carjack."
+        },
+        "cards": [
+          [
+            "Server cache",
+            "Busca por barcode não depende de SQL em toda ação."
+          ],
+          [
+            "Inventory hooks",
+            "Rebuild ocorre quando inventário/player muda."
+          ],
+          [
+            "State Bags",
+            "Locks e efeitos runtime são replicados pela entity."
+          ],
+          [
+            "Scoped loops",
+            "Watchdogs reduzem frequência fora do contexto relevante."
+          ],
+          [
+            "Bags indexed",
+            "Cada bolsa possui stash derivado do próprio barcode."
+          ],
+          [
+            "DB normalized",
+            "Configuração individual fica em uma única row por barcode."
+          ]
+        ]
+      }
     ]
   },
-
   pr_3dsound: {
     name:'PR 3D Sound',code:'pr_3dsound',repo:'https://github.com/Pierremoraes-ofc/pr_3dsound',
     category:{pt:'Hobby • Spatial Audio',en:'Hobby • Spatial Audio'},
