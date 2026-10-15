@@ -3891,6 +3891,582 @@ pr_lib.notify(source, {
       }
     ]
   },
+  pr_wep: {
+    name: 'PR WEP',
+    code: 'pr_wep',
+    repo: 'https://github.com/Pierremoraes-ofc/pr-wep',
+    category: { pt: 'Hobby • FiveM / Sistema de armas', en: 'Hobby • FiveM / Weapon system' },
+    lead: {
+      pt: 'Sistema completo de armas para FiveM que combina gerenciamento visual das armas no corpo, posicionamento individual por jogador, presets globais, coldres físicos, animações de saque e mira, modos de disparo, recoil, peso, sons, lanterna persistente, animação de rádio, lançamento físico de armas e recuperação pelo chão.',
+      en: 'Complete FiveM weapon system combining visible weapons on the player body, per-player positioning, global presets, physical holsters, draw/aim animations, fire modes, recoil, weight, sounds, persistent flashlight, radio animations, physical weapon throwing and ground recovery.'
+    },
+    facts: [
+      ['Version', '1.0.0'],
+      ['Dependency', 'ox_lib'],
+      ['Framework bridges', 'ESX / QBCore / QBox'],
+      ['Inventories', 'ox_inventory / qb-inventory / qs-inventory / core_inventory / custom'],
+      ['Targets', 'ox_target / qb-target / TextUI'],
+      ['Persistence', 'JSON presets + per-license positions'],
+      ['Weapon editor', 'Gizmo + orbital camera'],
+      ['Fire modes', 'Safe / Single / Burst / Auto'],
+      ['Sling limits', '10 total / 3 pistols / 3 heavy / 4 melee'],
+      ['Optional audio', 'pr_3dsound event integration']
+    ],
+    sections: [
+      {
+        id:'overview',
+        title:{pt:'Visão geral',en:'Overview'},
+        text:{
+          pt:'O PR WEP vai além de animações. O resource mantém armas guardadas visíveis no corpo, aplica acessórios do inventário no objeto visual, permite posicionar cada arma em ossos diferentes, salva preferências por jogador, suporta presets globais, controla modos de tiro, recoil, peso e ainda possui sistemas independentes de lanterna, rádio, inspeção, saque, lançamento e recuperação de armas.',
+          en:'PR WEP goes beyond animations. It renders stored weapons on the player body, applies inventory attachments to the visual object, allows per-weapon bone positioning, persists player preferences, supports global presets, controls fire modes, recoil and weight, and also includes flashlight, radio, inspection, draw, throw and pickup systems.'
+        },
+        bullets:{
+          pt:[
+            'Armas do inventário aparecem fisicamente no corpo quando não estão equipadas.',
+            'Configuração pessoal por license com fallback para preset global.',
+            'Editor visual com gizmo, câmera orbital, rotação, translação e undo.',
+            'Coldres físicos opcionais e posicionáveis.',
+            'Attachments/components aparecem também na arma visual guardada.',
+            'Modos Safe, Single, Burst e Full Auto por arma.',
+            'Recoil por classe, mira instável, crosshair opcional e headshot crítico desativável.',
+            'Peso das armas visíveis reduz velocidade de movimento.',
+            'Lanterna permanece ligada em movimento e sincroniza por State Bag.',
+            'Armas podem ser arremessadas fisicamente e recolhidas no chão.'
+          ],
+          en:[
+            'Inventory weapons appear physically on the body while holstered.',
+            'Per-license personal configuration with global preset fallback.',
+            'Visual editor with gizmo, orbital camera, translate/rotate and undo.',
+            'Optional physical holsters with independent positioning.',
+            'Attachments/components also render on the holstered weapon object.',
+            'Safe, Single, Burst and Full Auto modes per weapon.',
+            'Class-based recoil, aim shake, optional hidden crosshair and critical-hit control.',
+            'Visible weapon weight reduces movement speed.',
+            'Flashlight stays on while moving and synchronizes through State Bags.',
+            'Weapons can be physically thrown and picked back up.'
+          ]
+        }
+      },
+      {
+        id:'architecture',
+        title:{pt:'Arquitetura do resource',en:'Resource architecture'},
+        table:{
+          headers:['Arquivo','Responsabilidade'],
+          rows:[
+            ['config/config.lua','Configuração geral, armas, recoil, animações, sons, peso, rádio e inventário.'],
+            ['client/sling.lua','Armas visíveis no corpo, limites, peso, editor e coldres.'],
+            ['client/menu.lua','Menus ox_lib de loadout, presets, rádio, mira e saque.'],
+            ['client/gizmo.lua','Editor 3D da posição/rotação.'],
+            ['client/editor_camera.lua','Câmera orbital e zoom do editor.'],
+            ['client/shotingmode.lua','Safe, Single, Burst e Full Auto.'],
+            ['client/recoil.lua','Recoil, drunk aiming, crosshair e critical hits.'],
+            ['client/flashlight.lua','Persistência e sincronização da lanterna.'],
+            ['client/radioanimation.lua','Animações de rádio.'],
+            ['client/weapanimation.lua','Animações/overrides de arma e mira.'],
+            ['client/throwgun.lua','Arremessar, dropar e recolher arma.'],
+            ['bridge/inventory/inventory.lua','Abstração de inventários.'],
+            ['bridge/*','Compatibilidade ESX, QBCore e QBox.'],
+            ['server/events.lua','Persistência JSON, callbacks, presets e áudio.'],
+            ['server/throwgun.lua','Autoridade de remover/devolver armas jogadas.']
+          ]
+        }
+      },
+      {
+        id:'installation',
+        title:{pt:'Instalação e dependências',en:'Installation and dependencies'},
+        text:{
+          pt:'A única dependency declarada no fxmanifest é ox_lib. Os bridges detectam framework pelo resource iniciado. A reprodução dos sons de saque usa eventos do pr_3dsound, mas ele não está listado como dependency no fxmanifest atual.',
+          en:'The only dependency declared in fxmanifest is ox_lib. Framework bridges activate according to the running resource. Draw sounds call pr_3dsound events, but pr_3dsound is not currently declared as an fxmanifest dependency.'
+        },
+        code:"ensure ox_lib\nensure pr-wep\n\n-- opcional para sons espaciais de saque\nensure pr_3dsound"
+      },
+      {
+        id:'frameworks',
+        title:{pt:'Frameworks suportados no código atual',en:'Frameworks supported by current code'},
+        table:{
+          headers:['Framework','Bridge'],
+          rows:[
+            ['ESX','bridge/esx'],
+            ['QBCore','bridge/qb-core'],
+            ['QBox / qbx_core','bridge/qbx_core']
+          ]
+        },
+        note:{
+          pt:'O description do fxmanifest menciona custom frameworks, porém o repositório atual não possui um bridge custom pronto. Para outro framework é necessário implementar as funções esperadas em Framework.',
+          en:'The fxmanifest description mentions custom frameworks, but the current repository does not include a ready-made custom bridge. Another framework requires implementing the expected Framework functions.'
+        }
+      },
+      {
+        id:'inventory',
+        title:{pt:'Inventários suportados',en:'Supported inventories'},
+        table:{
+          headers:['Config.Inventory','Integração presente'],
+          rows:[
+            ['auto','Detecta automaticamente.'],
+            ['ox_inventory','Leitura, metadata, add/remove e CustomDrop.'],
+            ['qb-inventory','Leitura e add/remove via Player.Functions.'],
+            ['qs-inventory','Wrappers getUserInventory/addItem/removeItem.'],
+            ['core_inventory','Wrappers getInventory/addItem/removeItem.'],
+            ['custom','Chamadas esperadas em CustomInventory.']
+          ]
+        },
+        note:{
+          pt:'No auto do config, ox_inventory tem prioridade. Se não estiver iniciado e qb-core/qbx_core estiver, o valor é resolvido para qb-inventory antes de qs/core.',
+          en:'In config auto-detection, ox_inventory has priority. If it is not running and qb-core/qbx_core is running, the value resolves to qb-inventory before qs/core.'
+        }
+      },
+      {
+        id:'main-config',
+        title:{pt:'Configuração principal',en:'Main configuration'},
+        code:"Config.Debug = true\nConfig.Language = 'pt-BR'\nConfig.Inventory = 'auto'\nConfig.UseWeaponAttachments = true\n\nConfig.MaxWeaponsAttached = 10\nConfig.MaxPistols = 3\nConfig.MaxHeavyWeapon = 3\nConfig.MeleeWeapon = 4\n\nConfig.Flashlight = true\nConfig.FlashlightKey = 38\nConfig.Target = 'ox_target'\nConfig.ThrowGun = true\nConfig.ThrowKeybind = 'l'\nConfig.WeapInspect = 'MOUSE_MIDDLE'\nConfig.Command = 'animweapon'\nConfig.OpenMenu = 'F9'"
+      },
+      {
+        id:'weapon-schema',
+        title:{pt:'Como cadastrar uma arma',en:'How to register a weapon'},
+        text:{
+          pt:'Cada arma em Config.Weapons define o model visual, o hash/nome da arma e os modos de tiro permitidos. O campo shothing é a fonte usada por client/shotingmode.lua.',
+          en:'Each Config.Weapons entry defines the visual model, weapon hash/name and allowed fire modes. The shothing field is what client/shotingmode.lua reads.'
+        },
+        code:"Config.Weapons['WEAPON_MYRIFLE'] = {\n    model = `w_ar_myrifle`,\n    name = `WEAPON_MYRIFLE`,\n    shothing = { 0, 1, 3 }\n}\n\n-- 0 = Safe\n-- 1 = Single\n-- 2 = Burst\n-- 3 = Full Auto"
+      },
+      {
+        id:'weapon-mode-examples',
+        title:{pt:'Exemplos de configuração de modos',en:'Fire-mode configuration examples'},
+        code:"-- Pistola: safe + single\nshothing = { 0, 1 }\n\n-- SMG: safe + single + auto\nshothing = { 0, 1, 3 }\n\n-- Arma com burst\nshothing = { 0, 1, 2, 3 }\n\n-- Minigun\nshothing = { 0, 3 }"
+      },
+      {
+        id:'fire-modes',
+        title:{pt:'Como funcionam os modos de disparo',en:'How fire modes work'},
+        text:{
+          pt:'A tecla Config.ShotingMode percorre somente os modos declarados na arma. O modo escolhido é mantido em FireMode.Weapons[weaponHash] enquanto o player está em jogo.',
+          en:'Config.ShotingMode cycles only through modes declared for that weapon. The selected mode is kept in FireMode.Weapons[weaponHash] during the session.'
+        },
+        table:{
+          headers:['Valor','Modo','Comportamento'],
+          rows:[
+            ['0','Safe','DisablePlayerFiring bloqueia o disparo.'],
+            ['1','Single','Após o primeiro disparo, segurar o botão fica bloqueado até soltar.'],
+            ['2','Burst','Permite a rajada curta e depois bloqueia enquanto o ataque continua pressionado.'],
+            ['3','Full Auto','Deixa o disparo contínuo liberado.']
+          ]
+        }
+      },
+      {
+        id:'fire-mode-ammo',
+        title:{pt:'Proteção de munição nos modos',en:'Ammo handling in fire modes'},
+        text:{
+          pt:'O código também trata baixa munição. Quando resta 1 munição fora do burst, ou até 3 no burst, ShootingDisable é ativado e o clip é normalizado para impedir comportamento inconsistente do seletor.',
+          en:'The code also handles low ammo. With one round left outside burst, or three or fewer in burst, ShootingDisable is enabled and the clip is normalized to avoid inconsistent selector behavior.'
+        }
+      },
+      {
+        id:'sling',
+        title:{pt:'Sistema Sling — armas visíveis no corpo',en:'Sling system — visible body weapons'},
+        text:{
+          pt:'A cada segundo o Sling compara as armas conhecidas no inventário com a arma atualmente equipada. A arma equipada é removida do corpo visual; armas guardadas são criadas como WeaponObject e presas ao bone salvo. A lista real do inventário é atualizada por callback a cada 15 segundos.',
+          en:'Every second Sling compares known inventory weapons against the currently equipped weapon. The equipped weapon is removed from the body render, while stored weapons are created as WeaponObjects and attached to the saved bone. The inventory weapon list refreshes through a callback every 15 seconds.'
+        },
+        code:"equipped -> remove visual attachment\nstored + saved position -> create visual weapon\n\nrefresh inventory weapons: 15s\nrender/update loop: 1s"
+      },
+      {
+        id:'sling-limits',
+        title:{pt:'Limites por categoria',en:'Per-category limits'},
+        text:{
+          pt:'Antes de anexar uma arma visual, canAttachClass aplica limite total e por classe. Pistolas são identificadas por Config.AimWeapons ou GROUP_PISTOL; melee por GROUP_MELEE; o restante entra como heavy.',
+          en:'Before creating a visual attachment, canAttachClass enforces total and per-class limits. Pistols are identified through Config.AimWeapons or GROUP_PISTOL, melee through GROUP_MELEE, and everything else is treated as heavy.'
+        },
+        code:"Config.MaxWeaponsAttached = 10\nConfig.MaxPistols = 3\nConfig.MaxHeavyWeapon = 3\nConfig.MeleeWeapon = 4"
+      },
+      {
+        id:'attachments',
+        title:{pt:'Attachments aparecem na arma guardada',en:'Attachments render on holstered weapons'},
+        text:{
+          pt:'O servidor lê metadata.components, metadata.attachments, item.components e item.attachments. O client resolve nomes COMPONENT_* diretamente e, no ox_inventory, também consegue resolver itens de attachment através de item.client.component. Depois GiveWeaponComponentToWeaponObject aplica cada componente no objeto visual.',
+          en:'The server reads metadata.components, metadata.attachments, item.components and item.attachments. The client resolves COMPONENT_* names directly and, with ox_inventory, can resolve attachment items through item.client.component. GiveWeaponComponentToWeaponObject then applies each component to the visual weapon object.'
+        }
+      },
+      {
+        id:'position-priority',
+        title:{pt:'Posição pessoal x preset global',en:'Personal position vs global preset'},
+        text:{
+          pt:'getSavedPosition procura primeiro json/positions.json do jogador e depois json/presets.json. Isso significa que um jogador pode personalizar sua arma sem alterar o padrão global; ao resetar, volta a usar o preset.',
+          en:'getSavedPosition checks the player entry in json/positions.json first, then falls back to json/presets.json. A player can therefore customize a weapon without changing the global default; reset returns it to the preset.'
+        },
+        code:"player position\n    ↓ se não existir\nglobal preset\n    ↓ se não existir\nno visual attachment"
+      },
+      {
+        id:'position-data',
+        title:{pt:'Estrutura salva de uma posição',en:'Saved position structure'},
+        code:"weapon_pistol = {\n    coords = { x = -0.04, y = -0.12, z = 0.02 },\n    rot = { x = -3.4, y = 0.0, z = -177.4 },\n    boneId = 24816,\n    AimAnim = 'DefaultAS',\n    HolsterAnim = 'BackHolsterAnimation',\n    coldre = {\n        model = 'coldre_prop',\n        coords = { x = -0.06, y = -0.12, z = 0.03 },\n        rot = { x = -0.6, y = -65.8, z = -177.2 }\n    }\n}"
+      },
+      {
+        id:'bones',
+        title:{pt:'Bones disponíveis no editor',en:'Bones available in editor'},
+        table:{
+          headers:['Nome','Bone ID'],
+          rows:[
+            ['Coluna_A','24818'],
+            ['Coluna_M','24817'],
+            ['Coluna_B','24816'],
+            ['Clavicula_D','10706'],
+            ['Antebraco_D','28252'],
+            ['Coxa_D','51826'],
+            ['Panturrilha_D','36864'],
+            ['Clavicula_E','64729'],
+            ['Antebraco_E','61163'],
+            ['Coxa_E','58271'],
+            ['Panturrilha_E','63931']
+          ]
+        }
+      },
+      {
+        id:'editor',
+        title:{pt:'Editor 3D com gizmo',en:'3D gizmo editor'},
+        text:{
+          pt:'Ao editar uma arma, o ped é congelado e o script cria um anchor invisível no bone escolhido. Um objeto placeholder recebe o gizmo e uma WeaponObject de preview é ligada a ele. O resultado é convertido novamente para transform local do bone antes de salvar.',
+          en:'When editing a weapon, the ped is frozen and an invisible anchor is created on the selected bone. A placeholder object receives the gizmo and a preview WeaponObject is attached to it. The final transform is converted back into local bone coordinates before saving.'
+        }
+      },
+      {
+        id:'editor-controls',
+        title:{pt:'Controles do editor',en:'Editor controls'},
+        table:{
+          headers:['Controle','Ação'],
+          rows:[
+            ['Q','Modo translação'],
+            ['R','Modo rotação'],
+            ['Z','Undo'],
+            ['Mouse esquerdo','Manipular gizmo'],
+            ['Mouse direito','Orbitar câmera'],
+            ['Scroll','Zoom da câmera quando fora do precision mode'],
+            ['Enter / Accept','Confirmar posição'],
+            ['Backspace','Cancelar']
+          ]
+        }
+      },
+      {
+        id:'camera',
+        title:{pt:'Câmera orbital do editor',en:'Orbital editor camera'},
+        text:{
+          pt:'EditorCamera cria uma scripted camera mirando o ponto do gizmo. O botão direito orbita, scroll altera radius entre 0.5 e 8.0 e smoothTransitionToEntity faz a aproximação inicial.',
+          en:'EditorCamera creates a scripted camera focused on the gizmo point. Right mouse orbits, scroll changes radius between 0.5 and 8.0, and smoothTransitionToEntity performs the initial transition.'
+        }
+      },
+      {
+        id:'holsters',
+        title:{pt:'Coldres físicos',en:'Physical holsters'},
+        text:{
+          pt:'Depois de salvar a posição da arma, o sistema abre um select perguntando se o usuário quer configurar um coldre. Config.Coldres mapeia label para model. O coldre possui coords/rot próprios e é salvo junto da configuração da arma.',
+          en:'After saving a weapon position, the system opens a select asking whether a holster should be configured. Config.Coldres maps labels to models. Holsters have independent coords/rot and are persisted alongside the weapon configuration.'
+        },
+        code:"Config.Coldres = {\n    { 'coldre_pistola', 'coldre_prop' },\n}"
+      },
+      {
+        id:'menu',
+        title:{pt:'Menu principal',en:'Main menu'},
+        text:{
+          pt:'O menu usa ox_lib context e abre por /animweapon ou F9 por padrão.',
+          en:'The menu uses ox_lib context and opens with /animweapon or F9 by default.'
+        },
+        bullets:{
+          pt:[
+            'Limpar armas bugadas.',
+            'Loadout pessoal.',
+            'Configuração de animação de rádio.',
+            'Preset global/admin.'
+          ],
+          en:[
+            'Clear bugged weapons.',
+            'Player loadout.',
+            'Radio animation settings.',
+            'Global/admin preset.'
+          ]
+        }
+      },
+      {
+        id:'loadout-menu',
+        title:{pt:'Menu de cada arma',en:'Per-weapon menu'},
+        text:{
+          pt:'Ao selecionar uma arma, o loadout oferece Posição da Arma, Modo de Saque e Modo de Mira. A posição abre a lista de bones; os outros dois salvam a escolha diretamente no JSON pessoal ou preset.',
+          en:'Selecting a weapon opens Weapon Position, Holster Mode and Aim Mode. Position opens the bone list, while the other two persist the selected animation mode to player JSON or preset.'
+        }
+      },
+      {
+        id:'aim-modes',
+        title:{pt:'Modos de mira disponíveis',en:'Available aim modes'},
+        text:{
+          pt:'O menu atual expõe 14 opções: três Gangster, três Hillbilly, cinco Police/Cop, duas Simple e DefaultAS. Algumas opções possuem weapAnimOverride definido em weaponanimations.meta.',
+          en:'The current menu exposes 14 options: three Gangster, three Hillbilly, five Police/Cop, two Simple and DefaultAS. Some options use weapAnimOverride sets defined in weaponanimations.meta.'
+        },
+        code:"GangsterAS_01 / 02 / 03\nHillbillyAS_01 / 02 / 03\nCopShot_01 / 02 / 03 / 04 / 05\nSimpleShot_01 / 02\nDefaultAS"
+      },
+      {
+        id:'holster-modes',
+        title:{pt:'Modos de saque/guarda',en:'Draw/holster modes'},
+        code:"SideHolsterAnimation\nBackHolsterAnimation\nFrontHolsterAnimation\nAgressiveFrontHolsterAnimation\nSideLegHolsterAnimation",
+        text:{
+          pt:'Cada perfil define dict, anim, duração e o momento exato em que a arma deve ficar visível ao sacar ou invisível ao guardar.',
+          en:'Each profile defines dict, animation, duration and the exact point where the weapon becomes visible while drawing or hidden while holstering.'
+        }
+      },
+      {
+        id:'recoil',
+        title:{pt:'Recoil realista',en:'Realistic recoil'},
+        text:{
+          pt:'Quando ativado, o recoil calcula uma força aleatória influenciada pela velocidade do ped, identifica a classe da arma e aplica o multiplicador correspondente na pitch da câmera. Armas da whitelist não recebem recoil.',
+          en:'When enabled, recoil calculates random force influenced by player movement speed, detects weapon class and applies the corresponding multiplier to camera pitch. Whitelisted weapons skip recoil.'
+        },
+        code:"PISTOL = 0.3\nSMG = 0.8\nRIFLE = 1.3\nLMG = 1.6\nSHOTGUN = 2.3\nSNIPER = 5.5\nVEHICLE = 0.8"
+      },
+      {
+        id:'recoil-options',
+        title:{pt:'Opções adicionais de recoil',en:'Additional recoil options'},
+        table:{
+          headers:['Opção','Efeito'],
+          rows:[
+            ['hideCrosshair','Esconde HUD component 14.'],
+            ['drunkAiming','Aplica DRUNK_SHAKE ao mirar/atirar.'],
+            ['disableAimPunching','Bloqueia controles de melee enquanto armado.'],
+            ['disableHeadshots','SetPedSuffersCriticalHits(false).'],
+            ['drunkAimingPower','Intensidade do camera shake.']
+          ]
+        }
+      },
+      {
+        id:'weight',
+        title:{pt:'Peso das armas no corpo',en:'Body-carried weapon weight'},
+        text:{
+          pt:'O peso não usa o peso bruto do inventário: ele soma somente as armas atualmente renderizadas no corpo em Sling.cachedAttachments. Cada grupo possui weight próprio. A velocidade final é 1 - pesoTotal × WeightPenalty, limitada por WeightMinSpeed.',
+          en:'Weight does not use raw inventory weight: it sums only weapons currently rendered on the body in Sling.cachedAttachments. Each group has its own weight. Final speed is 1 - totalWeight × WeightPenalty, clamped by WeightMinSpeed.'
+        },
+        code:"Config.Weight = true\nConfig.WeightPenalty = 0.015\nConfig.WeightMinSpeed = 0.55\n\nspeed = max(minSpeed, min(1.0, 1.0 - totalWeight * penalty))"
+      },
+      {
+        id:'weight-example',
+        title:{pt:'Exemplo de penalidade de peso',en:'Weight penalty example'},
+        text:{
+          pt:'Com uma rifle de weight=2.6 e uma SMG de weight=1.9 visíveis no corpo, totalWeight=4.5. Com penalty=0.015, a velocidade alvo é 1 - 4.5×0.015 = 0.9325, aproximadamente 93,25% do normal.',
+          en:'With a rifle at weight=2.6 and SMG at weight=1.9 visible on the body, totalWeight=4.5. With penalty=0.015, target speed is 1 - 4.5×0.015 = 0.9325, roughly 93.25% of normal.'
+        }
+      },
+      {
+        id:'flashlight',
+        title:{pt:'Lanterna persistente e sincronizada',en:'Persistent synchronized flashlight'},
+        text:{
+          pt:'Ao pressionar Config.FlashlightKey com uma arma compatível, SetFlashLightEnabled é ativado junto de SetFlashLightKeepOnWhileMoving(true). O estado prwep_flashlight é replicado pelo LocalPlayer.state e outros clients reaplicam a lanterna no ped remoto.',
+          en:'Pressing Config.FlashlightKey with a compatible weapon enables SetFlashLightEnabled and SetFlashLightKeepOnWhileMoving(true). The prwep_flashlight player state replicates the setting so other clients reapply the flashlight on the remote ped.'
+        },
+        code:"LocalPlayer.state:set('prwep_flashlight', true, true)"
+      },
+      {
+        id:'flashlight-behavior',
+        title:{pt:'Por que a lanterna não apaga ao andar',en:'Why the flashlight stays on while moving'},
+        text:{
+          pt:'Além do KeepOnWhileMoving, existe um loop que reaplica a lanterna por frame enquanto ela está ligada e o ped continua armado. Se o player deixar de estar armado, o estado é desligado e sincronizado.',
+          en:'In addition to KeepOnWhileMoving, a loop reapplies the flashlight every frame while enabled and the player remains armed. If the player is no longer armed, the state is disabled and replicated.'
+        }
+      },
+      {
+        id:'radio',
+        title:{pt:'Animações de rádio',en:'Radio animations'},
+        text:{
+          pt:'O jogador pode escolher uma animação própria de rádio pelo menu. A escolha é salva por license em positions.json. O config suporta integração por evento de voz ou keybind independente.',
+          en:'Players can select their own radio animation from the menu. The choice is saved per license in positions.json. Configuration supports voice-event integration or an independent keybind.'
+        },
+        code:"ShoulderRadioAnimation\nChestRadioAnimation\nEarpieceRadioAnimation\nDisabledRadioAnimation"
+      },
+      {
+        id:'radio-config',
+        title:{pt:'Configuração do rádio',en:'Radio configuration'},
+        code:"Config.useEvent = false\nConfig.useKeybind = true\nConfig.keybindKey = 'LMENU'\nConfig.controllerKey = nil\n\nConfig.blacklistedClasses = { 8, 13, 15, 16 }"
+      },
+      {
+        id:'sounds',
+        title:{pt:'Sons por classe de arma',en:'Weapon-class sounds'},
+        text:{
+          pt:'Config.Sounds mapeia grupos para arquivos .ogg, distância, volume e duração. O evento weapon:drawSound delega para pr_3dsound:server:play e agenda Stop após a duração configurada.',
+          en:'Config.Sounds maps weapon groups to .ogg files, distance, volume and duration. weapon:drawSound delegates playback to pr_3dsound:server:play and schedules Stop after the configured duration.'
+        },
+        table:{
+          headers:['Grupo','Arquivo padrão','Distância'],
+          rows:[
+            ['Pistol','pistola.ogg','12'],
+            ['SMG','smg.ogg','17'],
+            ['Rifle','rifle.ogg','19'],
+            ['Shotgun','shotgun.ogg','19'],
+            ['Sniper','sniper.ogg','19'],
+            ['Heavy','heavy.ogg','19'],
+            ['MG','mg.ogg','19']
+          ]
+        }
+      },
+      {
+        id:'throwing',
+        title:{pt:'Lançar arma fisicamente',en:'Physically throwing a weapon'},
+        text:{
+          pt:'Com Config.ThrowGun=true, o comando/keybind throwGun toca animação, troca visualmente o ped para unarmed, cria um prop da arma, aplica velocidade na direção da câmera e informa o servidor. O servidor confirma que o jogador possui a arma, preserva os dados/metadata, remove do inventário e registra o objeto no chão.',
+          en:'With Config.ThrowGun=true, throwGun plays an animation, visually switches the ped to unarmed, creates a weapon prop, applies velocity in camera direction and informs the server. The server confirms ownership, preserves data/metadata, removes the inventory weapon and registers the ground object.'
+        },
+        code:"Config.ThrowGun = true\nConfig.ThrowKeybind = 'l'"
+      },
+      {
+        id:'throw-physics',
+        title:{pt:'Física do lançamento',en:'Throw physics'},
+        code:"local power = 25\nlocal dir = GetDirectionFromRotation(GetGameplayCamRot(2))\nSetEntityVelocity(prop, dir.x * power, dir.y * power, power * dir.z)"
+      },
+      {
+        id:'weapon-blacklist',
+        title:{pt:'Blacklist de armas que não podem ser lançadas',en:'Weapon throw blacklist'},
+        text:{
+          pt:'GetWeaponString rejeita hashes presentes em Config.WeaponBlacklist. O padrão inclui UNARMED, STUNGUN, SNOWBALL, BALL, FIREEXTINGUISHER e PETROLCAN.',
+          en:'GetWeaponString rejects hashes listed in Config.WeaponBlacklist. Defaults include UNARMED, STUNGUN, SNOWBALL, BALL, FIREEXTINGUISHER and PETROLCAN.'
+        }
+      },
+      {
+        id:'pickup',
+        title:{pt:'Recuperando a arma do chão',en:'Picking a weapon back up'},
+        text:{
+          pt:'Quando o prop para próximo ao jogador, o client cria uma interação. ox_target usa addSphereZone, qb-target usa AddCircleZone e TextUI usa Config.TakeKeybind. Ao pegar, o servidor apaga a entidade, devolve a arma com os dados preservados e remove o registro global.',
+          en:'When the prop settles near the player, the client creates an interaction. ox_target uses addSphereZone, qb-target uses AddCircleZone and TextUI uses Config.TakeKeybind. Pickup deletes the entity server-side, restores the weapon data and removes the global record.'
+        }
+      },
+      {
+        id:'hit-hand',
+        title:{pt:'Arma pode cair ao acertar a mão',en:'Weapon can drop after a hand hit'},
+        text:{
+          pt:'Com Config.DropWeaponWhenHitHand=true, CEventNetworkEntityDamage consulta GetPedLastDamageBone. Se o hit atingir um dos bones configurados no código para mão/braço e o ped estiver armado, ele entra em ragdoll e chama o fluxo de ThrowCurrentWeapon.',
+          en:'With Config.DropWeaponWhenHitHand=true, CEventNetworkEntityDamage checks GetPedLastDamageBone. If one of the coded hand/arm bones is hit while armed, the ped ragdolls and the system calls ThrowCurrentWeapon.'
+        }
+      },
+      {
+        id:'death-drop',
+        title:{pt:'Drop de arma na morte — comportamento atual',en:'Death weapon drop — current behavior'},
+        text:{
+          pt:'O caminho client ativo chama OnPlayerDeath quando detecta que o ped morreu e transforma somente a arma atualmente equipada em um prop de chão pelo mesmo evento pr-wep:throwWeapon. Existe também pr-wep:onPlayerDeath no servidor para construir CustomDrop do inventário, porém o código client atual não dispara esse evento.',
+          en:'The active client path calls OnPlayerDeath when the ped dies and turns only the currently equipped weapon into a ground prop through pr-wep:throwWeapon. There is also a server-side pr-wep:onPlayerDeath path for building an inventory CustomDrop, but the current client code does not trigger that event.'
+        },
+        note:{
+          pt:'Além disso, Inventory:CustomDrop está implementado somente para ox_inventory nesta versão; qb-inventory e qs-inventory possuem branches ainda sem implementação.',
+          en:'Inventory:CustomDrop is also implemented only for ox_inventory in this version; qb-inventory and qs-inventory branches are still placeholders.'
+        }
+      },
+      {
+        id:'presets',
+        title:{pt:'Presets globais e posições pessoais',en:'Global presets and personal positions'},
+        text:{
+          pt:'json/presets.json contém defaults globais por arma. json/positions.json é separado por license e pode sobrescrever coords, rot, boneId, AimAnim, HolsterAnim, coldre e RadioAnimation. SafeSavePosition faz merge em vez de substituir o arquivo inteiro.',
+          en:'json/presets.json stores global defaults per weapon. json/positions.json is keyed by license and can override coords, rot, boneId, AimAnim, HolsterAnim, holster and RadioAnimation. SafeSavePosition merges changes rather than replacing the whole file.'
+        }
+      },
+      {
+        id:'preset-security',
+        title:{pt:'Importante: preset global e permissão administrativa',en:'Important: global preset and admin permission'},
+        text:{
+          pt:'Config.Admin.Permissions e Utils:hasPermission existem, porém os eventos saveWeaponPosition/saveHolsterPosition/saveWeaponAnimMode não chamam hasPermission antes de aceitar isPreset=true. O menu AdminPreset também é registrado sem canInteract de permissão. Na versão 1.0.0 atual, um client capaz de acionar esses eventos pode alterar presets globais.',
+          en:'Config.Admin.Permissions and Utils:hasPermission exist, but saveWeaponPosition/saveHolsterPosition/saveWeaponAnimMode do not call hasPermission before accepting isPreset=true. AdminPreset is also registered without a permission gate. In current 1.0.0, a client able to invoke those events can modify global presets.'
+        },
+        note:{
+          pt:'Para produção, o recomendado é validar permissão no servidor em todos os branches isPreset=true, não apenas esconder a opção no menu.',
+          en:'For production, validate permissions server-side on every isPreset=true branch rather than only hiding the menu option.'
+        }
+      },
+      {
+        id:'reset',
+        title:{pt:'Reset da configuração pessoal',en:'Resetting personal configuration'},
+        text:{
+          pt:'Reset Current Weapon remove a entrada da arma em positions.json para a license do jogador. O attachment atual é removido e, na próxima reconstrução, o preset global volta a ser usado.',
+          en:'Reset Current Weapon removes the weapon entry from that player license in positions.json. The current visual attachment is deleted and the global preset becomes active on rebuild.'
+        }
+      },
+      {
+        id:'performance',
+        title:{pt:'Loops e comportamento de performance',en:'Loops and performance behavior'},
+        table:{
+          headers:['Sistema','Cadência/comportamento'],
+          rows:[
+            ['Sling render','Loop principal a cada 1 segundo.'],
+            ['Inventory refresh','Callback de armas a cada 15 segundos.'],
+            ['Weight movement','0 ms apenas enquanto penalidade está ativa; senão 500 ms.'],
+            ['Flashlight','0 ms enquanto ligada; 200 ms desligada/ociosa.'],
+            ['Thrown weapons','1 s base; reduz para 0 quando há interação próxima.'],
+            ['Recoil','0 ms enquanto sistema ativo, com sleep maior quando desarmado.']
+          ]
+        }
+      },
+      {
+        id:'troubleshooting',
+        title:{pt:'Diagnóstico e problemas comuns',en:'Troubleshooting'},
+        bullets:{
+          pt:[
+            'Arma não aparece no corpo: confira se ela existe em Config.Weapons e possui preset/posição salva.',
+            'Arma some do corpo ao equipar: comportamento esperado; o objeto visual é removido para não duplicar.',
+            'Attachment não aparece: confira metadata/components e Config.UseWeaponAttachments.',
+            'Modo de tiro não troca: confira shothing e Config.ShotingMode.',
+            'Recoil não aparece: confira realisticrecoil.enable e whitelist.',
+            'Player fica lento demais: reduza WeightPenalty ou weights por grupo.',
+            'Lanterna apaga ao trocar de arma: comportamento esperado; sem arma compatível o state é desligado.',
+            'Arma jogada não pode ser recolhida: confira Target e se o prop já parou no ox_target.',
+            'Som de saque não toca: verifique pr_3dsound e arquivos .ogg.',
+            'Preset global pode ser editado sem autorização: adicione validação server-side conforme a nota de segurança.',
+            'Death custom drop não funciona fora do ox_inventory: CustomDrop não está implementado para todos os providers.'
+          ],
+          en:[
+            'Weapon missing on body: verify Config.Weapons and a saved/preset position.',
+            'Weapon disappears when equipped: expected; visual duplicate is removed.',
+            'Attachment missing: verify metadata/components and Config.UseWeaponAttachments.',
+            'Fire mode will not change: verify shothing and Config.ShotingMode.',
+            'No recoil: verify realisticrecoil.enable and whitelist.',
+            'Player too slow: reduce WeightPenalty or group weights.',
+            'Flashlight turns off after switching away: expected when no compatible weapon remains.',
+            'Thrown weapon cannot be picked up: verify Target and wait for prop to stop with ox_target.',
+            'Draw sound missing: verify pr_3dsound and .ogg files.',
+            'Global preset can be edited without authorization: add server-side validation.',
+            'Death custom drop fails outside ox_inventory: CustomDrop is not implemented for every provider.'
+          ]
+        }
+      },
+      {
+        id:'custom-weapon-checklist',
+        title:{pt:'Checklist para adicionar uma arma customizada',en:'Custom weapon checklist'},
+        steps:{
+          pt:[
+            'Adicione a arma em Config.Weapons com model, name e shothing.',
+            'Garanta que o item exista no inventário com o mesmo nome lógico.',
+            'Defina quais modos de tiro serão permitidos.',
+            'Abra /animweapon ou F9.',
+            'Entre em Loadout e selecione a arma.',
+            'Escolha o bone onde ficará guardada.',
+            'Ajuste posição/rotação no gizmo.',
+            'Salve e, se desejado, configure o coldre.',
+            'Escolha Holster Mode e Aim Mode.',
+            'Teste arma guardada, equipada e novamente guardada.',
+            'Teste attachments visuais.',
+            'Teste limites de sling e peso.',
+            'Teste recoil e todos os fire modes.',
+            'Teste lançar, recolher e blacklist.',
+            'Teste com dois players para lanterna e comportamentos visuais.'
+          ],
+          en:[
+            'Add the weapon to Config.Weapons with model, name and shothing.',
+            'Ensure the inventory item uses the matching logical name.',
+            'Choose allowed fire modes.',
+            'Open /animweapon or F9.',
+            'Enter Loadout and select the weapon.',
+            'Choose the body bone.',
+            'Adjust position/rotation with the gizmo.',
+            'Save and optionally configure a holster.',
+            'Choose Holster Mode and Aim Mode.',
+            'Test stored, equipped and stored-again states.',
+            'Test visual attachments.',
+            'Test sling limits and weight.',
+            'Test recoil and all fire modes.',
+            'Test throw, pickup and blacklist.',
+            'Test with two players for flashlight and replicated visuals.'
+          ]
+        }
+      }
+    ]
+  },
   pr_trailer: {
     name: 'PR Trailer',
     code: 'pr_trailer',
