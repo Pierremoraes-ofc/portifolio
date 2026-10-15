@@ -70,6 +70,14 @@ const HOBBY_PROJECTS = [
     en: 'Elevator system for FiveM with PR ecosystem integration and a decoupled interaction flow.',
   },
   {
+    name: 'PR Trailer',
+    repo: 'https://github.com/Pierremoraes-ofc/pr_trailer',
+    code: 'pr_trailer',
+    tags: ['FiveM', 'Trailers', 'Winch', 'Vehicle Physics'],
+    pt: 'Sistema avançado de trailers e reboque com rampas, guincho físico por rope, cintas por roda, fixação de veículos, flatbed móvel, sincronização por State Bags e física de acidentes.',
+    en: 'Advanced trailer and towing system with ramps, physical rope winch, per-wheel straps, vehicle securing, moving flatbed, State Bag synchronization and crash physics.',
+  },
+  {
     name: 'PR Nitrous',
     repo: 'https://github.com/Pierremoraes-ofc/pr_nitrous',
     code: 'pr_nitrous',
