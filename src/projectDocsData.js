@@ -3891,6 +3891,512 @@ pr_lib.notify(source, {
       }
     ]
   },
+  pr_placeable: {
+    name:'PR Placeable',
+    code:'pr_placeable',
+    repo:'https://github.com/Pierremoraes-ofc/pr_placeable',
+    category:{pt:'Hobby • World Items & Physical Props',en:'Hobby • World Items & Physical Props'},
+    lead:{
+      pt:'Sistema persistente de itens físicos para FiveM que transforma itens de inventário em objetos reais no mundo. Suporta posicionamento livre e preciso, colocação sequencial, lotes/caixas, retirada total ou unitária, transporte nas mãos, reposicionamento, persistência MariaDB, State Bags e carga presa em veículos com offset persistente, recuperação por placa e física de desprendimento por impacto ou inclinação.',
+      en:'Persistent FiveM physical-item system that turns inventory items into real world objects. It supports free and precision placement, sequential placement, batches/boxes, full or single-unit pickup, hand carrying, repositioning, MariaDB persistence, State Bags and vehicle-mounted cargo with persistent offsets, plate-based recovery and impact/tilt detachment physics.'
+    },
+    facts:[
+      ['Version','1.0.1'],
+      ['Configured items','15'],
+      ['Inventories','ox / QB / core_inventory'],
+      ['Targets','ox_target / qb-target'],
+      ['Persistence','MariaDB + State Bags'],
+      ['Vehicle cargo','Plate + local offset'],
+      ['Locales','PT-BR / EN-US / ES']
+    ],
+    sections:[
+      {
+        id:'overview',
+        title:{pt:'Visão geral',en:'Overview'},
+        text:{
+          pt:'O PR Placeable não trata o prop como uma decoração temporária. Ao colocar um item, ele sai do inventário, recebe identidade persistente, é criado como entity networked, armazena quantidade, dono, metadata, posição e estado de carga, e volta ao inventário quando recolhido. O mesmo objeto pode ser colocado no chão, carregado pelo personagem, reposicionado ou preso fisicamente a um veículo.',
+          en:'PR Placeable does not treat props as temporary decoration. When placed, an item leaves inventory, receives persistent identity, becomes a networked entity, stores quantity, owner, metadata, position and cargo state, and returns to inventory when picked up. The same object can be placed on the ground, carried by a character, repositioned or physically attached to a vehicle.'
+        },
+        cards:[
+          ['Item → mundo','O item de inventário vira uma entity persistente.'],
+          ['Mundo → item','Ao recolher, quantidade e metadata retornam ao inventário.'],
+          ['Lotes','Itens stackable podem ser representados individualmente ou como uma caixa.'],
+          ['Carry','Props podem ser carregados com animação onehand/twohand.'],
+          ['Veículos','Carga pode ser fixada ao bodyshell com offset relativo persistente.'],
+          ['Física','Impactos e inclinações podem desprender automaticamente a carga.']
+        ]
+      },
+      {
+        id:'architecture',
+        title:{pt:'Arquitetura',en:'Architecture'},
+        text:{
+          pt:'O resource separa configuração do item, placement client-side, autoridade/persistência server-side e sincronização da entity. O banco mantém o estado durável; State Bags conectam a entity networked à identidade lógica; e o client reconstrói Target, carry e attach conforme o estado recebido.',
+          en:'The resource separates item configuration, client-side placement, server authority/persistence and entity synchronization. The database stores durable state; State Bags connect the networked entity to logical identity; and the client rebuilds Target, carry and vehicle attachment behavior from synchronized state.'
+        },
+        code:"Inventory item\n   ↓ Config.Items[item]\nPlacement preview\n   ↓ confirm\nserver:savePersistentProp\n   ↓\npr_placeable_item (MariaDB)\n   ↓\nNetworked object + State Bags\n   ↓\nTarget / pickup / carry / reposition\n   ↓\nWorld position OR vehicle plate + offset"
+      },
+      {
+        id:'providers',
+        title:{pt:'Providers e dependências',en:'Providers and dependencies'},
+        text:{
+          pt:'A implementação atual usa QB-Core para player/citizenid e locale base, oxmysql para banco e ox_lib carregado no manifest. Inventário, Target, notificações e TextUI possuem providers configuráveis.',
+          en:'The current implementation uses QB-Core for player/citizenid and base locale behavior, oxmysql for persistence and ox_lib loaded through the manifest. Inventory, Target, notifications and TextUI have configurable providers.'
+        },
+        table:{
+          headers:['Camada','Valores atuais suportados'],
+          rows:[
+            ['Inventory','ox_inventory, qb-inventory, core_inventory'],
+            ['Target','ox_target, qb-target'],
+            ['Notify','ox_lib, qb-core'],
+            ['TextUI','ox_lib ou instructional/GTA conforme fluxo do client'],
+            ['Database','oxmysql / MySQL API'],
+            ['Framework base','QB-Core'],
+            ['UI helpers','ox_lib']
+          ]
+        },
+        code:"Config.Inventory = 'ox_inventory'\nConfig.Target    = 'ox_target'\nConfig.Notify    = 'ox_lib'\nConfig.TextUi    = 'ox_lib'\nConfig.AddOutline = true"
+      },
+      {
+        id:'item-definition',
+        title:{pt:'Como cadastrar um item colocável',en:'How to define a placeable item'},
+        text:{
+          pt:'Cada item é declarado em Config.Items. A definição controla o modelo individual, modelo de caixa, capacidade de agrupamento, limites de placement, comportamento Freeze, tratamento como pickup nativo do GTA e animações usadas para carregar com uma ou duas mãos.',
+          en:'Each placeable item is declared in Config.Items. The definition controls individual model, box model, stacking capability, placement limits, Freeze behavior, native GTA pickup handling and one/two-handed carry animations.'
+        },
+        code:"Config.Items['jerry_can'] = {\n    prop      = 'w_am_jerrycan',\n    box       = 'v_serv_abox_02',\n    stackable = false,\n    maxPlace  = 4,\n    maxBox    = 8,\n    Freeze    = false,\n    is_pickup = true,\n\n    twohand = {\n        dict = 'weapons@misc@jerrycan@mp_male',\n        anim = 'idle',\n        bone = 28422,\n        pos  = vector3(0.0, -0.1, -0.1),\n        rot  = vector3(0.0, 0.0, 0.0),\n        flag = 51\n    },\n\n    onehand = {\n        dict = 'weapons@misc@jerrycan@mp_male',\n        anim = 'idle_c',\n        bone = 28422,\n        pos  = vector3(0.0, -0.1, -0.1),\n        rot  = vector3(0.0, 0.0, 0.0),\n        flag = 49\n    }\n}"
+      },
+      {
+        id:'item-fields',
+        title:{pt:'Campos de Config.Items',en:'Config.Items fields'},
+        table:{
+          headers:['Campo','Função'],
+          rows:[
+            ['prop','Modelo GTA usado para uma unidade individual.'],
+            ['box / propbox','Modelo visual usado para representar um lote/caixa.'],
+            ['stackable','Permite escolher múltiplas unidades no placement.'],
+            ['maxPlace','Limite de unidades colocadas individualmente em sequência.'],
+            ['maxBox','Máximo de unidades representadas por uma caixa.'],
+            ['Freeze','Define se o objeto deve ficar congelado quando repousa no mundo.'],
+            ['is_pickup','Ativa tratamento especial para modelos que o GTA reconhece como pickup.'],
+            ['onehand','Animação, bone, posição e rotação ao carregar unidade.'],
+            ['twohand','Animação, bone, posição e rotação ao carregar caixa/lote.']
+          ]
+        }
+      },
+      {
+        id:'catalog',
+        title:{pt:'Catálogo padrão atual',en:'Current default catalog'},
+        text:{
+          pt:'A configuração atual inclui 15 itens de exemplo cobrindo bebidas, comida, utilidades, combustível, cilindros e estruturas. O objetivo é demonstrar diferentes classes físicas e não limitar o resource a esses itens.',
+          en:'The current configuration includes 15 sample items across drinks, food, utilities, fuel, cylinders and structures. They demonstrate different physical classes rather than limiting the resource to these items.'
+        },
+        table:{
+          headers:['Categoria','Itens configurados'],
+          rows:[
+            ['Bebidas','water, sprunk, beer, whiskey, vodka, wine, wine_glass, coffee'],
+            ['Comida','sandwich'],
+            ['Utilidades','jerry_can, diving_fill, nitrous'],
+            ['Estruturas','tendinha, caixa_mad, fogueira']
+          ]
+        }
+      },
+      {
+        id:'placement',
+        title:{pt:'Sistema de posicionamento',en:'Placement system'},
+        text:{
+          pt:'Ao iniciar o placement, o client cria uma prévia do prop em frente ao personagem. O jogador movimenta, gira e ajusta altura enquanto o sistema tenta resolver a superfície abaixo do objeto. O contorno opcional facilita visualizar a peça antes de confirmar.',
+          en:'When placement starts, the client creates a preview in front of the character. The player moves, rotates and adjusts height while the system resolves the surface below the object. Optional outline rendering makes the object easier to position before confirmation.'
+        },
+        cards:[
+          ['Preview real','O próprio modelo é criado localmente durante o ajuste.'],
+          ['Surface detection','A altura pode acompanhar a superfície encontrada.'],
+          ['Heading','Rotação é ajustável antes de persistir.'],
+          ['Manual Z','Permite sair do snap automático e controlar altura.'],
+          ['Outline','Config.AddOutline destaca visualmente o objeto.'],
+          ['Cancelamento','Cancelar remove a prévia sem consumir o item.']
+        ]
+      },
+      {
+        id:'precision',
+        title:{pt:'Modo de precisão',en:'Precision mode'},
+        text:{
+          pt:'O placement possui modo normal e modo de precisão. O mesmo controlador centralizado altera offsets horizontal/vertical e heading, permitindo fazer desde colocação rápida de caixas no chão até alinhamento fino de objetos sobre bancadas, prateleiras ou carrocerias.',
+          en:'Placement supports normal and precision modes. The same centralized controller adjusts horizontal/vertical offsets and heading, enabling both quick floor placement and fine alignment on counters, shelves or vehicle beds.'
+        },
+        note:{
+          pt:'O modo também é reutilizado ao reposicionar um prop que já existe no mundo, evitando destruir e recriar o item.',
+          en:'The same placement mode is reused when repositioning an existing prop, avoiding destroy/recreate cycles.'
+        }
+      },
+      {
+        id:'stacking',
+        title:{pt:'Itens stackable, unidades e caixas',en:'Stackable items, units and boxes'},
+        text:{
+          pt:'Quando um item stackable possui quantidade maior que 1, o export placeItem abre uma seleção de quantidade. O jogador pode colocar várias unidades individualmente, em sequência, ou usar um modelo de caixa para representar um lote inteiro quando box/propbox estiver configurado.',
+          en:'When a stackable item has more than one unit, the placeItem export opens a quantity selector. Players can place several units sequentially or use a box model to represent an entire batch when box/propbox is configured.'
+        },
+        table:{
+          headers:['Modo','Persistência','Comportamento'],
+          rows:[
+            ['Individual','quantity normalmente 1 por prop','Cada unidade vira uma entity própria.'],
+            ['Sequencial','Vários placements consecutivos','O fluxo chama o placement repetidamente até atingir a quantidade.'],
+            ['Caixa/lote','Uma entity com quantity > 1 e is_box=true','Representa várias unidades em um único objeto físico.']
+          ]
+        }
+      },
+      {
+        id:'box-example',
+        title:{pt:'Exemplo: caixa com 12 bebidas',en:'Example: 12-drink box'},
+        steps:{
+          pt:[
+            'O inventário possui 20 unidades do item.',
+            'Config.stackable está ativo e maxBox permite pelo menos 12.',
+            'O jogador aciona placeItem.',
+            'Seleciona quantidade 12 e marca opção de caixa.',
+            'O client usa o modelo box/propbox.',
+            'O servidor salva quantity = 12 e is_box = 1.',
+            'O inventário perde 12 unidades.',
+            'No mundo existe apenas uma entity representando o lote.'
+          ],
+          en:[
+            'Inventory contains 20 units.',
+            'Config.stackable is enabled and maxBox allows at least 12.',
+            'Player invokes placeItem.',
+            'Player selects quantity 12 and box mode.',
+            'Client uses the box/propbox model.',
+            'Server stores quantity = 12 and is_box = 1.',
+            'Inventory removes 12 units.',
+            'Only one world entity represents the batch.'
+          ]
+        }
+      },
+      {
+        id:'pickup',
+        title:{pt:'Retirada total ou unitária',en:'Full or single-unit pickup'},
+        text:{
+          pt:'Targets de um lote oferecem duas operações diferentes. Recolher o lote inteiro apaga a row, remove a entity e devolve quantity itens. Recolher uma unidade decrementa quantity no banco e State Bag sem destruir o prop enquanto ainda restarem unidades.',
+          en:'Batch targets expose two distinct operations. Picking up the whole batch deletes the row, removes the entity and returns quantity items. Picking up one unit decrements quantity in database and synchronized state without destroying the prop while units remain.'
+        },
+        code:"-- lote com quantity = 12\npickup whole -> AddItem(item, 12) + DELETE row\npickup unit  -> quantity = 11 + AddItem(item, 1)\n...\nlast unit    -> DELETE row + DeleteEntity"
+      },
+      {
+        id:'carry',
+        title:{pt:'Carregar props nas mãos',en:'Carry props by hand'},
+        text:{
+          pt:'Além de recolher para o inventário, o jogador pode simplesmente carregar o objeto existente. O prop é attachado ao bone configurado do ped e a animação definida no próprio item permanece ativa enquanto o carry estiver em andamento.',
+          en:'Instead of returning an object to inventory, players can carry the existing world entity. The prop attaches to the configured ped bone and the item-specific animation remains active while carrying.'
+        },
+        table:{
+          headers:['Estado','Animação usada'],
+          rows:[
+            ['Prop individual','Config.Items[item].onehand'],
+            ['Caixa/lote','Config.Items[item].twohand']
+          ]
+        }
+      },
+      {
+        id:'reposition',
+        title:{pt:'Reposicionar sem recriar',en:'Reposition without recreating'},
+        text:{
+          pt:'Durante o carry, o jogador pode entrar novamente no modo de posicionamento. A entity atual é desacoplada do ped, fica semi-transparente/realçada e passa a usar o mesmo controlador de placement. Confirmar atualiza coordenadas no banco ou cria o attach no veículo; cancelar retorna ao carry.',
+          en:'While carrying, the player can re-enter placement mode. The current entity detaches from the ped, becomes a highlighted placement object and reuses the same controller. Confirming updates world coordinates or creates vehicle attachment; cancelling returns to carry.'
+        }
+      },
+      {
+        id:'vehicle-cargo',
+        title:{pt:'Carga física em veículos',en:'Physical vehicle cargo'},
+        text:{
+          pt:'Se a superfície detectada durante a confirmação for um veículo — ou um prop que já esteja preso a um veículo — o PR Placeable calcula coordenadas locais em relação ao veículo e persiste placa + offset. O prop é então attachado ao bone bodyshell, mantendo sua posição relativa durante o movimento.',
+          en:'If the detected placement surface is a vehicle — or another prop already attached to a vehicle — PR Placeable calculates vehicle-local coordinates and persists plate + offset. The prop then attaches to the bodyshell bone, preserving relative position while the vehicle moves.'
+        },
+        code:"offset = {\n    x = localCoords.x,\n    y = localCoords.y,\n    z = localCoords.z,\n    h = propHeading - vehicleHeading\n}\n\nDB:\nin_vehicle = 1\nvehicle_plate = plate\nvehicle_offset_x/y/z/h = offset"
+      },
+      {
+        id:'vehicle-recovery',
+        title:{pt:'Persistência por placa e recuperação',en:'Plate persistence and recovery'},
+        text:{
+          pt:'Uma carga presa continua relacionada ao veículo mesmo quando ele não está presente no streaming local. Ao carregar o prop, o client procura a placa; se o veículo ainda não existir, oculta o prop e o coloca em pendingVehicleProps. Um scanner periódico percorre veículos streamados e faz o attach assim que a placa correspondente reaparece.',
+          en:'Mounted cargo remains associated with a vehicle even while that vehicle is not locally streamed. On prop load, the client searches for its plate; if unavailable, the prop is hidden and queued in pendingVehicleProps. A periodic scanner checks streamed vehicles and reattaches cargo when the matching plate appears.'
+        },
+        table:{
+          headers:['Config','Padrão','Função'],
+          rows:[
+            ['VehicleScanMs','2000 ms','Procura veículos para props pendentes por placa.'],
+            ['CoordsSyncMs','8000 ms','Intervalo configurado para sincronização periódica de coordenadas.'],
+            ['vehicle_plate','Persistido','Identidade usada para reencontrar o veículo.'],
+            ['vehicle_offset_*','Persistido','Reconstrói a posição local da carga.']
+          ]
+        }
+      },
+      {
+        id:'vehicle-physics',
+        title:{pt:'Física de desprendimento da carga',en:'Cargo detachment physics'},
+        text:{
+          pt:'Props presos em veículos têm um monitor de física próprio. Inclinação lateral/frontal acima dos limites ou uma variação brusca de velocidade pode romper o attach. Em vez de simplesmente soltar o prop parado, o sistema calcula impulso com base na velocidade do veículo, direção do impacto e inclinação e aplica força/torque para produzir uma queda coerente.',
+          en:'Vehicle-mounted props have their own physics monitor. Excessive roll/pitch or a sharp velocity delta can break the attachment. Instead of dropping the prop statically, the system derives impulse from vehicle speed, impact direction and tilt and applies force/torque for believable cargo motion.'
+        },
+        table:{
+          headers:['Parâmetro','Padrão','Efeito'],
+          rows:[
+            ['MaxRoll','35°','Desprende por inclinação lateral excessiva.'],
+            ['MaxPitch','35°','Desprende por inclinação frontal excessiva.'],
+            ['ImpactThreshold','8.0 m/s Δv','Desprende após mudança brusca do vetor de velocidade.'],
+            ['PhysicsCheckMs','300 ms','Frequência do monitor de física.'],
+            ['Impulse','~17% da velocidade','Base usada pelo cálculo cinematográfico de lançamento.']
+          ]
+        }
+      },
+      {
+        id:'physics-scenarios',
+        title:{pt:'Cenários físicos simulados',en:'Simulated physics scenarios'},
+        cards:[
+          ['Impacto frontal','Carga tende a continuar na direção anterior do movimento com componente vertical.'],
+          ['Impacto lateral','O cálculo adiciona desvio lateral conforme a direção do delta de velocidade.'],
+          ['Capotamento','Roll/pitch influenciam o vetor de desprendimento.'],
+          ['Torque','Força angular aleatória limitada adiciona rotação visual ao objeto.'],
+          ['Freeze posterior','Itens configurados com Freeze podem ser congelados novamente após estabilização.']
+        ]
+      },
+      {
+        id:'native-pickups',
+        title:{pt:'Tratamento de pickups nativos do GTA',en:'Native GTA pickup handling'},
+        text:{
+          pt:'Alguns modelos, como armas/utilidades reconhecidas pelo jogo como pickup, não funcionam de forma confiável com raycast de addLocalEntity. Para itens marcados is_pickup=true, o resource usa uma sphere zone do ox_target e atualiza sua posição periodicamente.',
+          en:'Some models recognized by GTA as native pickups do not behave reliably with addLocalEntity raycasts. For items marked is_pickup=true, the resource uses an ox_target sphere zone and periodically rebuilds it at the object position.'
+        },
+        code:"if cfg.is_pickup then\n    exports.ox_target:addSphereZone({\n        coords = GetEntityCoords(entity),\n        radius = 1.5,\n        options = options\n    })\nelse\n    exports.ox_target:addLocalEntity(entity, options)\nend"
+      },
+      {
+        id:'targets',
+        title:{pt:'Opções disponíveis no Target',en:'Target actions'},
+        text:{
+          pt:'Cada prop recebe opções de interação conforme quantidade e estado. Para lotes, a interface diferencia recolher tudo de retirar apenas uma unidade; todos podem oferecer carry. O provider pode ser ox_target ou qb-target.',
+          en:'Each prop receives interaction options based on quantity and state. Batches distinguish full pickup from single-unit pickup, while objects can also expose carry. Target provider can be ox_target or qb-target.'
+        },
+        table:{
+          headers:['Ação','Resultado'],
+          rows:[
+            ['Recolher','Remove o prop e devolve toda a quantity.'],
+            ['Pegar 1 unidade','Disponível quando quantity > 1; decrementa o lote.'],
+            ['Carregar','Mantém a entity no mundo e prende ao personagem.'],
+            ['Reposicionar','Acessado a partir do carry para mover o mesmo objeto.']
+          ]
+        }
+      },
+      {
+        id:'statebags',
+        title:{pt:'State Bags e identidade runtime',en:'State Bags and runtime identity'},
+        text:{
+          pt:'A entity networked carrega dados que evitam depender de consultas SQL para cada interação. O client usa esses estados para identificar item, propId, metadata, quantity, is_box, freeze e associação com veículo.',
+          en:'The networked entity carries state that avoids SQL lookups for every interaction. Clients use these values to identify item, propId, metadata, quantity, box state, freeze behavior and vehicle association.'
+        },
+        table:{
+          headers:['State','Uso'],
+          rows:[
+            ['useditem','Item de inventário originário.'],
+            ['propid','ID persistente lógico.'],
+            ['metadata','Metadata devolvida no pickup.'],
+            ['quantity','Quantidade representada pela entity.'],
+            ['is_box','Indica lote/caixa.'],
+            ['freeze','Comportamento de congelamento.'],
+            ['in_vehicle','Indica associação com veículo.'],
+            ['vehicle_plate','Placa persistente do veículo associado.']
+          ]
+        }
+      },
+      {
+        id:'database',
+        title:{pt:'Banco de dados',en:'Database'},
+        text:{
+          pt:'A tabela pr_placeable_item representa cada objeto persistente. A mesma row suporta objeto solto e carga veicular; quando in_vehicle=1, placa e offsets complementam a posição mundial.',
+          en:'The pr_placeable_item table represents each persistent object. The same row supports free-standing objects and vehicle cargo; when in_vehicle=1, plate and local offsets complement world coordinates.'
+        },
+        table:{
+          headers:['Campo','Função'],
+          rows:[
+            ['id','Identificador persistente do prop.'],
+            ['model','Hash/model salvo.'],
+            ['item','Item de inventário de origem.'],
+            ['quantity','Quantidade representada.'],
+            ['is_box','Marca lote/caixa.'],
+            ['freeze','Estado de congelamento usado pelo runtime.'],
+            ['x / y / z / heading','Transform mundial.'],
+            ['citizen','Citizen ID de quem colocou.'],
+            ['metadata','Metadata serializada do item.'],
+            ['in_vehicle','Indica attach persistente.'],
+            ['vehicle_plate','Veículo associado.'],
+            ['vehicle_offset_x/y/z/h','Transform local relativa ao veículo.']
+          ]
+        }
+      },
+      {
+        id:'persistence-flow',
+        title:{pt:'Fluxo de persistência',en:'Persistence flow'},
+        steps:{
+          pt:[
+            'Player escolhe item/quantidade no inventário.',
+            'Client cria a prévia e recebe a posição final.',
+            'Servidor gera um propId.',
+            'Row é inserida em pr_placeable_item.',
+            'Servidor cria a entity networked.',
+            'State Bags recebem identidade e estado operacional.',
+            'Item/quantidade são removidos do inventário.',
+            'Clients registram Target e comportamento local.',
+            'Movimentos posteriores atualizam coords ou attach no banco.',
+            'Pickup devolve o item e remove/decrementa a persistência.'
+          ],
+          en:[
+            'Player chooses an inventory item/quantity.',
+            'Client previews and confirms final placement.',
+            'Server generates a propId.',
+            'A row is inserted into pr_placeable_item.',
+            'Server creates the networked entity.',
+            'State Bags receive logical and operational state.',
+            'Inventory removes the placed amount.',
+            'Clients register target and local behavior.',
+            'Later movement updates coordinates or vehicle attachment.',
+            'Pickup restores inventory and deletes/decrements persistence.'
+          ]
+        }
+      },
+      {
+        id:'export',
+        title:{pt:'Export para integração com inventários',en:'Inventory integration export'},
+        text:{
+          pt:'O principal export client-side é placeItem(slot). Ele resolve o item conforme o provider selecionado, consulta Config.Items, fecha o inventário e decide se abre placement simples, fluxo sequencial ou caixa/lote.',
+          en:'The main client export is placeItem(slot). It resolves the selected inventory slot, reads Config.Items, closes inventory and chooses simple placement, sequential placement or box/batch flow.'
+        },
+        code:"-- exemplo de integração\nexports['pr_placeable']:placeItem(slot)\n\n-- o resource resolve:\n-- item.name\n-- item.count/amount\n-- Config.Items[item.name]\n-- prop / propbox / maxPlace / maxBox"
+      },
+      {
+        id:'examples',
+        title:{pt:'Modelos de uso',en:'Usage models'},
+        table:{
+          headers:['Cenário','Como usar o PR Placeable'],
+          rows:[
+            ['Loja/mercado','Garrafas, latas, comida e caixas físicas com retirada unitária.'],
+            ['Bar/restaurante','Bebidas e copos posicionáveis sobre balcões e mesas.'],
+            ['Acampamento','Tenda, fogueira e caixas persistentes no mundo.'],
+            ['Oficina','Galões, cilindros, nitro e peças físicas no chão ou bancada.'],
+            ['Entrega/logística','Caixas com quantity, carry e carga presa ao veículo.'],
+            ['Pickup/carga','Jerry can e outros modelos especiais usando sphere zone.'],
+            ['Roleplay de mudança','Objetos carregados nas mãos e reposicionados sem ir ao inventário.'],
+            ['Caminhão/pickup','Carga posicionada na carroceria com offset persistente e física de queda.']
+          ]
+        }
+      },
+      {
+        id:'truck-example',
+        title:{pt:'Exemplo: carregar uma caminhonete',en:'Example: loading a pickup truck'},
+        steps:{
+          pt:[
+            'Player coloca uma caixa perto da carroceria.',
+            'Usa Carregar para pegar a entity nas mãos.',
+            'Entra no modo de reposicionamento.',
+            'Move a caixa sobre a carroceria.',
+            'O raycast identifica o veículo como superfície.',
+            'O client converte posição mundial para offset local.',
+            'Servidor persiste plate + offset e in_vehicle=1.',
+            'A caixa acompanha o veículo.',
+            'Se o veículo sair do streaming, a associação continua persistida.',
+            'Quando a mesma placa reaparece, o client reanexa a carga.',
+            'Impacto forte ou inclinação excessiva pode derrubar a caixa.'
+          ],
+          en:[
+            'Player places a box near the truck bed.',
+            'Uses Carry to hold the existing entity.',
+            'Enters reposition mode.',
+            'Moves the box over the truck bed.',
+            'Surface detection identifies the vehicle.',
+            'Client converts world position to local offset.',
+            'Server persists plate + offset and in_vehicle=1.',
+            'The box follows the vehicle.',
+            'If the vehicle leaves streaming, association remains persistent.',
+            'When the same plate reappears, the client reattaches cargo.',
+            'A strong impact or excessive tilt can throw the box off.'
+          ]
+        }
+      },
+      {
+        id:'locales',
+        title:{pt:'Idiomas',en:'Locales'},
+        text:{
+          pt:'O recurso possui arquivos de locale para PT-BR, EN-US e ES. Mensagens de placement, pickup, carry, quantidade, caixa e targets são resolvidas pelo sistema de locale usado no resource.',
+          en:'The resource includes PT-BR, EN-US and ES locale files. Placement, pickup, carry, quantity, box and target strings are resolved through the resource locale system.'
+        }
+      },
+      {
+        id:'performance',
+        title:{pt:'Performance e loops',en:'Performance and loops'},
+        text:{
+          pt:'As rotinas mais frequentes são condicionais ao estado. O monitor de física só existe enquanto um prop está attached; a busca de veículos pendentes roda no intervalo configurado; targets são verificados periodicamente; e o banco recebe atualização de movimento em eventos/sincronizações, não por frame.',
+          en:'Frequent routines are state-dependent. Physics monitoring only runs while a prop is attached; pending vehicle scans use a configurable interval; targets are checked periodically; and database position writes happen through events/synchronization rather than every frame.'
+        },
+        cards:[
+          ['300 ms','Monitor de física de carga attached.'],
+          ['2 s','VehicleScanMs padrão para reencontrar placas.'],
+          ['1.5 s','Monitor client de criação de Targets.'],
+          ['8 s','CoordsSyncMs configurado para sincronização de posição.'],
+          ['State Bags','Dados runtime ficam na entity, reduzindo lookup SQL por interação.']
+        ]
+      },
+      {
+        id:'security-notes',
+        title:{pt:'Autoridade e pontos de atenção',en:'Authority and important considerations'},
+        bullets:{
+          pt:[
+            'O servidor é responsável por persistir, criar a entity e remover/adicionar itens do inventário.',
+            'Cada prop registra o citizenid do personagem que o colocou.',
+            'Pickup só prossegue para entities conhecidas na lista server-side de props persistentes.',
+            'Quantidade de lotes é persistida e sincronizada após retirada unitária.',
+            'Attach/detach atualizam o banco para que o estado sobreviva a streaming/restart.',
+            'Modelos marcados is_pickup precisam do fluxo especial de zone para interação confiável.',
+            'A configuração atual ainda é baseada em QB-Core no servidor; os providers de inventory não significam independência completa de framework.'
+          ],
+          en:[
+            'The server persists state, creates the entity and removes/adds inventory items.',
+            'Each prop stores the citizenid of the character that placed it.',
+            'Pickup only proceeds for entities known by the server-side persistent prop list.',
+            'Batch quantity persists and synchronizes after single-unit pickup.',
+            'Attach/detach update database state so it survives streaming/restarts.',
+            'Models marked is_pickup require the special zone flow for reliable interaction.',
+            'The current server implementation still depends on QB-Core; inventory provider support does not imply complete framework independence.'
+          ]
+        }
+      },
+      {
+        id:'production-patterns',
+        title:{pt:'Boas práticas de configuração',en:'Recommended production patterns'},
+        bullets:{
+          pt:[
+            'Use stackable somente quando fizer sentido representar várias unidades do mesmo item.',
+            'Defina maxPlace para evitar que grandes stacks gerem dezenas de entities em uma única ação.',
+            'Use box/propbox para mercadorias, entregas e armazenamento físico de grandes quantidades.',
+            'Marque is_pickup=true para modelos problemáticos com raycast de entity.',
+            'Configure Freeze=true para estruturas que não devem reagir à física após placement.',
+            'Ajuste onehand/twohand por modelo para evitar clipping durante o carry.',
+            'Para cargas em veículos, teste offsets em diferentes classes e tamanhos de carroceria.',
+            'Não reduza demais PhysicsCheckMs em servidores com grande volume de carga attached.',
+            'Ajuste ImpactThreshold conforme o nível de realismo desejado; valores menores derrubam carga com impactos leves.',
+            'Mantenha MaxRoll/MaxPitch coerentes com o comportamento esperado de pickups, caminhões e veículos off-road.'
+          ],
+          en:[
+            'Use stackable only when multiple units should logically share the same placement flow.',
+            'Set maxPlace to prevent large stacks from generating dozens of entities in one action.',
+            'Use box/propbox for merchandise, deliveries and physical bulk storage.',
+            'Mark problematic native pickup models with is_pickup=true.',
+            'Use Freeze=true for structures that should stop reacting to physics after placement.',
+            'Tune onehand/twohand animations per model to reduce carry clipping.',
+            'Test vehicle cargo offsets across different bed/body dimensions.',
+            'Do not over-aggressively lower PhysicsCheckMs on servers with many attached cargo props.',
+            'Tune ImpactThreshold to desired realism; lower values detach cargo on lighter impacts.',
+            'Keep MaxRoll/MaxPitch appropriate for pickups, trucks and off-road gameplay.'
+          ]
+        }
+      }
+    ]
+  },
+
   pr_elevator: {
     name:'PR Elevator',
     code:'pr_elevator',
