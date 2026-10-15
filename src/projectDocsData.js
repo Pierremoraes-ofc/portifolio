@@ -4211,19 +4211,127 @@ pr_lib.notify(source, {
       },
       {
         id:'purge',
-        title:{pt:'Sistema de purge',en:'Purge system'},
+        title:{pt:'Sistema de purge — não é apenas estético',en:'Purge system — not just cosmetic'},
         text:{
-          pt:'O purge é instalado por unidade através de kitpurge e pode ter vários bicos no mesmo veículo. Cada bico possui posicionamento persistente. A configuração padrão permite até 8. O purge também tem nível próprio de necessidade/carga, drenagem por segundo e bônus de potência após a purga.',
-          en:'Purge nozzles are installed individually with kitpurge and multiple nozzles can be attached to a vehicle. Each nozzle has persistent placement. Default maximum is 8. Purge also tracks its own level, drain rate and post-purge power bonus.'
+          pt:'No PR Nitrous o purge faz parte da mecânica de desempenho. Ao segurar a tecla de purge com o motor ligado e sem estar usando boost, o sistema realmente consome nitro do cilindro ativo e converte essa quantidade em uma carga temporária de purge. Essa carga é armazenada por veículo e depois é consumida quando o jogador usa o nitro, aumentando temporariamente a potência e também intensificando chama, trail e câmera. Portanto, purgar antes de uma puxada tem efeito real no comportamento do veículo.',
+          en:'In PR Nitrous, purge is part of the performance mechanic. Holding the purge key with the engine running and while boost is not active actually consumes nitrous from the active bottle and converts that amount into a temporary purge charge. That charge is stored per vehicle and later consumed while boosting, temporarily increasing power while also intensifying flame, trail and camera effects. Purging before a run therefore has a real gameplay effect.'
         },
-        code:"PR.purgeSettings = {\n    size = 1.0,\n    drainAmount = 10.0,\n    increaseAmount = 10.0,\n    nitroPowerBonus = 10.0\n}"
+        code:"PR.purgeSettings = {\n    size = 1.0,\n    drainAmount = 10.0,\n    increaseAmount = 10.0,\n    nitroPowerBonus = 10.0\n}\n\nPR.nitroFx.purgeChargeForMaxScale = 1.80"
       },
       {
-        id:'purge-meaning',
-        title:{pt:'Lógica de carga/purga',en:'Purge charge logic'},
+        id:'purge-runtime-flow',
+        title:{pt:'Fluxo real do purge no código',en:'Actual purge runtime flow'},
+        steps:{
+          pt:[
+            'O jogador segura Left Ctrl (ou a tecla remapeada de purge).',
+            'O motor precisa estar ligado.',
+            'O purge só entra quando o boost não está ativo; se o jogador estiver acelerando e segurando a tecla de nitro, o boost tem prioridade.',
+            'O sistema calcula o consumo do cilindro usando bottle.usage.',
+            'Durante purge, esse consumo é multiplicado por drainAmount / 10.',
+            'A quantidade realmente consumida é adicionada em purgeFlameCharge[plate].',
+            'O HUD converte essa carga em purgeLevel de 0 a 100.',
+            'Quando o jogador passa a usar o nitro, getPurgeNitroPower soma um bônus proporcional ao nível de carga.',
+            'Enquanto o boost continua, a carga de purge é consumida gradualmente junto com o nitro.',
+            'Quando a carga chega a zero, o bônus desaparece e a potência volta para bottlePower.'
+          ],
+          en:[
+            'Player holds Left Ctrl (or the remapped purge key).',
+            'Engine must be running.',
+            'Purge only runs while boost is inactive; boost takes priority when nitrous is requested under throttle.',
+            'Bottle consumption is based on bottle.usage.',
+            'While purging, consumption is multiplied by drainAmount / 10.',
+            'The amount actually consumed is added to purgeFlameCharge[plate].',
+            'HUD converts that charge into a 0–100 purgeLevel.',
+            'When boost starts, getPurgeNitroPower adds a bonus proportional to stored purge charge.',
+            'While boosting, purge charge is gradually consumed alongside nitrous.',
+            'At zero charge, the bonus ends and power returns to bottlePower.'
+          ]
+        }
+      },
+      {
+        id:'purge-code-logic',
+        title:{pt:'Fórmulas usadas pelo sistema',en:'Formulas used by the system'},
+        code:"-- Consumo normal do cilindro\nlocal drain = bottle.usage\n\n-- Durante purge\ndrain = drain * (PR.purgeSettings.drainAmount / 10.0)\n\n-- O que foi gasto purgando vira carga temporária\naddPurgeFlameCharge(plate, consumed)\n\n-- Potência ao usar nitro depois da purga\nlocal power = bottle.bottlePower\n    + (PR.purgeSettings.nitroPowerBonus * purgeRatio)\n\n-- Enquanto usa boost, a carga acumulada é gasta\nconsumePurgeFlameCharge(plate, consumed)"
+      },
+      {
+        id:'purge-power-example',
+        title:{pt:'Exemplo: purge aumentando a potência',en:'Example: purge increasing power'},
         text:{
-          pt:'O nível de purge opera em escala de 0 a 100. A configuração comenta que entre 50 e 100 o indicador do cilindro começa a alertar o motorista. Durante a utilização, o purge pode drenar nitro e influenciar bônus/escala dos efeitos conforme a configuração.',
-          en:'Purge level operates on a 0–100 scale. Configuration notes that from 50 to 100 the bottle indicator begins warning the driver. Purging drains nitrous and can influence boost bonus and effect scale according to configuration.'
+          pt:'Considere um nitro2 com bottlePower=40 e o padrão nitroPowerBonus=10. Sem carga de purge, o boost usa aproximadamente 40 de potência base. Se a carga de purge estiver em 50%, o cálculo acrescenta 5 e o boost trabalha em aproximadamente 45. Com a carga em 100%, o bônus completo é aplicado e a potência chega a aproximadamente 50. Conforme o jogador continua usando nitro, purgeRatio cai e o bônus volta gradualmente para zero.',
+          en:'Consider nitro2 with bottlePower=40 and the default nitroPowerBonus=10. With no purge charge, boost uses roughly 40 base power. At 50% purge charge the calculation adds 5 for roughly 45. At 100% charge the full bonus is applied for roughly 50. As boost continues, purgeRatio falls and the bonus gradually returns to zero.'
+        },
+        table:{
+          headers:['Purge charge','Base power','Bonus','Power used'],
+          rows:[
+            ['0%','40','+0','40'],
+            ['25%','40','+2.5','42.5'],
+            ['50%','40','+5','45'],
+            ['75%','40','+7.5','47.5'],
+            ['100%','40','+10','50']
+          ]
+        }
+      },
+      {
+        id:'purge-race-example',
+        title:{pt:'Exemplo prático: preparar o carro antes da largada',en:'Practical example: preparing before a launch'},
+        steps:{
+          pt:[
+            'O carro está parado com o motor ligado e possui nitro disponível.',
+            'O motorista segura o purge por alguns instantes.',
+            'O cilindro perde uma pequena quantidade real de shot; não é apenas uma partícula visual.',
+            'Essa quantidade vira purgeFlameCharge do veículo.',
+            'O HUD sobe o indicador de purge.',
+            'O motorista solta o purge e acelera.',
+            'Ao pressionar o nitro, o primeiro momento do boost recebe potência extra proporcional à carga acumulada.',
+            'Chamas, trail e shake também usam o purgeRatio para aumentar a intensidade.',
+            'À medida que o boost consome a carga, o bônus diminui até voltar ao valor base.'
+          ],
+          en:[
+            'Vehicle is stationary with engine running and available nitrous.',
+            'Driver holds purge for a short period.',
+            'Bottle loses real shot; this is not only a visual particle.',
+            'That amount becomes the vehicle purgeFlameCharge.',
+            'HUD purge indicator rises.',
+            'Driver releases purge and accelerates.',
+            'When nitrous is activated, the initial boost receives extra power based on stored charge.',
+            'Flames, trail and shake also use purgeRatio to increase intensity.',
+            'As boost consumes the stored charge, the bonus falls back toward base power.'
+          ]
+        }
+      },
+      {
+        id:'purge-cost-example',
+        title:{pt:'Exemplo de custo do purge',en:'Purge cost example'},
+        text:{
+          pt:'Com um cilindro usage=2.0 e drainAmount=10, o multiplicador do purge é 10/10=1, portanto o purge consome na mesma taxa-base daquele cilindro durante o tempo pressionado. Se você alterar drainAmount para 20, o multiplicador passa a 2 e a purga consome o dobro da taxa-base. Isso permite balancear o trade-off entre gastar nitro antecipadamente e receber um boost inicial mais forte depois.',
+          en:'With a bottle using usage=2.0 and drainAmount=10, the purge multiplier is 10/10=1, so purge consumes at that bottle\'s base rate while held. Setting drainAmount to 20 changes the multiplier to 2, making purge consume twice the base rate. This lets servers balance the trade-off between spending nitrous in advance and receiving a stronger initial boost later.'
+        },
+        code:"-- usage = 2.0\n-- drainAmount = 10\n2.0 * (10 / 10) = 2.0\n\n-- drainAmount = 20\n2.0 * (20 / 10) = 4.0"
+      },
+      {
+        id:'purge-scale',
+        title:{pt:'Carga de purge, chama e trail',en:'Purge charge, flame and trail'},
+        text:{
+          pt:'A mesma carga funcional também controla a intensidade visual. getPurgeChargeRatio alimenta getPurgeFlameScale e getPurgeTrailScale. PR.nitroFx.purgeChargeForMaxScale define quanta carga é necessária para alcançar a escala máxima configurada. Assim o visual serve como feedback do estado mecânico: mais carga disponível significa efeito mais agressivo e também maior bônus de potência.',
+          en:'The same functional charge also controls visual intensity. getPurgeChargeRatio feeds getPurgeFlameScale and getPurgeTrailScale. PR.nitroFx.purgeChargeForMaxScale defines how much charge is needed to reach maximum configured scale. Visual intensity therefore acts as feedback for the mechanical state: more stored charge means stronger visuals and a larger power bonus.'
+        },
+        code:"local ratio = getPurgeChargeRatio(plate)\n\nflameScale = minScale + ((maxScale - minScale) * ratio)\ntrailScale = trailMinScale + ((trailMaxScale - trailMinScale) * ratio)\npower = bottlePower + (nitroPowerBonus * ratio)"
+      },
+      {
+        id:'purge-hud',
+        title:{pt:'Indicador de purge na HUD',en:'Purge HUD indicator'},
+        text:{
+          pt:'purgeLevel não é um número decorativo separado da mecânica. Ele é calculado diretamente de getPurgeChargeRatio(plate) * 100 e enviado para a NUI. Portanto 0%, 50% e 100% na HUD representam a mesma proporção usada no cálculo do bônus de potência e na escala dos efeitos.',
+          en:'purgeLevel is not a cosmetic number detached from gameplay. It is calculated directly from getPurgeChargeRatio(plate) * 100 and sent to the NUI. Therefore 0%, 50% and 100% on the HUD represent the same ratio used for power bonus and effect scaling.'
+        },
+        code:"local purgeLevel = math.floor(getPurgeChargeRatio(plate) * 100.0)"
+      },
+      {
+        id:'purge-important-config-note',
+        title:{pt:'Nota sobre increaseAmount',en:'Note about increaseAmount'},
+        text:{
+          pt:'O config atual ainda declara PR.purgeSettings.increaseAmount, porém na versão 1.1.0 inspecionada esse campo não é lido pela lógica runtime do client. A carga é aumentada pela quantidade real de nitro consumida durante o purge através de addPurgeFlameCharge(plate, consumed). Por isso, para balancear o comportamento funcional atual, use principalmente drainAmount, nitroPowerBonus e PR.nitroFx.purgeChargeForMaxScale.',
+          en:'The current config still declares PR.purgeSettings.increaseAmount, but in the inspected 1.1.0 runtime this field is not read by client logic. Charge increases from the actual amount of nitrous consumed during purge through addPurgeFlameCharge(plate, consumed). For current balancing, use drainAmount, nitroPowerBonus and PR.nitroFx.purgeChargeForMaxScale.'
         }
       },
       {
