@@ -70,6 +70,14 @@ const HOBBY_PROJECTS = [
     en: 'Elevator system for FiveM with PR ecosystem integration and a decoupled interaction flow.',
   },
   {
+    name: 'PR Nitrous',
+    repo: 'https://github.com/Pierremoraes-ofc/pr_nitrous',
+    code: 'pr_nitrous',
+    tags: ['FiveM', 'Vehicle Systems', 'Nitrous', 'Persistence'],
+    pt: 'Sistema avançado de nitro veicular com cilindros físicos persistentes, consumo individual por garrafa, reaproveitamento de carga restante, purge configurável, HUD, efeitos sincronizados e instalação visual.',
+    en: 'Advanced vehicle nitrous system with persistent physical bottles, per-bottle consumption, reusable remaining charge, configurable purge, HUD, synchronized effects and visual installation.',
+  },
+  {
     name: 'PR Placeable',
     repo: 'https://github.com/Pierremoraes-ofc/pr_placeable',
     code: 'pr_placeable',
