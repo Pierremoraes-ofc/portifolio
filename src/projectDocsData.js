@@ -3891,6 +3891,608 @@ pr_lib.notify(source, {
       }
     ]
   },
+  pr_nitrous: {
+    name: 'PR Nitrous',
+    code: 'pr_nitrous',
+    repo: 'https://github.com/Pierremoraes-ofc/pr_nitrous',
+    category: { pt: 'Hobby • FiveM / Sistema veicular', en: 'Hobby • FiveM / Vehicle system' },
+    lead: {
+      pt: 'Sistema completo de nitro veicular com instalação física do kit, cilindros e bicos de purge, persistência por placa, consumo individual por cilindro e reaproveitamento real da carga restante. Um cilindro parcialmente utilizado pode ser removido de um veículo, voltar ao inventário com seu nível exato de nitro em metadata e depois ser instalado em outro veículo sem perder o progresso de consumo.',
+      en: 'Complete vehicle nitrous system with physical kit, bottle and purge-nozzle installation, plate-based persistence, per-bottle consumption and true remaining-charge reuse. A partially used bottle can be removed from one vehicle, returned to inventory with its exact nitrous level in metadata, and installed into another vehicle without losing consumption progress.'
+    },
+    facts: [
+      ['Version', '1.1.0'],
+      ['Core', 'Lua 5.4 + ox_lib'],
+      ['Database', 'oxmysql / ghmattimysql / mysql-async'],
+      ['Frameworks', 'QBCore / QBX / ESX / ox_core / ND_Core'],
+      ['Inventories', 'ox_inventory / qb-inventory'],
+      ['Targets', 'ox_target / qb-target'],
+      ['Audio', 'pr_3dsound + GTA sound'],
+      ['Persistence', 'SQL + State Bags'],
+      ['Default max bottles', '5'],
+      ['Default max purge nozzles', '8']
+    ],
+    sections: [
+      {
+        id:'overview',
+        title:{pt:'Visão geral',en:'Overview'},
+        text:{
+          pt:'O PR Nitrous trata o nitro como um sistema físico e persistente do veículo, não apenas como um boost temporário. O fluxo completo envolve instalar o kit principal, instalar um ou mais cilindros físicos, posicioná-los com gizmo, opcionalmente instalar bicos de purge, consumir o conteúdo de cada cilindro e manter tudo sincronizado entre banco de dados, State Bags, inventário e efeitos visuais.',
+          en:'PR Nitrous models nitrous as a physical, persistent vehicle system rather than a temporary boost. The full flow includes installing the main kit, installing one or more physical bottles, positioning them with a gizmo, optionally adding purge nozzles, consuming each bottle individually, and synchronizing database, State Bags, inventory and visual effects.'
+        },
+        bullets:{
+          pt:[
+            'Kit principal instalado por veículo e persistido pela placa.',
+            'Até PR.maxCylinds cilindros instalados fisicamente no veículo.',
+            'Cada cilindro mantém sua própria quantidade restante em metadata.',
+            'Cilindro parcialmente usado pode ser removido e reutilizado em outro veículo.',
+            'Cilindros vazios tornam-se inutilizáveis até serem substituídos/removidos.',
+            'Purge com múltiplos bicos posicionáveis e limite configurável.',
+            'Chamas de escape, trail lights, câmera, HUD e efeitos sincronizados.',
+            'Configuração de cilindros totalmente extensível em PR.nitroBottles.'
+          ],
+          en:[
+            'Main kit persisted per vehicle plate.',
+            'Up to PR.maxCylinds physical bottles per vehicle.',
+            'Each bottle keeps its own remaining amount in metadata.',
+            'Partially used bottles can be removed and reused in another vehicle.',
+            'Empty bottles become unusable until replaced/removed.',
+            'Multiple configurable purge nozzles.',
+            'Synchronized exhaust flames, trail lights, camera effects and HUD.',
+            'Fully extensible bottle catalog through PR.nitroBottles.'
+          ]
+        }
+      },
+      {
+        id:'architecture',
+        title:{pt:'Arquitetura do resource',en:'Resource architecture'},
+        table:{
+          headers:['Camada','Responsabilidade'],
+          rows:[
+            ['shared/config.lua','Framework, inventário, SQL, limites, controles, itens, cilindros e partículas.'],
+            ['shared/main.lua','Detecção de framework/inventário/SQL e utilitários compartilhados.'],
+            ['shared/bridge.lua','Compatibilidade de framework, inventário, notify, target e operações comuns.'],
+            ['server/main.lua','Autoridade de instalação, consumo, metadata, banco, inventário e State Bags.'],
+            ['client/install.lua','Fluxos de instalação, target, menus, gizmo, troca e remoção.'],
+            ['client/client.lua','Boost, purge, efeitos, HUD, consumo e controles.'],
+            ['client/placement.lua + gizmo.lua','Posicionamento físico de cilindros e bicos.'],
+            ['client/state.lua','Reconstrução e sincronização visual pelo State Bag.'],
+            ['web/build','HUD de nitro e editor de posição.'],
+            ['install/install.lua','Definições de itens para ox_inventory e qb-inventory.']
+          ]
+        }
+      },
+      {
+        id:'dependencies',
+        title:{pt:'Dependências e providers',en:'Dependencies and providers'},
+        text:{
+          pt:'O fxmanifest exige ox_lib, oxmysql e pr_3dsound. O código também possui wrappers para ghmattimysql/mysql-async e auto-detecção de vários frameworks. O target é detectado em runtime entre ox_target e qb-target.',
+          en:'The fxmanifest requires ox_lib, oxmysql and pr_3dsound. The code also wraps ghmattimysql/mysql-async and auto-detects multiple frameworks. Target integration is detected at runtime between ox_target and qb-target.'
+        },
+        code:"dependencies {\n  'oxmysql',\n  'pr_3dsound',\n  'ox_lib'\n}\n\nPR.Framework = 'auto'\nPR.Inventory = 'auto'\nPR.SQL = 'auto'"
+      },
+      {
+        id:'frameworks',
+        title:{pt:'Frameworks, inventários e SQL',en:'Frameworks, inventories and SQL'},
+        table:{
+          headers:['Tipo','Valores suportados pelo config'],
+          rows:[
+            ['Framework',"auto, qb-core, qbx-core/qbx_core, es_extended, ox_core, ND_Core"],
+            ['Inventory',"auto, ox_inventory, qb-inventory"],
+            ['SQL',"auto, oxmysql, ghmattimysql, mysql-async"]
+          ]
+        },
+        note:{
+          pt:'Em auto, a prioridade de framework é QBX → ND_Core → ox_core → ESX → QBCore. Para inventário, ox_inventory é preferido quando iniciado; caso contrário o fallback é qb-inventory.',
+          en:'In auto mode the framework priority is QBX → ND_Core → ox_core → ESX → QBCore. For inventory, ox_inventory is preferred when running; otherwise qb-inventory is used as fallback.'
+        }
+      },
+      {
+        id:'basic-config',
+        title:{pt:'Configuração principal',en:'Main configuration'},
+        code:"PR.Lang = 'ptBr'\nPR.Debug = false\nPR.autoDb = true\nPR.SQL = 'auto'\nPR.Framework = 'auto'\nPR.Inventory = 'auto'\n\nPR.maxCylinds = 5\nPR.maxPurge = 8\n\nPR.useNitro = 'LShift'\nPR.usePurge = 'LCONTROL'\n\nPR.Command = 'nitroushud'"
+      },
+      {
+        id:'items',
+        title:{pt:'Itens do sistema',en:'System items'},
+        table:{
+          headers:['Config','Padrão','Uso'],
+          rows:[
+            ['PR.items.kitnitro','kitnitro','Instala o kit principal no veículo.'],
+            ['PR.items.kitpurge','kitpurge','Instala um bico de purge por unidade.'],
+            ['PR.items.propCylind','garrafanitro','Prop físico usado para os cilindros.'],
+            ['PR.items.propPurge','springle_prop','Prop físico usado no purge.']
+          ]
+        }
+      },
+      {
+        id:'bottle-schema',
+        title:{pt:'Como criar um cilindro de nitro',en:'How to create a nitrous bottle'},
+        text:{
+          pt:'Cada cilindro é uma entrada em PR.nitroBottles. A chave da tabela é também o nome do item de inventário. O sistema usa essa configuração para definir capacidade, potência, taxa de consumo e aparência dos efeitos.',
+          en:'Each bottle is an entry in PR.nitroBottles. The table key is also the inventory item name. The system uses this configuration for capacity, power, consumption rate and effect appearance.'
+        },
+        table:{
+          headers:['Campo','Função'],
+          rows:[
+            ['labelId','Chave de idioma/label do cilindro.'],
+            ['bottleSize','Capacidade máxima do cilindro; também vira maxShot.'],
+            ['bottlePower','Potência base aplicada pelo cilindro.'],
+            ['usage','Quantidade consumida por taxa/ciclo de consumo.'],
+            ['flameColor','HEX, RGB ou false conforme efeito desejado.'],
+            ['flameSize','Escala base das chamas.'],
+            ['trailLights','Ativa/desativa trail lights.'],
+            ['trailSize','Escala dos trails.']
+          ]
+        }
+      },
+      {
+        id:'bottle-example',
+        title:{pt:'Exemplo: criando um cilindro personalizado',en:'Example: custom bottle'},
+        code:"PR.nitroBottles['nitro_pro_150'] = {\n    labelId = 'CilindroNitroPro150',\n\n    bottleSize = 150,\n    bottlePower = 55.0,\n    usage = 1.5,\n\n    flameColor = '#00BFFF',\n    flameSize = 0.85,\n\n    trailLights = true,\n    trailSize = 1.25\n}",
+        note:{
+          pt:'Depois de criar a entrada no config, crie também o item nitro_pro_150 no inventário. Como os cilindros guardam metadata individual, use stack=false no ox_inventory ou unique=true no qb-inventory.',
+          en:'After adding the config entry, also create nitro_pro_150 in the inventory. Because bottles store individual metadata, use stack=false in ox_inventory or unique=true in qb-inventory.'
+        }
+      },
+      {
+        id:'inventory-custom-bottle',
+        title:{pt:'Exemplo de item do cilindro no inventário',en:'Bottle inventory item example'},
+        code:"-- ox_inventory/data/items.lua\n['nitro_pro_150'] = {\n    label = 'Cilindro Nitro Pro 150',\n    weight = 4200,\n    stack = false,\n    close = true,\n    description = 'Cilindro de alto desempenho com 150 unidades de carga.'\n}\n\n-- qb-core/shared/items.lua\n['nitro_pro_150'] = {\n    name = 'nitro_pro_150',\n    label = 'Cilindro Nitro Pro 150',\n    weight = 4200,\n    type = 'item',\n    image = 'nitro_pro_150.png',\n    unique = true,\n    useable = true,\n    shouldClose = true,\n    description = 'Cilindro de alto desempenho com 150 unidades de carga.'\n}"
+      },
+      {
+        id:'metadata',
+        title:{pt:'Metadata individual do cilindro',en:'Per-bottle metadata'},
+        text:{
+          pt:'O ponto central do sistema de reaproveitamento é que cada cilindro não é apenas um nome de item. Ele carrega metadata própria com capacidade, potência, carga restante e estado. Ao criar um item no ox_inventory, um createItem hook normaliza essa metadata automaticamente para todos os itens presentes em PR.nitroBottles.',
+          en:'Bottle reuse is possible because each bottle is more than an item name. It carries its own metadata with capacity, power, remaining charge and status. With ox_inventory, a createItem hook automatically normalizes this metadata for every item present in PR.nitroBottles.'
+        },
+        code:"{\n    item = 'nitro2',\n    flameColor = '#6600cc',\n    bottleSize = 100,\n    bottlePower = 40.0,\n    shot = 73,\n    maxShot = 100,\n    empty = false,\n    unusable = false,\n    percent = 73,\n    description = '...'\n}"
+      },
+      {
+        id:'reuse-core',
+        title:{pt:'Lógica de reaproveitamento do cilindro',en:'Bottle reuse logic'},
+        text:{
+          pt:'Quando um cilindro é instalado, o servidor lê a metadata do item e copia seu shot atual para metadata.bottles do veículo. O consumo reduz esse shot dentro do cilindro instalado. Ao desinstalar, o servidor calcula exatamente quanto ainda existe, recria a metadata do item com esse valor e devolve o cilindro ao inventário. Se esse mesmo item for instalado em outro veículo, o novo veículo recebe exatamente a carga restante, não uma garrafa cheia.',
+          en:'When a bottle is installed, the server reads the item metadata and copies its current shot into vehicle metadata.bottles. Consumption reduces that installed bottle shot. On removal, the server calculates the exact remainder, rebuilds the item metadata with that value and returns the bottle to inventory. Installing that same item in another vehicle transfers the exact remaining charge instead of resetting it to full.'
+        },
+        steps:{
+          pt:[
+            'Cilindro novo nitro2 nasce com shot=100 e maxShot=100.',
+            'Ele é instalado no veículo A; o item sai do inventário e shot=100 passa para metadata.bottles do veículo.',
+            'O jogador consome 27 unidades; o cilindro passa a shot=73.',
+            'O cilindro é desinstalado; o servidor cria novamente o item nitro2 com shot=73.',
+            'O item volta ao inventário mostrando aproximadamente 73%.',
+            'O mesmo cilindro é instalado no veículo B.',
+            'O veículo B recebe shot=73; o sistema não restaura 100.',
+            'Após novo consumo de 20, restam 53.',
+            'Ele pode ser removido novamente e continuar circulando entre veículos até chegar a zero.'
+          ],
+          en:[
+            'A new nitro2 bottle starts at shot=100/maxShot=100.',
+            'It is installed in vehicle A and shot=100 moves into vehicle metadata.',
+            '27 units are consumed, leaving shot=73.',
+            'The bottle is removed and returned as nitro2 with shot=73 metadata.',
+            'Inventory now represents roughly 73% remaining.',
+            'The same bottle is installed in vehicle B.',
+            'Vehicle B receives shot=73 rather than a full 100.',
+            'After another 20 units, 53 remain.',
+            'It can continue moving between vehicles until empty.'
+          ]
+        }
+      },
+      {
+        id:'reuse-example',
+        title:{pt:'Exemplo numérico completo de reuso',en:'Complete numeric reuse example'},
+        table:{
+          headers:['Etapa','Veículo','shot do cilindro','Resultado'],
+          rows:[
+            ['Compra/criação','Inventário','100 / 100','100% cheio'],
+            ['Instalação','Veículo A','100 / 100','Item removido do inventário'],
+            ['Uso','Veículo A','62 / 100','38 unidades consumidas'],
+            ['Desinstalação','Inventário','62 / 100','Retorna como o mesmo tipo com 62%'],
+            ['Reinstalação','Veículo B','62 / 100','Mantém carga restante'],
+            ['Uso','Veículo B','17 / 100','Mais 45 consumidas'],
+            ['Desinstalação','Inventário','17 / 100','Ainda reutilizável'],
+            ['Consumo final','Veículo C','0 / 100','Marcado vazio/inutilizável']
+          ]
+        }
+      },
+      {
+        id:'empty-bottle',
+        title:{pt:'O que acontece quando o cilindro zera',en:'What happens when a bottle reaches zero'},
+        text:{
+          pt:'Ao chegar a zero, setBottleUnusable marca shot=0, empty=true, unusable=true e status=inutilizavel. O servidor não considera esse item uma opção válida para novas instalações. O jogador recebe aviso de cilindro vazio e pode removê-lo pelo sistema de gerenciamento.',
+          en:'At zero, setBottleUnusable stores shot=0, empty=true, unusable=true and status=unusable. The server no longer considers that inventory item valid for installation. The player is notified that the bottle is empty and can remove it through the management flow.'
+        },
+        code:"metadata.shot = 0\nmetadata.empty = true\nmetadata.unusable = true\nmetadata.status = 'inutilizavel'"
+      },
+      {
+        id:'multi-bottle-consumption',
+        title:{pt:'Consumo com vários cilindros',en:'Multiple-bottle consumption'},
+        text:{
+          pt:'O consumo é drenado sequencialmente da lista metadata.bottles. consumeBottleAmount percorre os cilindros, retira o máximo possível do primeiro e continua para o próximo apenas quando necessário. Isso permite representar corretamente um rack com vários cilindros, inclusive quando alguns já estão parcialmente vazios.',
+          en:'Consumption drains sequentially through metadata.bottles. consumeBottleAmount removes as much as possible from the first bottle and proceeds to the next only when needed. This correctly models multi-bottle racks even when individual bottles have different remaining levels.'
+        },
+        code:"-- Exemplo conceitual\nBottle #1: 10/100\nBottle #2: 80/100\nBottle #3: 100/100\n\nConsumo solicitado: 25\n\nResultado:\nBottle #1: 0/100\nBottle #2: 65/100\nBottle #3: 100/100"
+      },
+      {
+        id:'same-type-rule',
+        title:{pt:'Regra de tipo dos cilindros no mesmo veículo',en:'Same bottle type rule'},
+        text:{
+          pt:'Depois que o primeiro cilindro é instalado, o veículo passa a exigir o mesmo bottletype para os demais cilindros. O servidor valida tanto row.bottletype quanto cada entrada já instalada. Isso evita misturar configurações com potência, capacidade, cor e usage diferentes dentro do mesmo conjunto.',
+          en:'After the first bottle is installed, the vehicle requires the same bottletype for additional bottles. The server validates row.bottletype and every installed bottle entry, preventing mixed power, capacity, color and usage configurations in one setup.'
+        },
+        code:"if row.bottletype ~= '' and row.bottletype ~= bottleType then\n    -- instalação recusada\nend"
+      },
+      {
+        id:'limits',
+        title:{pt:'Limites de instalação',en:'Installation limits'},
+        code:"PR.maxCylinds = 5\nPR.maxPurge = 8",
+        text:{
+          pt:'O limite é validado tanto no fluxo client quanto no servidor. O servidor usa a quantidade persistida e o tamanho real de metadata.bottles para impedir instalação acima do máximo.',
+          en:'Limits are validated both client-side and server-side. The server uses the persisted count and the real metadata.bottles length to prevent exceeding the configured maximum.'
+        }
+      },
+      {
+        id:'kit-flow',
+        title:{pt:'Fluxo de instalação do kit principal',en:'Main kit installation flow'},
+        steps:{
+          pt:[
+            'O jogador usa o item kitnitro.',
+            'O resource registra o uso pelo Bridge.framework.RegisterUsableItem.',
+            'O client mantém o slot pendente para instalação.',
+            'O jogador seleciona o capô do veículo pelo target.',
+            'O veículo precisa estar destrancado.',
+            'O servidor remove 1x kitnitro.',
+            'Cria/atualiza a linha da placa com kitnitro=1.',
+            'State Bag pr_nitrous é atualizado para todos os clientes.'
+          ],
+          en:[
+            'Player uses kitnitro.',
+            'The item is registered through Bridge.framework.RegisterUsableItem.',
+            'Client stores the pending slot.',
+            'Player selects the hood through target.',
+            'Vehicle must be unlocked.',
+            'Server removes 1x kitnitro.',
+            'The plate row is created/updated with kitnitro=1.',
+            'pr_nitrous State Bag is replicated.'
+          ]
+        }
+      },
+      {
+        id:'bottle-install-flow',
+        title:{pt:'Instalando um cilindro no veículo',en:'Installing a bottle'},
+        steps:{
+          pt:[
+            'O veículo deve estar destrancado e com o capô aberto.',
+            'O kit principal precisa estar instalado.',
+            'O servidor consulta quais cilindros utilizáveis existem no inventário.',
+            'Se já houver cilindros, somente o mesmo tipo é oferecido.',
+            'O jogador posiciona o prop garrafanitro usando o gizmo.',
+            'Posição, rotação, bone e dados físicos viram metadata do cilindro instalado.',
+            'O servidor lê o shot existente no item.',
+            'Remove exatamente aquela unidade/slot do inventário.',
+            'Persiste a garrafa em metadata.bottles e sincroniza o State Bag.'
+          ],
+          en:[
+            'Vehicle must be unlocked with hood open.',
+            'Main nitrous kit must already be installed.',
+            'Server queries usable bottles in player inventory.',
+            'If bottles already exist, only the same type is offered.',
+            'Player positions garrafanitro using the gizmo.',
+            'Position, rotation, bone and physical data become installed-bottle metadata.',
+            'Server reads the existing shot value from the inventory item.',
+            'That exact unit/slot is removed.',
+            'Bottle is persisted into metadata.bottles and State Bag is synchronized.'
+          ]
+        }
+      },
+      {
+        id:'gizmo',
+        title:{pt:'Posicionamento físico com gizmo',en:'Physical gizmo placement'},
+        text:{
+          pt:'Cilindros e bicos de purge não ficam presos a coordenadas hardcoded. O editor cria um preview ligado ao veículo e permite mover/rotacionar o objeto. A documentação interna do gizmo suporta modo mover/rotacionar, câmera orbital, zoom, undo, confirmação e cancelamento.',
+          en:'Bottles and purge nozzles are not limited to hardcoded coordinates. The editor creates a vehicle-attached preview and allows moving/rotating the object, with orbit camera, zoom, undo, confirm and cancel flows.'
+        },
+        code:"Q = mover\nR = rotacionar\nLeft Mouse = arrastar gizmo\nRight Mouse = orbitar câmera\nScroll = zoom\nTAB = alternar modo\nZ = desfazer\nENTER = confirmar\nBACKSPACE = cancelar"
+      },
+      {
+        id:'manage-bottles',
+        title:{pt:'Gerenciamento, troca e remoção',en:'Management, replacement and removal'},
+        text:{
+          pt:'O target do capô oferece gerenciamento dos cilindros instalados. A remoção devolve o cilindro atual com sua carga restante. A troca exige outro cilindro utilizável do mesmo tipo no inventário: o novo entra no veículo e o antigo retorna preservando seu shot.',
+          en:'The hood target exposes installed-bottle management. Removal returns the current bottle with its remaining charge. Replacement requires another usable bottle of the same type: the replacement enters the vehicle and the old bottle returns preserving its shot.'
+        },
+        note:{
+          pt:'Na troca, o servidor primeiro lê oldRemaining, remove o novo cilindro do inventário, devolve o antigo com createBottleItemMetadata(oldRemaining) e só então substitui metadata.bottles[index]. Há rollback do novo item se a devolução do antigo falhar.',
+          en:'During replacement the server reads oldRemaining, removes the new inventory bottle, returns the old one with createBottleItemMetadata(oldRemaining), then replaces metadata.bottles[index]. If returning the old bottle fails, the new item is added back as rollback.'
+        }
+      },
+      {
+        id:'purge',
+        title:{pt:'Sistema de purge',en:'Purge system'},
+        text:{
+          pt:'O purge é instalado por unidade através de kitpurge e pode ter vários bicos no mesmo veículo. Cada bico possui posicionamento persistente. A configuração padrão permite até 8. O purge também tem nível próprio de necessidade/carga, drenagem por segundo e bônus de potência após a purga.',
+          en:'Purge nozzles are installed individually with kitpurge and multiple nozzles can be attached to a vehicle. Each nozzle has persistent placement. Default maximum is 8. Purge also tracks its own level, drain rate and post-purge power bonus.'
+        },
+        code:"PR.purgeSettings = {\n    size = 1.0,\n    drainAmount = 10.0,\n    increaseAmount = 10.0,\n    nitroPowerBonus = 10.0\n}"
+      },
+      {
+        id:'purge-meaning',
+        title:{pt:'Lógica de carga/purga',en:'Purge charge logic'},
+        text:{
+          pt:'O nível de purge opera em escala de 0 a 100. A configuração comenta que entre 50 e 100 o indicador do cilindro começa a alertar o motorista. Durante a utilização, o purge pode drenar nitro e influenciar bônus/escala dos efeitos conforme a configuração.',
+          en:'Purge level operates on a 0–100 scale. Configuration notes that from 50 to 100 the bottle indicator begins warning the driver. Purging drains nitrous and can influence boost bonus and effect scale according to configuration.'
+        }
+      },
+      {
+        id:'controls',
+        title:{pt:'Controles do jogador',en:'Player controls'},
+        table:{
+          headers:['Ação','Padrão','Comando interno'],
+          rows:[
+            ['Ativar nitro','Left Shift','+pr_nitrous_use'],
+            ['Ativar purge','Left Ctrl','+pr_nitrous_purge'],
+            ['Editar HUD','/nitroushud','PR.Command']
+          ]
+        },
+        note:{
+          pt:'Os controles são registrados com RegisterKeyMapping, então o jogador pode remapear pelas configurações de teclas do FiveM/GTA.',
+          en:'Controls use RegisterKeyMapping, allowing players to remap them through FiveM/GTA key settings.'
+        }
+      },
+      {
+        id:'hud',
+        title:{pt:'HUD e editor de posição',en:'HUD and position editor'},
+        text:{
+          pt:'A NUI recebe visible, amount, color, purgeLevel e shake. amount representa a porcentagem agregada restante; color acompanha o cilindro ativo. O comando configurável PR.Command abre o editor para reposicionar e salvar a HUD.',
+          en:'The NUI receives visible, amount, color, purgeLevel and shake. amount is the aggregate remaining percentage while color follows the active bottle. The configurable PR.Command opens the HUD positioning editor.'
+        },
+        code:"SendNUIMessage({\n  action = 'setData',\n  data = {\n    visible = true,\n    amount = 73,\n    color = '#6600cc',\n    purgeLevel = 20,\n    shake = true\n  }\n})"
+      },
+      {
+        id:'effects',
+        title:{pt:'Efeitos visuais e câmera',en:'Visual and camera effects'},
+        text:{
+          pt:'O sistema sincroniza boost/purge por State Bag separado pr_nitrous_effect. Ele replica índice do cilindro ativo, cor, flameSize, trailLights, flameScale, trailScale, shakePower, nitroPower e purgeLevel. Chamas são aplicadas nos bones de escape encontrados no veículo.',
+          en:'Boost/purge effects are synchronized through a separate pr_nitrous_effect State Bag. It replicates active bottle index, color, flameSize, trailLights, flameScale, trailScale, shakePower, nitroPower and purgeLevel. Flame particles are attached to detected exhaust bones.'
+        },
+        code:"Entity(vehicle).state.pr_nitrous_effect = {\n    boost = true,\n    purge = false,\n    bottleIndex = 1,\n    flameColor = '#00ffff',\n    flameSize = 0.60,\n    trailLights = true,\n    nitroPower = 40.0,\n    purgeLevel = 0\n}"
+      },
+      {
+        id:'flame-colors',
+        title:{pt:'Cores de chama',en:'Flame colors'},
+        text:{
+          pt:'flameColor pode usar HEX para uma cor fixa ou a string RGB para ciclo dinâmico. O client converte HEX em valores RGB normalizados e possui um ciclo senoidal para a opção RGB.',
+          en:'flameColor can use a HEX value for fixed color or RGB for a dynamic cycle. The client converts HEX into normalized RGB values and uses a time-based color cycle for RGB.'
+        },
+        code:"flameColor = '#ff0000' -- vermelho\nflameColor = '#00ffff' -- ciano\nflameColor = 'RGB'     -- ciclo de cores"
+      },
+      {
+        id:'particle-config',
+        title:{pt:'Configuração da partícula de escape',en:'Exhaust particle configuration'},
+        code:"PR.nitroFx = {\n    asset = 'tkog_lmb_flames',\n    name = 'lmb_um',\n    minScale = 0.60,\n    maxScale = 1.80,\n    purgeChargeForMaxScale = 1.80,\n    trailMinScale = 0.30,\n    trailMaxScale = 3.80,\n    alpha = 1.0,\n    offset = { x = 0.0, y = -0.08, z = 0.0 },\n    rotation = { x = 0.0, y = 0.0, z = 0.0 }\n}"
+      },
+      {
+        id:'targets',
+        title:{pt:'Integração com target',en:'Target integration'},
+        text:{
+          pt:'Após 1 segundo o client registra opções globais no primeiro provider disponível: ox_target ou qb-target. As ações incluem instalar kit no bonnet, instalar purge, instalar cada tipo de cilindro disponível, gerenciar nitro e desinstalar kit.',
+          en:'After one second the client registers global vehicle options with the first available provider: ox_target or qb-target. Actions include installing the kit on the bonnet, installing purge, installing each available bottle type, managing nitrous and uninstalling the kit.'
+        }
+      },
+      {
+        id:'security',
+        title:{pt:'Validação server-side',en:'Server-side validation'},
+        bullets:{
+          pt:[
+            'Servidor resolve o veículo pelo netId e confere a placa.',
+            'Kit precisa existir antes de cilindro ou purge.',
+            'Tipo do cilindro precisa existir em PR.nitroBottles.',
+            'Limite de cilindros e purge é revalidado no servidor.',
+            'Instalação usa o slot real do inventário quando disponível.',
+            'Cilindro vazio/inutilizável é rejeitado.',
+            'Troca exige outro cilindro válido do mesmo tipo.',
+            'Remoção só conclui se o item puder voltar ao inventário.'
+          ],
+          en:[
+            'Server resolves vehicle by netId and validates plate.',
+            'Kit must exist before bottle or purge installation.',
+            'Bottle type must exist in PR.nitroBottles.',
+            'Bottle and purge limits are revalidated server-side.',
+            'Installation uses the real inventory slot when available.',
+            'Empty/unusable bottles are rejected.',
+            'Replacement requires another valid bottle of the same type.',
+            'Removal completes only if the item can be returned to inventory.'
+          ]
+        }
+      },
+      {
+        id:'statebags',
+        title:{pt:'State Bags e sincronização',en:'State Bags and synchronization'},
+        text:{
+          pt:'A configuração persistente é replicada em Entity(vehicle).state.pr_nitrous. O client escuta AddStateBagChangeHandler, reconstrói props quando o veículo entra em scope e também solicita ressincronização ao entrar/tentar entrar em veículos. O servidor tenta sincronizar veículos recém-criados em múltiplos delays.',
+          en:'Persistent configuration is replicated through Entity(vehicle).state.pr_nitrous. Clients listen with AddStateBagChangeHandler, rebuild props when vehicles enter scope and request resync when entering vehicles. The server also retries synchronization for newly created vehicles at multiple delays.'
+        },
+        code:"pr_nitrous = {\n    plate = 'ABC1234',\n    kitnitro = 1,\n    metadata = { bottles = {...}, purgeProps = {...} },\n    bottleamount = 2,\n    bottletype = 'nitro2',\n    usage = 48.0,\n    _syncId = 123\n}"
+      },
+      {
+        id:'database',
+        title:{pt:'Persistência no banco de dados',en:'Database persistence'},
+        table:{
+          headers:['Coluna','Conteúdo'],
+          rows:[
+            ['plate','Placa normalizada e UNIQUE.'],
+            ['kitnitro','0/1 para presença do kit.'],
+            ['metadata','JSON com bottles, purgeProps e demais dados.'],
+            ['bottleamount','Quantidade instalada.'],
+            ['bottletype','Tipo de cilindro do conjunto.'],
+            ['usage','Consumo total derivado do estado dos cilindros.'],
+            ['created_at','Timestamp da criação.']
+          ]
+        },
+        code:"CREATE TABLE IF NOT EXISTS pr_nitrous (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  plate VARCHAR(255) NOT NULL UNIQUE,\n  kitnitro INT NOT NULL DEFAULT 0,\n  metadata JSON NOT NULL,\n  bottleamount INT NOT NULL DEFAULT 0,\n  bottletype VARCHAR(64) NOT NULL DEFAULT '',\n  usage FLOAT NOT NULL DEFAULT 0,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);"
+      },
+      {
+        id:'autodb',
+        title:{pt:'Criação automática da tabela',en:'Automatic database setup'},
+        text:{
+          pt:'Com PR.autoDb=true, o servidor cria pr_nitrous automaticamente no start. Se PR.autoDb=false, use shared/database.sql manualmente.',
+          en:'With PR.autoDb=true, the server creates pr_nitrous automatically on startup. If disabled, import shared/database.sql manually.'
+        }
+      },
+      {
+        id:'inventory-install',
+        title:{pt:'Instalação dos itens de inventário',en:'Inventory item installation'},
+        text:{
+          pt:'install/install.lua já contém tabelas completas para ox_inventory e qb-inventory/QBCore, incluindo kitnitro, kitpurge e nitro1 até nitro20. Os cilindros são não-stackáveis/unique justamente porque cada unidade pode possuir uma quantidade de shot diferente.',
+          en:'install/install.lua already contains complete item tables for ox_inventory and qb-inventory/QBCore, including kitnitro, kitpurge and nitro1 through nitro20. Bottles are non-stackable/unique because every physical item can carry a different shot value.'
+        },
+        code:"-- ox_inventory\nstack = false\n\n-- qb-inventory\nunique = true"
+      },
+      {
+        id:'default-bottles',
+        title:{pt:'Catálogo padrão de cilindros',en:'Default bottle catalog'},
+        text:{
+          pt:'O config atual contém nitro1 até nitro20. Há variantes pequenas de 50 unidades e grandes de 100, várias cores fixas, uma opção RGB e diferentes combinações de potência/consumo. Isso serve como catálogo e também como referência para criar novos modelos.',
+          en:'The current config includes nitro1 through nitro20. It provides 50-unit small bottles, 100-unit large bottles, multiple fixed colors, one RGB option and different power/consumption combinations, serving as a template for custom bottles.'
+        },
+        table:{
+          headers:['Exemplos','Capacidade','Potência','Cor'],
+          rows:[
+            ['nitro1','50','85.0','#6600cc'],
+            ['nitro2','100','40.0','#6600cc'],
+            ['nitro7','100','25.0','RGB'],
+            ['nitro14','50','85.0','#0000ff'],
+            ['nitro17','100','40.0','#00ffff'],
+            ['nitro20','50','85.0','#000000']
+          ]
+        }
+      },
+      {
+        id:'scenario-race',
+        title:{pt:'Cenário: carro de corrida com 3 cilindros',en:'Scenario: race car with 3 bottles'},
+        steps:{
+          pt:[
+            'Configure PR.maxCylinds >= 3.',
+            'Instale kitnitro no veículo.',
+            'Instale três unidades do mesmo tipo, por exemplo nitro2.',
+            'Cada nitro2 começa com 100; capacidade agregada inicial = 300.',
+            'Posicione cada cilindro individualmente no porta-malas/cofre usando o gizmo.',
+            'Durante uso, o sistema drena os cilindros sequencialmente.',
+            'Se restarem 0, 44 e 100, capacidade restante agregada = 144.',
+            'Você pode remover o cilindro de 44 e instalá-lo em outro carro preservando exatamente 44.'
+          ],
+          en:[
+            'Set PR.maxCylinds to at least 3.',
+            'Install kitnitro.',
+            'Install three bottles of the same type, e.g. nitro2.',
+            'Each nitro2 starts at 100, for 300 aggregate capacity.',
+            'Position each bottle individually using the gizmo.',
+            'Consumption drains bottles sequentially.',
+            'If bottles contain 0, 44 and 100, aggregate remaining charge is 144.',
+            'The 44-unit bottle can be removed and installed in another car preserving exactly 44.'
+          ]
+        }
+      },
+      {
+        id:'scenario-swap',
+        title:{pt:'Cenário: trocar cilindro durante manutenção',en:'Scenario: bottle replacement during maintenance'},
+        text:{
+          pt:'Se um cilindro instalado está com 12/100 e o mecânico possui outro nitro2 utilizável, a ação de troca remove a unidade de reposição do inventário e devolve o cilindro antigo com 12/100. Assim o cilindro antigo não desaparece e pode ser guardado, vendido, recarregado por outro sistema ou usado posteriormente.',
+          en:'If an installed bottle has 12/100 and the mechanic carries another usable nitro2, replacement consumes the replacement unit and returns the old bottle with 12/100. The old bottle therefore remains a real inventory asset that can be stored, sold, refilled by another system or reused later.'
+        }
+      },
+      {
+        id:'scenario-uninstall-kit',
+        title:{pt:'Desinstalando o kit completo',en:'Uninstalling the full kit'},
+        text:{
+          pt:'O kit principal não pode ser removido enquanto existirem cilindros instalados. Primeiro remova todos os cilindros. Ao desinstalar o kit, 1x kitnitro volta ao inventário e todos os purgeProps existentes devolvem 1x kitpurge cada; depois o registro do veículo é limpo e os State Bags são removidos.',
+          en:'The main kit cannot be removed while bottles remain installed. Remove all bottles first. Uninstalling the kit returns 1x kitnitro plus one kitpurge for every installed purge nozzle, clears vehicle state and removes replicated State Bags.'
+        }
+      },
+      {
+        id:'admin',
+        title:{pt:'Permissões administrativas',en:'Administrative permissions'},
+        code:"PR.Admin = {\n  Permissions = {\n    ['admin'] = { min_grade = 0 }\n  },\n  Job = {\n    ['mechanic'] = { min_grade = 0 }\n  },\n  AdminWhitelist = {\n    'ETK100KY',\n    '1234567'\n  }\n}",
+        text:{
+          pt:'O config oferece permissões por grupo, job/grade e whitelist por citizenid. Ajuste a whitelist de exemplo antes de produção.',
+          en:'Configuration supports group permissions, job/grade access and citizenid whitelist. Replace the example whitelist before production.'
+        }
+      },
+      {
+        id:'localization',
+        title:{pt:'Idiomas',en:'Localization'},
+        text:{
+          pt:"PR.Lang aceita ptBr, en e es no config. O arquivo shared/language.lua centraliza labels, mensagens, target, HUD, erros de instalação, avisos de cilindro vazio e textos do gizmo.",
+          en:"PR.Lang accepts ptBr, en and es. shared/language.lua centralizes labels, notifications, target text, HUD, installation errors, empty-bottle warnings and gizmo help."
+        }
+      },
+      {
+        id:'troubleshooting',
+        title:{pt:'Diagnóstico e problemas comuns',en:'Troubleshooting'},
+        bullets:{
+          pt:[
+            'Botão de instalar cilindro não aparece: confirme kit instalado, capô aberto, veículo destrancado e item utilizável no inventário.',
+            'Outro tipo de cilindro não aparece: o veículo já está preso ao bottletype do primeiro cilindro.',
+            'Cilindro removido volta parcialmente cheio: comportamento esperado; shot é preservado.',
+            'Cilindro vazio não instala: comportamento esperado; unusable/empty impede reutilização com zero carga.',
+            'Props não aparecem após streaming: verifique State Bag pr_nitrous e sincronização de entidade.',
+            'Banco não cria tabela: confirme PR.autoDb, provider SQL e dependência do banco.',
+            'Sem opção target: inicie ox_target ou qb-target antes do pr_nitrous.',
+            'Efeito visual ausente: confirme arquivos .ypt no stream e PR.nitroFx asset/name.',
+            'HUD fora do lugar: use /nitroushud ou altere PR.Command.'
+          ],
+          en:[
+            'Bottle install option missing: verify kit, open hood, unlocked vehicle and usable inventory item.',
+            'Different bottle type missing: vehicle is locked to the first installed bottletype.',
+            'Removed bottle returns partially filled: expected; shot is preserved.',
+            'Empty bottle cannot be installed: expected; unusable/empty prevents zero-charge reuse.',
+            'Props missing after streaming: inspect pr_nitrous State Bag and entity sync.',
+            'Database table missing: verify PR.autoDb and SQL provider.',
+            'No target option: start ox_target or qb-target before pr_nitrous.',
+            'Missing effects: verify streamed .ypt assets and PR.nitroFx asset/name.',
+            'HUD misplaced: use /nitroushud or change PR.Command.'
+          ]
+        }
+      },
+      {
+        id:'production-pattern',
+        title:{pt:'Padrão recomendado para criar novos cilindros',en:'Recommended custom-bottle pattern'},
+        steps:{
+          pt:[
+            'Escolha um nome de item único e permanente.',
+            'Crie a entrada em PR.nitroBottles.',
+            'Defina bottleSize conforme autonomia desejada.',
+            'Balanceie bottlePower e usage em conjunto.',
+            'Escolha flameColor, flameSize e trail.',
+            'Cadastre o item como não-stackável/unique no inventário.',
+            'Adicione imagem/label/descrição.',
+            'Teste metadata inicial em um item novo.',
+            'Instale, consuma parcialmente, remova e confira se shot retorna correto.',
+            'Instale a mesma unidade em outro veículo e valide que a carga não foi resetada.',
+            'Teste zero carga para garantir marcação unusable.',
+            'Teste múltiplos cilindros e a regra de mesmo tipo.'
+          ],
+          en:[
+            'Choose a unique, stable item name.',
+            'Add it to PR.nitroBottles.',
+            'Set bottleSize for desired endurance.',
+            'Balance bottlePower together with usage.',
+            'Choose flameColor, flameSize and trail.',
+            'Register the item as non-stackable/unique.',
+            'Add inventory image, label and description.',
+            'Test initial metadata on a fresh item.',
+            'Install, partially consume, remove and verify returned shot.',
+            'Install the same unit in another vehicle and verify no reset.',
+            'Test zero charge and unusable state.',
+            'Test multiple bottles and same-type restriction.'
+          ]
+        }
+      }
+    ]
+  },
   pr_placeable: {
     name:'PR Placeable',
     code:'pr_placeable',
