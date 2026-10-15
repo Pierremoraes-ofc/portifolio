@@ -4270,14 +4270,14 @@ pr_lib.notify(source, {
       },
       {
         id:'ox-inventory-install',
-        title:{pt:'ox_inventory — instalação completa',en:'ox_inventory — complete installation'},
+        title:{pt:'ox_inventory — botão PLACE global',en:'ox_inventory — global PLACE button'},
         text:{
-          pt:'O ox_inventory não precisa ter seu client.lua ou interface alterados. Ele já oferece botões customizados por item através de data/items.lua. A integração recomendada é adicionar um botão PLACE no item e, no action, chamar o export do PR Placeable passando o slot.',
-          en:'ox_inventory does not require editing its client.lua or UI. It already supports custom item buttons in data/items.lua. The recommended integration is to add a PLACE button and call the PR Placeable export with the selected slot.'
+          pt:'No ox_inventory, a integração pode ser feita uma única vez no client.lua. Em vez de adicionar buttons em cada item de data/items.lua, o código percorre a tabela global Items carregada pelo ox_inventory e injeta automaticamente um botão PLACE em todos os itens cadastrados no Config.Items do PR Placeable. Botões já existentes são preservados.',
+          en:'ox_inventory can be integrated once in client.lua. Instead of adding buttons to every entry in data/items.lua, the code iterates over the global Items table loaded by ox_inventory and automatically injects a PLACE button into items registered in PR Placeable Config.Items. Existing buttons are preserved.'
         },
         note:{
-          pt:'Essa abordagem é preferível a client.export direto porque o PR Placeable recebe o slot no formato esperado e então busca o item real por exports[\'ox_inventory\']:GetPlayerItems()[slot].',
-          en:'This is preferred over wiring client.export directly because PR Placeable receives the expected slot and resolves the real item through exports[\'ox_inventory\']:GetPlayerItems()[slot].'
+          pt:'Essa integração usa o sistema nativo de custom buttons que o próprio InventoryContext do ox_inventory já renderiza. Portanto não é necessário alterar React/TypeScript, HTML nem recompilar a NUI.',
+          en:'This uses ox_inventory\'s native custom button system already rendered by InventoryContext, so no React/TypeScript or HTML changes and no NUI rebuild are required.'
         }
       },
       {
@@ -4290,57 +4290,86 @@ pr_lib.notify(source, {
         code:"Config.Inventory = 'ox_inventory'"
       },
       {
-        id:'ox-inventory-step2',
-        title:{pt:'ox_inventory — Step 2: adicionar PLACE ao item',en:'ox_inventory — Step 2: add PLACE to the item'},
+        id:'ox-inventory-step2-search',
+        title:{pt:'ox_inventory — Step 2: localizar Items no client.lua',en:'ox_inventory — Step 2: locate Items in client.lua'},
         text:{
-          pt:'Abra ox_inventory/data/items.lua, localize o item que será colocável e adicione o bloco buttons. O action recebe o slot selecionado e envia diretamente ao PR Placeable.',
-          en:'Open ox_inventory/data/items.lua, locate the placeable item and add a buttons block. The action receives the selected slot and forwards it directly to PR Placeable.'
+          pt:'Abra ox_inventory/client.lua e procure por:',
+          en:'Open ox_inventory/client.lua and find:'
         },
-        code:"-- ox_inventory/data/items.lua\n\n['water'] = {\n    label = 'Água',\n    weight = 500,\n    stack = true,\n    close = true,\n\n    buttons = {\n        {\n            label = 'PLACE',\n            action = function(slot)\n                exports['pr_placeable']:placeItem(slot)\n            end\n        }\n    }\n},"
+        code:"local Items = require 'modules.items.client'\nlocal usingItem = false"
       },
       {
-        id:'ox-inventory-existing-buttons',
-        title:{pt:'ox_inventory — item que já possui buttons',en:'ox_inventory — item with existing buttons'},
+        id:'ox-inventory-step2-code',
+        title:{pt:'Logo após carregar Items, adicione o registrador global',en:'Add the global registrar after Items is loaded'},
         text:{
-          pt:'Se o item já tiver outros botões, não crie um segundo campo buttons. Apenas adicione uma nova entrada à tabela existente.',
-          en:'If the item already has other buttons, do not create a second buttons field. Add another entry to the existing table.'
+          pt:'O código abaixo consulta o export isPlaceable do PR Placeable e adiciona PLACE somente aos itens realmente configurados. Ele também evita duplicação se algum item já recebeu o botão e suporta reinício do pr_placeable sem precisar reiniciar o ox_inventory.',
+          en:'The code below calls PR Placeable isPlaceable and adds PLACE only to configured items. It avoids duplicates and supports restarting pr_placeable without restarting ox_inventory.'
         },
-        code:"buttons = {\n    {\n        label = 'Outra ação',\n        action = function(slot)\n            -- ação existente\n        end\n    },\n    {\n        label = 'PLACE',\n        action = function(slot)\n            exports['pr_placeable']:placeItem(slot)\n        end\n    }\n},"
+        code:"local function registerPrPlaceableButtons()\n    if GetResourceState('pr_placeable') ~= 'started' then return end\n\n    for itemName, itemData in pairs(Items) do\n        local success, placeable = pcall(function()\n            return exports['pr_placeable']:isPlaceable(itemName)\n        end)\n\n        if success and placeable then\n            itemData.buttons = itemData.buttons or {}\n\n            local alreadyRegistered = false\n\n            for i = 1, #itemData.buttons do\n                if itemData.buttons[i].pr_placeable then\n                    alreadyRegistered = true\n                    break\n                end\n            end\n\n            if not alreadyRegistered then\n                itemData.buttons[#itemData.buttons + 1] = {\n                    label = 'PLACE',\n                    pr_placeable = true,\n                    action = function(slot)\n                        if GetResourceState('pr_placeable') ~= 'started' then\n                            return lib.notify({\n                                type = 'error',\n                                description = 'PR Placeable is not started.'\n                            })\n                        end\n\n                        exports['pr_placeable']:placeItem(slot)\n                    end\n                }\n            end\n        end\n    end\nend\n\nregisterPrPlaceableButtons()\n\nAddEventHandler('onClientResourceStart', function(resourceName)\n    if resourceName == 'pr_placeable' then\n        registerPrPlaceableButtons()\n    end\nend)"
       },
       {
-        id:'ox-inventory-step3',
-        title:{pt:'ox_inventory — Step 3: cadastrar no PR Placeable',en:'ox_inventory — Step 3: register in PR Placeable'},
+        id:'ox-inventory-how-global-works',
+        title:{pt:'Como o botão global funciona',en:'How the global button works'},
         text:{
-          pt:'O mesmo nome usado no ox_inventory precisa existir em Config.Items. O inventário cria a ação; o PR Placeable define modelo, quantidade, caixa, Freeze e animações.',
-          en:'The same item name used by ox_inventory must exist in Config.Items. Inventory defines the action while PR Placeable defines model, quantities, box behavior, Freeze and animations.'
+          pt:'O ox_inventory já possui useButton(id, slot) e InventoryContext.tsx, que leem Items[item.name].buttons e renderizam as ações no menu de contexto. O registrador apenas preenche essa tabela em runtime; por isso a interface existente cria o botão automaticamente.',
+          en:'ox_inventory already has useButton(id, slot) and InventoryContext.tsx reading Items[item.name].buttons and rendering those actions in the context menu. The registrar only fills that table at runtime, so the existing UI creates the button automatically.'
         },
-        code:"-- pr_placeable/config.lua\nConfig.Items['water'] = {\n    prop      = 'prop_ld_flow_bottle',\n    propbox   = 'v_serv_abox_02',\n    stackable = true,\n    maxPlace  = 10,\n    maxBox    = 24,\n    Freeze    = false,\n    is_pickup = false,\n\n    onehand = {\n        dict = 'amb@world_human_drinking@coffee@male@idle_a',\n        anim = 'idle_c',\n        bone = 28422,\n        pos = vector3(0.0, 0.0, 0.0),\n        rot = vector3(0.0, 0.0, 0.0),\n        flag = 49\n    },\n\n    twohand = {\n        dict = 'anim@heists@box_carry@',\n        anim = 'idle',\n        bone = 28422,\n        pos = vector3(0.0, -0.1, -0.1),\n        rot = vector3(0.0, 0.0, 0.0),\n        flag = 51\n    }\n}"
+        code:"Items[itemName].buttons\n        ↓\nInventoryContext.tsx\n        ↓\nMenuItem: PLACE\n        ↓\nRegisterNUICallback('useButton')\n        ↓\nbuttons[id].action(slot)\n        ↓\nexports['pr_placeable']:placeItem(slot)"
       },
       {
-        id:'ox-inventory-flow',
-        title:{pt:'ox_inventory — resultado no jogo',en:'ox_inventory — in-game result'},
+        id:'ox-inventory-pr-export',
+        title:{pt:'PR Placeable — export usado pelo ox_inventory',en:'PR Placeable — export used by ox_inventory'},
+        text:{
+          pt:'O PR Placeable fornece isPlaceable(itemName) para que o ox_inventory descubra automaticamente quais itens devem receber o botão. Não é necessário duplicar a lista de itens no inventário.',
+          en:'PR Placeable exposes isPlaceable(itemName), allowing ox_inventory to automatically discover which items should receive the button without duplicating the item list.'
+        },
+        code:"exports('isPlaceable', function(itemName)\n    if type(itemName) ~= 'string' then return false end\n    return Config.Items[itemName] ~= nil\nend)"
+      },
+      {
+        id:'ox-inventory-preserves-buttons',
+        title:{pt:'Itens que já possuem botões',en:'Items that already have buttons'},
+        text:{
+          pt:'A integração não substitui buttons existentes. Ela usa itemData.buttons = itemData.buttons or {} e adiciona PLACE no final da lista. Um item que já possua ações próprias continuará com todas elas.',
+          en:'The integration does not replace existing buttons. It uses itemData.buttons = itemData.buttons or {} and appends PLACE to the list, preserving all existing actions.'
+        },
+        code:"-- antes\nitemData.buttons = {\n    { label = 'Lick it', action = function(slot) end },\n    { label = 'Squeeze it', action = function(slot) end }\n}\n\n-- runtime depois do registrador\nitemData.buttons = {\n    { label = 'Lick it', action = function(slot) end },\n    { label = 'Squeeze it', action = function(slot) end },\n    { label = 'PLACE', pr_placeable = true, action = function(slot) ... end }\n}"
+      },
+      {
+        id:'ox-inventory-result',
+        title:{pt:'Resultado no jogo',en:'In-game result'},
         steps:{
           pt:[
-            'Jogador abre o ox_inventory.',
-            'Seleciona o item configurado.',
-            'O menu do item mostra PLACE.',
-            'Ao clicar em PLACE, action(slot) é executado.',
-            "O action chama exports['pr_placeable']:placeItem(slot).",
-            'PR Placeable busca o item real no slot do ox_inventory.',
-            'Se houver stack, abre seleção de quantidade/caixa.',
-            'O placement é iniciado.'
+            'O ox_inventory carrega normalmente todos os itens.',
+            'registerPrPlaceableButtons percorre a tabela Items uma única vez.',
+            'Para cada item, isPlaceable(itemName) consulta Config.Items do PR Placeable.',
+            'Se o item estiver configurado, PLACE é anexado à lista de buttons.',
+            'Se o item já tiver outros botões, eles são mantidos.',
+            'Ao abrir o menu contextual do item, InventoryContext mostra PLACE automaticamente.',
+            'Ao clicar em PLACE, o useButton nativo do ox_inventory executa a action.',
+            "A action chama exports['pr_placeable']:placeItem(slot).",
+            'O PR Placeable fecha o inventário e inicia placement individual, sequencial ou caixa/lote.'
           ],
           en:[
-            'Player opens ox_inventory.',
-            'Selects the configured item.',
-            'The item menu shows PLACE.',
-            'Clicking PLACE executes action(slot).',
+            'ox_inventory loads all items normally.',
+            'registerPrPlaceableButtons iterates the Items table once.',
+            'For each item, isPlaceable(itemName) checks PR Placeable Config.Items.',
+            'Configured items receive PLACE in their buttons list.',
+            'Existing custom buttons are preserved.',
+            'InventoryContext automatically renders PLACE in the item context menu.',
+            'Clicking PLACE is handled by ox_inventory native useButton.',
             "The action calls exports['pr_placeable']:placeItem(slot).",
-            'PR Placeable resolves the actual item from the ox_inventory slot.',
-            'If stacked, quantity/box selection is shown.',
-            'Placement starts.'
+            'PR Placeable closes inventory and starts single, sequential or box/batch placement.'
           ]
         }
+      },
+      {
+        id:'ox-inventory-no-item-edit',
+        title:{pt:'Não é necessário editar cada item',en:'No per-item edits required'},
+        text:{
+          pt:'Depois dessa alteração única em ox_inventory/client.lua, adicionar um novo item posicionável exige apenas cadastrá-lo em Config.Items do PR Placeable. O botão PLACE será criado automaticamente na próxima inicialização dos resources.',
+          en:'After this one-time ox_inventory/client.lua modification, adding a new placeable item only requires registering it in PR Placeable Config.Items. PLACE will be created automatically on the next resource startup.'
+        },
+        code:"-- você NÃO precisa mais fazer isto em cada item:\nbuttons = {\n    {\n        label = 'PLACE',\n        action = function(slot)\n            exports['pr_placeable']:placeItem(slot)\n        end\n    }\n}\n\n-- basta cadastrar:\nConfig.Items['nome_do_item'] = {\n    prop = 'nome_do_prop',\n    -- ...\n}"
       },
       {
         id:'qb-inventory-install',
