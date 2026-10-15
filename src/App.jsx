@@ -69,6 +69,14 @@ const HOBBY_PROJECTS = [
     pt: 'Sistema de elevadores para FiveM com integração ao ecossistema PR e fluxo de interação desacoplado.',
     en: 'Elevator system for FiveM with PR ecosystem integration and a decoupled interaction flow.',
   },
+  {
+    name: 'PR Placeable',
+    repo: 'https://github.com/Pierremoraes-ofc/pr_placeable',
+    code: 'pr_placeable',
+    tags: ['FiveM', 'Physical Props', 'Persistence', 'Vehicle Cargo'],
+    pt: 'Sistema persistente de itens físicos com posicionamento preciso, lotes e caixas, carry, reposicionamento, integração com inventários e carga presa a veículos com física de impacto.',
+    en: 'Persistent physical-item system with precision placement, batches and boxes, carry, repositioning, inventory integration and vehicle-mounted cargo with impact physics.',
+  },
 ];
 
 const COPY = {
