@@ -3891,6 +3891,763 @@ pr_lib.notify(source, {
       }
     ]
   },
+  pr_trailer: {
+    name: 'PR Trailer',
+    code: 'pr_trailer',
+    repo: 'https://github.com/Pierremoraes-ofc/pr_trailer',
+    category: { pt: 'Hobby • FiveM / Reboque & transporte', en: 'Hobby • FiveM / Towing & transport' },
+    lead: {
+      pt: 'Sistema completo de trailers, guincho e transporte de veículos para FiveM. O PR Trailer combina rampas físicas, cabo de reboque, gancho sincronizado, guincho por rope, cintas individuais nas rodas, fixação do veículo ao trailer, flatbed com plataforma móvel e um modo de realismo que pode soltar a carga em capotamentos ou impactos fortes.',
+      en: 'Complete trailer, winch and vehicle transport system for FiveM. PR Trailer combines physical ramps, tow ropes, synchronized hooks, rope-based winching, individual wheel straps, vehicle securing, a moving flatbed platform and a realism mode that can detach cargo after rollovers or severe impacts.'
+    },
+    facts: [
+      ['Version', '1.0.2'],
+      ['Dependency', 'pr_bridge'],
+      ['Target', 'PR Bridge target abstraction'],
+      ['Inventory', 'PR Bridge inventory abstraction'],
+      ['Sync', 'State Bags + network entities'],
+      ['Ramp props', 'Small / Large'],
+      ['Winch', 'GTA Rope API'],
+      ['Straps', 'Per-wheel'],
+      ['Realism', 'Roll / impact detach'],
+      ['Locales', 'PT-BR / EN-US']
+    ],
+    sections: [
+      {
+        id:'overview',
+        title:{pt:'Visão geral',en:'Overview'},
+        text:{
+          pt:'O PR Trailer não é apenas um script de prender veículo em caminhão. Ele modela todo o processo de transporte: abrir/posicionar rampa, pegar o gancho, conectar o cabo, puxar o veículo pelo guincho, posicioná-lo sobre a plataforma, prender cada roda com cintas, sincronizar tudo para os outros jogadores e, opcionalmente, aplicar risco físico de a carga se soltar em capotamentos ou colisões severas.',
+          en:'PR Trailer is more than a simple vehicle-attach script. It models the complete transport workflow: opening/placing ramps, taking the hook, attaching the rope, winching a vehicle, positioning it on the bed, securing each wheel with straps, synchronizing everything to other players and optionally allowing cargo to break loose during rollovers or severe crashes.'
+        },
+        bullets:{
+          pt:[
+            'Rampas configuráveis por modelo de trailer.',
+            'Guincho físico usando Rope natives.',
+            'Gancho físico sincronizado como network object.',
+            'Cabo pode ligar trailer/guincho a outro veículo.',
+            'Cintas independentes por roda.',
+            'Veículo só é fixado ao trailer quando as rodas necessárias estão presas.',
+            'Flatbed3 possui plataforma que recua, abaixa, sobe e avança.',
+            'State Bags sincronizam rampas, rope, veículos presos e cintas.',
+            'Modo Realism pode soltar veículos em inclinação excessiva ou impacto.'
+          ],
+          en:[
+            'Configurable ramps per trailer model.',
+            'Physical winch using GTA Rope natives.',
+            'Synchronized hook as a network object.',
+            'Rope can connect a trailer/winch to another vehicle.',
+            'Independent wheel straps.',
+            'Vehicle is secured only when required wheels are strapped.',
+            'Flatbed3 bed can slide back, lower, raise and return.',
+            'State Bags synchronize ramps, rope, attached vehicles and straps.',
+            'Realism mode can detach cargo from excessive tilt or impact.'
+          ]
+        }
+      },
+      {
+        id:'architecture',
+        title:{pt:'Arquitetura do resource',en:'Resource architecture'},
+        table:{
+          headers:['Arquivo','Responsabilidade'],
+          rows:[
+            ['shared/config.lua','Configuração de itens, jobs, trailers, rampas, winch e realismo.'],
+            ['shared/vehicles.lua','Helpers para detectar trailers, veículos sobre a plataforma e props de rampa.'],
+            ['client/main.lua','Abrir/fechar rampas e sincronização visual da rampa.'],
+            ['client/winch.lua','Gancho, rope, ligação com veículo e operação do guincho.'],
+            ['client/attach.lua','Cintas, fixação física do veículo e detach.'],
+            ['client/functions.lua','Targets, jobs e ações de interação.'],
+            ['client/flatbed.lua','Plataforma móvel do flatbed3.'],
+            ['client/realism.lua','Detecção de roll/pitch e impactos.'],
+            ['client/ropetowing.lua','Controle de reboque com cabo.'],
+            ['client/ramp_adjust.lua','Calibração de offsets de rampa.'],
+            ['server/main.lua','Validação server-side e State Bags.'],
+            ['server/inventory.lua','Devolução do item de rampa.']
+          ]
+        }
+      },
+      {
+        id:'dependency',
+        title:{pt:'Dependência do PR Bridge',en:'PR Bridge dependency'},
+        text:{
+          pt:'O fxmanifest declara pr_bridge como dependência obrigatória e carrega @pr_bridge/init.lua. O resource usa pr_lib para target, inventário, framework/job, callback, notificações, streaming, veículos/objetos e comandos.',
+          en:'The fxmanifest declares pr_bridge as a required dependency and loads @pr_bridge/init.lua. The resource uses pr_lib for target, inventory, framework/job, callbacks, notifications, streaming, vehicle/object helpers and commands.'
+        },
+        code:"dependency 'pr_bridge'\n\nshared_scripts {\n    '@pr_bridge/init.lua',\n    'shared/config.lua',\n    'shared/lang.lua',\n    'shared/vehicles.lua',\n}"
+      },
+      {
+        id:'main-config',
+        title:{pt:'Configuração principal',en:'Main configuration'},
+        code:"PR.useitem = false\nPR.RampItem = 'VehicleRamp'\nPR.useHookitem = false\nPR.HookItem = 'WinchHook'\n\nPR.restrictToJob = false\nPR.AllowTowRopeForAllVehicles = true\n\nPR.Realism = true\nPR.RollAngle = 18.0\nPR.SpeedType = 'KPH'\nPR.CrashSpeed = 40.0\nPR.Chance = 5\nPR.HookTimeOut = 10"
+      },
+      {
+        id:'trailer-schema',
+        title:{pt:'Como cadastrar um trailer',en:'How to register a trailer'},
+        text:{
+          pt:'Cada entrada de PR.Trailers descreve as capacidades daquele modelo. O sistema procura o hash do veículo e aplica as opções correspondentes.',
+          en:'Each PR.Trailers entry describes that model capabilities. The system matches the vehicle hash and applies the corresponding behavior.'
+        },
+        table:{
+          headers:['Campo','Função'],
+          rows:[
+            ['model','Spawn/model name do trailer ou veículo.'],
+            ['ramp','Permite sistema de rampa.'],
+            ['winch','Permite guincho quando AllowTowRopeForAllVehicles=false.'],
+            ['rampoffset','Offset local X/Y/Z da rampa.'],
+            ['size','small ou large para escolher o prop da rampa.'],
+            ['winchoffset','Ponto local X/Y/Z de ancoragem do winch.'],
+            ['winchbed','Se true, o winch ancora na plataforma móvel do flatbed3 quando disponível.']
+          ]
+        }
+      },
+      {
+        id:'custom-trailer',
+        title:{pt:'Exemplo: criando um novo trailer',en:'Example: adding a new trailer'},
+        code:"PR.Trailers[#PR.Trailers + 1] = {\n    model = 'my_car_trailer',\n    ramp = true,\n    winch = true,\n    rampoffset = { 0.0, -5.40, 0.42 },\n    size = 'large',\n    winchoffset = { 0.0, 2.80, 0.65 },\n    winchbed = false\n}"
+      },
+      {
+        id:'default-models',
+        title:{pt:'Modelos configurados por padrão',en:'Default configured models'},
+        table:{
+          headers:['Modelo','Ramp','Winch','Tamanho'],
+          rows:[
+            ['tr2','false','false','—'],
+            ['bison','false','true','small'],
+            ['cotrailer','false','true','—'],
+            ['flatbed','true','true','large'],
+            ['flatbed3','true','true','large'],
+            ['sadler','true','true','small'],
+            ['boattrailer','false','true','—']
+          ]
+        }
+      },
+      {
+        id:'ramp-system',
+        title:{pt:'Como funciona a rampa',en:'How the ramp system works'},
+        text:{
+          pt:'Ao selecionar Abrir/Fechar Rampa, o client resolve o trailer e calcula rampWorldCoords. O servidor valida modelo, ação, distância do jogador e, se necessário, item de inventário. Em seguida grava wizRampHandler no State Bag. Cada client que recebe esse state cria ou remove o prop da rampa localmente e sincroniza a porta traseira.',
+          en:'When Open/Close Ramp is selected, the client resolves the trailer and calculates rampWorldCoords. The server validates model, action, player distance and optional inventory item, then stores wizRampHandler in the State Bag. Clients receiving that state create/remove the ramp prop locally and synchronize the rear door.'
+        },
+        code:"Entity(trailer).state.wizRampHandler = {\n    action = 'open',\n    trailer = trailerNetId,\n    rampCoords = { x = ..., y = ..., z = ... },\n    rotation = { x = ..., y = ..., z = ... },\n    source = src\n}"
+      },
+      {
+        id:'ramp-item',
+        title:{pt:'Rampa como item de inventário',en:'Ramp as inventory item'},
+        text:{
+          pt:'Com PR.useitem=true, abrir uma rampa que exige item verifica PR.RampItem no servidor e remove uma unidade. Ao fechar, o callback pr_trailer:cb:giveVehicleRamp devolve o item somente se o State Bag indicar fechamento válido, a rampa ainda não tiver sido reembolsada e o jogador estiver próximo.',
+          en:'With PR.useitem=true, opening an item-backed ramp checks PR.RampItem server-side and removes one unit. On closing, pr_trailer:cb:giveVehicleRamp returns the item only when the State Bag indicates a valid close state, it has not already been refunded and the player is nearby.'
+        },
+        code:"PR.useitem = true\nPR.RampItem = 'VehicleRamp'"
+      },
+      {
+        id:'ramp-size',
+        title:{pt:'Rampa pequena e grande',en:'Small and large ramps'},
+        text:{
+          pt:'O prop usado é wizating_trailer_ramp ou wizating_trailer_ramp_large. O campo size=large seleciona a versão grande; ajustes salvos pelo calibrador também podem sobrescrever o modelo usado.',
+          en:'The ramp prop is wizating_trailer_ramp or wizating_trailer_ramp_large. size=large selects the large version, while saved calibration data can also override the chosen model.'
+        }
+      },
+      {
+        id:'ramp-calibration',
+        title:{pt:'Calibrando o offset da rampa',en:'Calibrating ramp offsets'},
+        text:{
+          pt:'O resource possui ferramentas de calibração para ajustar trailers customizados sem ficar recompilando offsets no escuro.',
+          en:'The resource includes calibration tools for tuning custom trailer ramps without guessing offsets.'
+        },
+        code:"/rampoffset sadler 0 -5.5 0.45 small\n\n/rampcalibrate\n/rampcalibrate save\n/rampcalibrate reset\n/rampcalibrate exit\n/rampcalibrate swap"
+      },
+      {
+        id:'ramp-cal-controls',
+        title:{pt:'Controles da calibração',en:'Calibration controls'},
+        table:{
+          headers:['Controle','Ação'],
+          rows:[
+            ['Setas esquerda/direita','Move X'],
+            ['Setas cima/baixo','Move Y'],
+            ['Q / E','Move Z'],
+            ['Shift','Aumenta step para 0.5'],
+            ['/rampcalibrate save','Salva offset'],
+            ['/rampcalibrate swap','Alterna rampa small/large']
+          ]
+        }
+      },
+      {
+        id:'winch-overview',
+        title:{pt:'Guincho físico por Rope API',en:'Physical Rope API winch'},
+        text:{
+          pt:'O guincho usa as natives de Rope do GTA em vez de teleportar o veículo. O sistema cria um gancho físico, liga a corda ao trailer e depois ao veículo alvo. Ao iniciar o guincho, StartRopeWinding encurta a corda até que o veículo esteja próximo, haja colisão contrária, ocorra timeout ou outra condição de parada.',
+          en:'The winch uses GTA Rope natives instead of teleporting vehicles. A physical hook is created, the rope is connected to the trailer and then to the target vehicle. Starting the winch calls StartRopeWinding until the vehicle reaches the bed, encounters opposing collision, times out or another stop condition occurs.'
+        }
+      },
+      {
+        id:'winch-flow',
+        title:{pt:'Fluxo completo do guincho',en:'Complete winch workflow'},
+        steps:{
+          pt:[
+            'Selecione Pegar Cabo de Reboque no trailer.',
+            'O servidor cria wizating_winchhook como network object.',
+            'O gancho é anexado à mão do jogador.',
+            'Uma Rope é criada entre trailer/âncora e gancho.',
+            'Leve o gancho até o veículo alvo.',
+            'Use Prender Cabo de Reboque no veículo.',
+            'O servidor troca ropesync de Hand para Vehicle.',
+            'Todos os clients recriam a rope entre trailer e veículo.',
+            'Selecione Iniciar Guincho.',
+            'StartRopeWinding puxa fisicamente o veículo.',
+            'Quando o veículo chega à plataforma, a rope é removida.',
+            'O sistema tenta fixar o veículo ao trailer.'
+          ],
+          en:[
+            'Select Get Tow Rope on the trailer.',
+            'Server creates wizating_winchhook as a network object.',
+            'Hook is attached to the player hand.',
+            'A Rope is created between trailer/anchor and hook.',
+            'Carry the hook to the target vehicle.',
+            'Use Attach Tow Rope on the target.',
+            'Server changes ropesync from Hand to Vehicle.',
+            'All clients rebuild the rope between trailer and vehicle.',
+            'Select Start Winch.',
+            'StartRopeWinding physically pulls the vehicle.',
+            'When the vehicle reaches the bed, rope is removed.',
+            'The system attempts to secure the vehicle to the trailer.'
+          ]
+        }
+      },
+      {
+        id:'winch-stop',
+        title:{pt:'Quando o guincho para',en:'When the winch stops'},
+        text:{
+          pt:'Durante o winch, o loop monitora colisão oposta, distância entre pontas da corda, distância do veículo para a âncora, vida do player e timeout de 30 segundos.',
+          en:'During winching, the loop monitors opposing collision, distance between rope ends, vehicle-to-anchor distance, player health and a 30-second timeout.'
+        },
+        code:"if collision\n   or ropeDistance < 1.4\n   or vehicleDistance < 4.5\n   or GetEntityHealth(playerPed) <= 0\n   or GetGameTimer() > winchTimeout then\n    winchActive = false\nend"
+      },
+      {
+        id:'winch-safety',
+        title:{pt:'Segurança durante o guincho',en:'Winch safety'},
+        bullets:{
+          pt:[
+            'Trailer é congelado enquanto o winch trabalha.',
+            'Saída do veículo é bloqueada para o motorista durante a operação.',
+            'Veículo alvo fica temporariamente undriveable durante conexão da rope.',
+            'Antes de remover a rope, o veículo é congelado para evitar snap físico.',
+            'Depois o script tenta attach e aguarda até 10 segundos.',
+            'Controles e freeze são restaurados ao final.'
+          ],
+          en:[
+            'Trailer is frozen during winching.',
+            'Driver exit controls are disabled during the operation.',
+            'Target vehicle is temporarily undriveable while connected.',
+            'Vehicle is frozen before rope deletion to avoid physics snapping.',
+            'Script then attempts attach and waits up to 10 seconds.',
+            'Controls and freeze state are restored afterward.'
+          ]
+        }
+      },
+      {
+        id:'winch-anchor',
+        title:{pt:'winchoffset e winchbed',en:'winchoffset and winchbed'},
+        text:{
+          pt:'winchoffset define onde o cabo nasce no veículo. No flatbed3, winchbed=true faz a âncora usar a plataforma móvel quando ela existe, de modo que o ponto do cabo acompanhe a cama em vez de ficar preso ao chassis principal.',
+          en:'winchoffset defines the rope anchor point. On flatbed3, winchbed=true uses the moving bed as the anchor entity when available, so the rope follows the bed instead of the main chassis.'
+        },
+        code:"{\n    model = 'flatbed3',\n    winch = true,\n    winchoffset = { 0.45, 3.25, 0.65 },\n    winchbed = true\n}"
+      },
+      {
+        id:'tow-any-vehicle',
+        title:{pt:'Cabo de reboque em qualquer veículo',en:'Tow rope on any vehicle'},
+        text:{
+          pt:'Com PR.AllowTowRopeForAllVehicles=true, trailerModelHasWinch retorna true independentemente da flag winch de PR.Trailers e resolveTrailer aceita qualquer veículo para ações de rope. Isso permite usar o sistema como cabo de reboque entre veículos, não apenas em trailers cadastrados.',
+          en:'With PR.AllowTowRopeForAllVehicles=true, trailerModelHasWinch returns true regardless of PR.Trailers winch flags and resolveTrailer accepts any vehicle for rope actions. This enables general vehicle-to-vehicle towing rather than only configured trailers.'
+        },
+        code:"PR.AllowTowRopeForAllVehicles = true"
+      },
+      {
+        id:'hook-item',
+        title:{pt:'Gancho como item',en:'Hook as an item'},
+        text:{
+          pt:'Com PR.useHookitem=true, a ação de pegar o cabo exige que o jogador possua PR.HookItem. A checagem passa pela abstração de inventário do PR Bridge.',
+          en:'With PR.useHookitem=true, taking the tow rope requires PR.HookItem in the player inventory. The check uses PR Bridge inventory abstraction.'
+        },
+        code:"PR.useHookitem = true\nPR.HookItem = 'WinchHook'"
+      },
+      {
+        id:'hook-timeout',
+        title:{pt:'Timeout do gancho',en:'Hook timeout'},
+        text:{
+          pt:'PR.HookTimeOut define por quantos segundos um gancho solto pode permanecer sem ser pego novamente. monitorHookHeld verifica o objeto a cada 250 ms e deleteRopeSync limpa rope/hook quando o limite é atingido.',
+          en:'PR.HookTimeOut defines how many seconds a dropped hook may remain before cleanup. monitorHookHeld checks the object every 250 ms and deleteRopeSync removes rope/hook when the limit expires.'
+        },
+        code:"PR.HookTimeOut = 10"
+      },
+      {
+        id:'straps',
+        title:{pt:'Cintas físicas por roda',en:'Physical per-wheel straps'},
+        text:{
+          pt:'O sistema possui quatro pontos padrão: wheel_lf, wheel_rf, wheel_lr e wheel_rr. Cada cinta é um prop hammer3d_Strap_Small criado localmente e anexado ao trailer na posição mundial da roda. A presença de cada cinta é sincronizada pelo State Bag straps.',
+          en:'The system uses four standard wheel points: wheel_lf, wheel_rf, wheel_lr and wheel_rr. Each strap is a hammer3d_Strap_Small prop locally attached to the trailer at the wheel world position. Each strap state is synchronized through the straps State Bag.'
+        }
+      },
+      {
+        id:'strap-flow',
+        title:{pt:'Como prender um veículo com cintas',en:'How to secure a vehicle with straps'},
+        steps:{
+          pt:[
+            'Coloque o veículo sobre o trailer/plataforma.',
+            'Saia do veículo.',
+            'Aproxime-se de uma roda.',
+            'Use Prender Cinta na roda desejada.',
+            'O player executa animação de mecânico por aproximadamente 3,5 s.',
+            'O servidor marca aquela roda em Entity(trailer).state.straps.',
+            'Clients criam o prop da cinta naquele ponto.',
+            'Repita nas rodas detectadas pelo modelo.',
+            'Quando todas as rodas necessárias estão presas, attachVehicleToTrailer faz o attach físico.'
+          ],
+          en:[
+            'Position the vehicle on the trailer/bed.',
+            'Exit the vehicle.',
+            'Approach a wheel.',
+            'Select Attach Strap for that wheel.',
+            'Player runs a mechanic animation for about 3.5 seconds.',
+            'Server marks that wheel in Entity(trailer).state.straps.',
+            'Clients spawn the strap prop at that point.',
+            'Repeat for the detected wheel bones.',
+            'Once all required wheels are strapped, attachVehicleToTrailer performs the physical attach.'
+          ]
+        }
+      },
+      {
+        id:'strap-requirement',
+        title:{pt:'As cintas não são apenas estéticas',en:'Straps are not cosmetic'},
+        text:{
+          pt:'A lógica verifica as rodas reais disponíveis no veículo. Se qualquer roda necessária não estiver marcada como presa, attachVehicleToTrailer cancela o attach. Se um veículo já estiver anexado e uma cinta obrigatória for removida, syncStrapsFromState solta o veículo.',
+          en:'The logic checks the actual wheel bones available on the vehicle. If any required wheel is not strapped, attachVehicleToTrailer cancels the attach. If a secured vehicle loses a required strap, syncStrapsFromState detaches it.'
+        },
+        code:"for _, wheelName in ipairs(vehicleWheels) do\n    if not strapsState.wheels[wheelName] then\n        allWheelsStrapped = false\n        break\n    end\nend\n\nif not allWheelsStrapped then return end"
+      },
+      {
+        id:'detach-rule',
+        title:{pt:'Para soltar o veículo, remova as cintas',en:'Remove straps before detaching'},
+        text:{
+          pt:'A opção Soltar Veículo é bloqueada se trailerHasAnyStrap retornar true. Isso impede remover o veículo enquanto ainda existe alguma cinta registrada.',
+          en:'Detach Vehicle is blocked while trailerHasAnyStrap returns true, preventing cargo removal while straps are still installed.'
+        }
+      },
+      {
+        id:'attach-physics',
+        title:{pt:'Como o veículo é fixado ao trailer',en:'How the vehicle is attached'},
+        text:{
+          pt:'Depois de validar as cintas e proximidade, o script calcula offset relativo e diferença de rotação entre veículo e trailer. Carros usam AttachEntityToEntity; barcos usam AttachVehicleOnToTrailer com offsets específicos. O servidor mantém attachedvehicles com os Network IDs.',
+          en:'After validating straps and proximity, the script calculates relative offset and rotation delta. Cars use AttachEntityToEntity while boats use AttachVehicleOnToTrailer with specific offsets. The server stores Network IDs in attachedvehicles.'
+        }
+      },
+      {
+        id:'statebags',
+        title:{pt:'State Bags usados pelo sistema',en:'State Bags used by the system'},
+        table:{
+          headers:['State Bag','Uso'],
+          rows:[
+            ['wizRampHandler','Estado e coordenadas da rampa.'],
+            ['ropesync','Hand / Vehicle / StartWinch / Delete para rope/hook.'],
+            ['linked','Indica vínculo ativo do cabo.'],
+            ['attachedvehicles','Lista de veículos registrados no trailer.'],
+            ['attachvehicle','Solicita attach de um veículo.'],
+            ['detachvehicle','Solicita detach normal ou por crash.'],
+            ['straps','Cintas por veículo e roda.'],
+            ['matrix','Matriz/transform compartilhado quando necessário.']
+          ]
+        }
+      },
+      {
+        id:'flatbed3',
+        title:{pt:'Flatbed3 com plataforma móvel',en:'Flatbed3 moving bed'},
+        text:{
+          pt:'O flatbed3 tem uma cama física separada, criada como objeto networked inm_flatbed_base. A plataforma usa Decorators para manter estado e Network ID, permitindo que o client com controle de rede mova a cama de forma interpolada.',
+          en:'flatbed3 has a separate physical bed created as a networked inm_flatbed_base object. Decorators store state and Network ID, allowing the network-controlling client to interpolate the moving bed.'
+        }
+      },
+      {
+        id:'flatbed-states',
+        title:{pt:'Máquina de estados do flatbed3',en:'flatbed3 state machine'},
+        table:{
+          headers:['State','Comportamento'],
+          rows:[
+            ['0','Plataforma levantada/recolhida.'],
+            ['1','Movendo para trás.'],
+            ['2','Descendo.'],
+            ['3','Plataforma abaixada.'],
+            ['4','Subindo.'],
+            ['5','Movendo para frente/recolhendo.']
+          ]
+        }
+      },
+      {
+        id:'flatbed-controls',
+        title:{pt:'Operação do flatbed3',en:'Operating flatbed3'},
+        steps:{
+          pt:[
+            'Quando state=0, o target mostra Abaixar Rampa.',
+            'A plataforma entra em state=1 e desliza para trás.',
+            'Depois state=2 inclina/abaixa.',
+            'Em state=3 fica totalmente baixa para carga.',
+            'O target passa a mostrar Subir Rampa.',
+            'state=4 levanta a plataforma.',
+            'state=5 move para frente.',
+            'Ao terminar retorna para state=0.'
+          ],
+          en:[
+            'At state=0, target shows Lower Ramp.',
+            'Bed enters state=1 and slides backward.',
+            'Then state=2 lowers/tilts.',
+            'At state=3 it is fully lowered for loading.',
+            'Target changes to Raise Ramp.',
+            'state=4 raises the bed.',
+            'state=5 slides forward.',
+            'It returns to state=0 when complete.'
+          ]
+        }
+      },
+      {
+        id:'flatbed-cargo',
+        title:{pt:'Carga acompanha a plataforma móvel',en:'Cargo follows the moving bed'},
+        text:{
+          pt:'Ao iniciar a subida (state=4), attachVehiclesToBedDuringMove encontra veículos posicionados sobre a cama, guarda offset e rotação relativos e os congela temporariamente. Enquanto a cama move, updateVehiclesWithMovingBed recalcula posição/rotação para que a carga acompanhe a plataforma sem cair. No final, detachVehiclesFromBedAfterMove libera os veículos.',
+          en:'When raising begins (state=4), attachVehiclesToBedDuringMove detects vehicles on the bed, stores relative offset/rotation and temporarily freezes them. While the bed moves, updateVehiclesWithMovingBed recomputes position/rotation so cargo follows the platform. At the end, detachVehiclesFromBedAfterMove releases them.'
+        }
+      },
+      {
+        id:'realism',
+        title:{pt:'Modo Realism — carga pode se soltar',en:'Realism mode — cargo can break loose'},
+        text:{
+          pt:'PR.Realism adiciona risco físico ao transporte. O client monitora trailers com attachedvehicles enquanto o jogador dirige. Existem duas causas principais de detach: inclinação/capotamento e mudança brusca de velocidade causada por impacto.',
+          en:'PR.Realism adds physical risk to transport. The client monitors trailers with attachedvehicles while the player drives. Two main conditions can detach cargo: excessive tilt/rollover and abrupt velocity change from impact.'
+        },
+        code:"PR.Realism = true\nPR.RollAngle = 18.0\nPR.CrashSpeed = 40.0\nPR.Chance = 5"
+      },
+      {
+        id:'realism-roll',
+        title:{pt:'Realismo: inclinação e capotamento',en:'Realism: tilt and rollover'},
+        text:{
+          pt:'O script normaliza roll e pitch do trailer. Se roll ou pitch ultrapassar PR.RollAngle, ou IsEntityUpsidedown retornar true, cada veículo preso passa por randomByChance. Se aprovado, o servidor dispara detach com crash=true.',
+          en:'The script normalizes trailer roll and pitch. If either exceeds PR.RollAngle or the trailer is upside down, each attached vehicle is evaluated with randomByChance and may be detached with crash=true.'
+        }
+      },
+      {
+        id:'realism-crash',
+        title:{pt:'Realismo: impacto por delta de velocidade',en:'Realism: velocity-delta impact detection'},
+        text:{
+          pt:'O script guarda a velocidade vetorial anterior do trailer e compara com a atual. A magnitude dessa diferença é deltaSpeed. PR.CrashSpeed é convertido para m/s e usado como threshold. Se o delta exceder o limite, randomDetachBySpeed calcula chance baseada na velocidade anterior e em PR.Chance.',
+          en:'The script stores the previous trailer velocity vector and compares it with the current one. The magnitude becomes deltaSpeed. PR.CrashSpeed is converted to m/s and used as the threshold. Above that threshold, randomDetachBySpeed computes a chance based on previous speed and PR.Chance.'
+        },
+        code:"dVel = currentVelocity - lastVelocity\ndeltaSpeed = length(dVel)\nthreshold = PR.CrashSpeed / speedFactor\n\nif deltaSpeed > threshold then\n    -- pode soltar a carga\nend"
+      },
+      {
+        id:'realism-force',
+        title:{pt:'O que acontece quando a carga se solta em acidente',en:'What happens when cargo detaches in a crash'},
+        text:{
+          pt:'detachvehicle recebe crash=true. O client remove as cintas, usa DetachEntity e, se houver espaço, aplica força no veículo para produzir uma separação física em vez de simplesmente deixá-lo parado no mesmo ponto.',
+          en:'detachvehicle receives crash=true. The client removes straps, calls DetachEntity and, when space permits, applies force so the vehicle physically separates rather than remaining static at the same location.'
+        },
+        code:"DetachEntity(vehicle, false, true)\nApplyForceToEntity(vehicle, 1, 0.0, force, -force, ...)"
+      },
+      {
+        id:'realism-example',
+        title:{pt:'Exemplo prático de acidente',en:'Practical crash example'},
+        steps:{
+          pt:[
+            'Carro está preso ao trailer por todas as cintas.',
+            'Trailer viaja em velocidade elevada.',
+            'Há uma colisão forte e a velocidade vetorial muda abruptamente.',
+            'deltaSpeed ultrapassa CrashSpeed.',
+            'randomDetachBySpeed calcula a probabilidade com base na velocidade anterior.',
+            'Se o teste passar, attachedvehicles remove o carro com crash=true.',
+            'State straps daquele veículo é apagado.',
+            'Clients removem cintas e destacam o carro.',
+            'Uma força é aplicada para simular a carga sendo lançada.'
+          ],
+          en:[
+            'Car is secured to the trailer with all straps.',
+            'Trailer is moving at high speed.',
+            'A severe collision produces a sharp velocity change.',
+            'deltaSpeed exceeds CrashSpeed.',
+            'randomDetachBySpeed computes probability from previous speed.',
+            'If it succeeds, attachedvehicles removes the car with crash=true.',
+            'That vehicle strap state is cleared.',
+            'Clients remove strap props and detach the car.',
+            'A force is applied to simulate cargo being thrown loose.'
+          ]
+        }
+      },
+      {
+        id:'realism-caveat',
+        title:{pt:'Nota sobre SpeedDifferencePercent',en:'Note about SpeedDifferencePercent'},
+        text:{
+          pt:'O config 1.0.2 ainda declara PR.SpeedDifferencePercent=20.0, porém a implementação atual de client/realism.lua não lê esse campo. O impacto real é decidido por delta de velocidade contra PR.CrashSpeed e pela chance calculada com PR.Chance. Portanto SpeedDifferencePercent não altera o comportamento desta versão.',
+          en:'Config 1.0.2 still declares PR.SpeedDifferencePercent=20.0, but the current client/realism.lua implementation does not read that field. Crash behavior is driven by velocity delta versus PR.CrashSpeed and probability derived from PR.Chance. SpeedDifferencePercent therefore has no effect in this version.'
+        }
+      },
+      {
+        id:'jobs',
+        title:{pt:'Restrição por emprego',en:'Job restriction'},
+        text:{
+          pt:'Com PR.restrictToJob=true, isJobAllowed consulta pr_lib.framework.GetJobInfo() e exige correspondência com PR.JobRoles. O minJobGrade é aplicado quando grade está disponível.',
+          en:'With PR.restrictToJob=true, isJobAllowed queries pr_lib.framework.GetJobInfo() and requires a match in PR.JobRoles. minJobGrade is enforced when grade data is available.'
+        },
+        code:"PR.restrictToJob = true\nPR.JobRoles = {\n    [1] = { name = 'mechanic', minJobGrade = 0 },\n}"
+      },
+      {
+        id:'targets',
+        title:{pt:'Ações disponíveis no target',en:'Available target actions'},
+        bullets:{
+          pt:[
+            'Abrir/Fechar Rampa.',
+            'Pegar Cabo de Reboque.',
+            'Iniciar Guincho.',
+            'Remover Cabo de Reboque.',
+            'Soltar Veículo.',
+            'Desvirar Veículo.',
+            'Prender Cabo de Reboque no veículo alvo.',
+            'Pegar Gancho físico.',
+            'Prender/remover cinta individual em cada roda.',
+            'Abaixar/Subir plataforma do flatbed3.'
+          ],
+          en:[
+            'Open/Close Ramp.',
+            'Get Tow Rope.',
+            'Start Winch.',
+            'Remove Tow Rope.',
+            'Detach Vehicle.',
+            'Flip Vehicle.',
+            'Attach Tow Rope to target vehicle.',
+            'Pick up physical hook.',
+            'Attach/remove individual wheel straps.',
+            'Lower/Raise flatbed3 bed.'
+          ]
+        }
+      },
+      {
+        id:'server-validation',
+        title:{pt:'Validação server-side',en:'Server-side validation'},
+        bullets:{
+          pt:[
+            'Eventos validam ações permitidas antes de alterar states.',
+            'Trailer precisa ser um modelo configurado quando a ação exige trailer.',
+            'Player precisa estar próximo: normalmente 15–25 m conforme a operação.',
+            'Veículo alvo precisa existir e estar próximo.',
+            'attachedVehicles só adiciona veículo até 8 m do trailer.',
+            'setStrapWheel valida trailer, veículo e wheelName.',
+            'Ramp item é verificado/removido no servidor quando ativado.',
+            'Hook network object é criado no servidor para sincronização.'
+          ],
+          en:[
+            'Events validate allowed actions before mutating state.',
+            'Trailer must be configured when the operation requires one.',
+            'Player must be nearby, generally 15–25 m depending on action.',
+            'Target vehicle must exist and be nearby.',
+            'attachedVehicles only adds vehicles within 8 m of the trailer.',
+            'setStrapWheel validates trailer, vehicle and wheelName.',
+            'Ramp item is checked/removed server-side when enabled.',
+            'Hook network object is created server-side for synchronization.'
+          ]
+        }
+      },
+      {
+        id:'scenario-recovery',
+        title:{pt:'Cenário completo: resgatar um carro quebrado',en:'Full scenario: recovering a disabled car'},
+        steps:{
+          pt:[
+            'Posicione o flatbed/trailer próximo ao carro.',
+            'Abra ou abaixe a rampa.',
+            'Pegue o cabo de reboque.',
+            'Caminhe com o gancho até o carro.',
+            'Prenda o cabo ao carro.',
+            'Entre no carro se o fluxo de winch exigir ocupante no banco do motorista.',
+            'Inicie o guincho.',
+            'O cabo puxa fisicamente o carro até a plataforma.',
+            'Posicione corretamente o veículo.',
+            'Prenda as cintas nas rodas.',
+            'Quando todas as rodas necessárias estiverem presas, o carro fica anexado ao trailer.',
+            'Recolha a plataforma/rampa.',
+            'Transporte o veículo.',
+            'No destino, remova todas as cintas antes de usar Soltar Veículo.'
+          ],
+          en:[
+            'Position the flatbed/trailer near the disabled car.',
+            'Open/lower the ramp.',
+            'Take the tow rope.',
+            'Carry the hook to the car.',
+            'Attach the rope to the car.',
+            'Enter the car if the winch flow requires a driver occupant.',
+            'Start the winch.',
+            'Rope physically pulls the car onto the bed.',
+            'Position the vehicle correctly.',
+            'Attach wheel straps.',
+            'Once all required wheels are strapped, the car is secured to the trailer.',
+            'Raise/store the bed/ramp.',
+            'Transport the vehicle.',
+            'At destination remove all straps before Detach Vehicle.'
+          ]
+        }
+      },
+      {
+        id:'scenario-boat',
+        title:{pt:'Cenário: transporte de barco',en:'Scenario: boat transport'},
+        text:{
+          pt:'attachVehicleToTrailer detecta IsThisModelABoat. Para barcos o resource usa AttachVehicleOnToTrailer em vez do attach genérico, com offsets diferentes para Seashark e outros barcos. Isso permite que o mesmo sistema trate cargas que não são carros tradicionais.',
+          en:'attachVehicleToTrailer checks IsThisModelABoat. Boats use AttachVehicleOnToTrailer instead of generic entity attachment, with different offsets for Seashark models and other boats, allowing non-car cargo support.'
+        }
+      },
+      {
+        id:'scenario-any-tow',
+        title:{pt:'Cenário: reboque entre dois veículos sem trailer',en:'Scenario: vehicle-to-vehicle towing'},
+        text:{
+          pt:'Quando AllowTowRopeForAllVehicles=true, você pode usar a mesma mecânica de gancho/rope em veículos comuns. Isso transforma PR Trailer também em uma ferramenta de resgate simples: um veículo pode servir de ponto de cabo para puxar outro, mesmo sem ser um trailer configurado.',
+          en:'When AllowTowRopeForAllVehicles=true, the same hook/rope mechanic can be used on ordinary vehicles. PR Trailer can therefore act as a general recovery tool where one vehicle serves as the tow anchor for another without a configured trailer.'
+        }
+      },
+      {
+        id:'debug-tools',
+        title:{pt:'Ferramentas de desenvolvimento',en:'Development tools'},
+        table:{
+          headers:['Comando','Finalidade'],
+          rows:[
+            ['/rampoffset','Define offset absoluto de uma rampa por modelo.'],
+            ['/rampcalibrate','Editor interativo de posição da rampa.'],
+            ['/strapedit','Editor/debug visual das cintas ativas.']
+          ]
+        }
+      },
+      {
+        id:'strap-editor',
+        title:{pt:'Editor de cintas',en:'Strap editor'},
+        text:{
+          pt:'O comando /strapedit é uma ferramenta de debug para quatro cintas ativas. Permite selecionar a cinta, mover, rotacionar e imprimir valores para calibração visual.',
+          en:'/strapedit is a debug tool for four active straps. It allows selecting a strap, moving/rotating it and printing values for visual calibration.'
+        },
+        code:"1-4 = selecionar cinta\nSetas = mover XY\nSHIFT + Setas = rotacionar\nR/F = mover Z\nQ/E = rotacionar Z\nESPAÇO = imprimir valores"
+      },
+      {
+        id:'stream-assets',
+        title:{pt:'Assets incluídos',en:'Included assets'},
+        bullets:{
+          pt:[
+            'flatbed3 custom e texturas.',
+            'inm_flatbed_base para plataforma móvel.',
+            'wizating_trailer_ramp e versão large.',
+            'wizating_winchhook.',
+            'hammer3d_Strap_Small.',
+            'Metas de veículo, handling, layout, carcols e variations.'
+          ],
+          en:[
+            'Custom flatbed3 and textures.',
+            'inm_flatbed_base moving bed.',
+            'wizating_trailer_ramp and large variant.',
+            'wizating_winchhook.',
+            'hammer3d_Strap_Small.',
+            'Vehicle, handling, layout, carcols and variation metadata.'
+          ]
+        }
+      },
+      {
+        id:'locales',
+        title:{pt:'Idiomas',en:'Localization'},
+        text:{
+          pt:'O resource possui locale/pt-br.lua e locale/en-us.lua. Textos de notify, target, rodas, debug, calibração e ferramentas de desenvolvimento passam por pr_lib.locale().',
+          en:'The resource provides locale/pt-br.lua and locale/en-us.lua. Notifications, target labels, wheel names, debug text, calibration and development tools use pr_lib.locale().'
+        }
+      },
+      {
+        id:'implementation-notes',
+        title:{pt:'Notas importantes da versão 1.0.2',en:'Important notes for version 1.0.2'},
+        bullets:{
+          pt:[
+            'SpeedDifferencePercent existe no config, mas não é usado pelo realism.lua atual.',
+            'O attach final depende das cintas quando o veículo possui wheel bones detectáveis.',
+            'O winch espera existir alguém no assento do motorista do veículo alvo antes de começar a enrolar a corda.',
+            'O sistema de rampas usa props locais reconstruídos pelo State Bag, enquanto o hook é networked.',
+            'flatbed3 usa Decorators para estado da plataforma e Network ID da cama.',
+            'AllowTowRopeForAllVehicles=true sobrepõe a restrição winch por modelo para ações de cabo.'
+          ],
+          en:[
+            'SpeedDifferencePercent exists in config but is not used by current realism.lua.',
+            'Final attach depends on straps when the vehicle exposes detectable wheel bones.',
+            'Winch waits for a driver occupant in the target vehicle before winding.',
+            'Ramp props are locally rebuilt from State Bag state while the hook is networked.',
+            'flatbed3 uses Decorators for bed state and bed Network ID.',
+            'AllowTowRopeForAllVehicles=true overrides per-model winch restriction for rope actions.'
+          ]
+        }
+      },
+      {
+        id:'troubleshooting',
+        title:{pt:'Diagnóstico e problemas comuns',en:'Troubleshooting'},
+        bullets:{
+          pt:[
+            'Rampa não aparece: confirme ramp=true, rampoffset/calibração e assets stream.',
+            'Item de rampa some e não volta: confirme fechamento válido e callback giveVehicleRamp.',
+            'Cabo não aparece: confirme ação Hand no ropesync e existência do hook networked.',
+            'Não consigo prender cabo: verifique linked, hook próximo e AllowTowRopeForAllVehicles/winch.',
+            'Guincho não inicia: WinchReady só fica true depois da rope estar ligada ao veículo.',
+            'Veículo não fixa: verifique se todas as rodas detectadas possuem cintas.',
+            'Soltar veículo não aparece: remova todas as cintas e pare o trailer.',
+            'Carga cai em curvas/capotamento: verifique PR.Realism e PR.RollAngle.',
+            'Carga cai em batidas: revise PR.CrashSpeed e PR.Chance.',
+            'Job não consegue interagir: confira PR.restrictToJob, JobRoles e grade.',
+            'Flatbed3 não move: confirme controle de rede e Decor flatbed3_state.'
+          ],
+          en:[
+            'Ramp missing: verify ramp=true, rampoffset/calibration and streamed assets.',
+            'Ramp item not returned: verify valid close state and giveVehicleRamp callback.',
+            'Rope missing: inspect Hand ropesync and networked hook existence.',
+            'Cannot attach rope: inspect linked state, nearby hook and AllowTowRopeForAllVehicles/winch.',
+            'Winch will not start: WinchReady becomes true only after rope is attached to the target.',
+            'Vehicle will not secure: verify every detected wheel has a strap.',
+            'Detach option missing: remove every strap and stop the trailer.',
+            'Cargo falls during turns/rollover: inspect PR.Realism and PR.RollAngle.',
+            'Cargo detaches on impacts: tune PR.CrashSpeed and PR.Chance.',
+            'Job cannot interact: verify PR.restrictToJob, JobRoles and grade.',
+            'flatbed3 not moving: verify network control and flatbed3_state Decor.'
+          ]
+        }
+      },
+      {
+        id:'custom-trailer-checklist',
+        title:{pt:'Checklist para adicionar um trailer customizado',en:'Custom trailer checklist'},
+        steps:{
+          pt:[
+            'Adicione o model em PR.Trailers.',
+            'Defina ramp=true/false.',
+            'Defina winch=true/false.',
+            'Escolha size small/large se usar rampa.',
+            'Defina rampoffset ou calibre com /rampcalibrate.',
+            'Defina winchoffset se quiser ponto de cabo específico.',
+            'Use winchbed=true somente quando a âncora deve acompanhar uma plataforma móvel compatível.',
+            'Teste abertura/fechamento da rampa.',
+            'Teste hook → vehicle → StartWinch.',
+            'Teste cintas em todas as rodas.',
+            'Teste attach e detach.',
+            'Teste com PR.Realism=true em roll e colisão.',
+            'Teste sincronização com dois players.'
+          ],
+          en:[
+            'Add the model to PR.Trailers.',
+            'Set ramp=true/false.',
+            'Set winch=true/false.',
+            'Choose small/large size when using ramps.',
+            'Set rampoffset or calibrate with /rampcalibrate.',
+            'Set winchoffset for a custom rope anchor.',
+            'Use winchbed=true only when the anchor should follow a compatible moving bed.',
+            'Test ramp open/close.',
+            'Test hook → vehicle → StartWinch.',
+            'Test all wheel straps.',
+            'Test attach and detach.',
+            'Test PR.Realism=true with roll and collisions.',
+            'Test synchronization with two players.'
+          ]
+        }
+      }
+    ]
+  },
   pr_nitrous: {
     name: 'PR Nitrous',
     code: 'pr_nitrous',
