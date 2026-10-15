@@ -3891,6 +3891,540 @@ pr_lib.notify(source, {
       }
     ]
   },
+  pr_boombox: {
+    name: 'PR Boombox',
+    code: 'pr_boombox',
+    repo: 'https://github.com/Pierremoraes-ofc/pr_boombox',
+    category: { pt: 'Hobby • FiveM / Áudio 3D e mídia', en: 'Hobby • FiveM / 3D audio & media' },
+    lead: {
+      pt: 'Sistema de áudio 3D para FiveM com caixas de som físicas, uso por item, carry sincronizado, playlists persistentes por jogador, reprodução por URL, controle de volume, atalhos, suporte a veículos e integração opcional com o PR Sound System para distribuir a mesma música por vários alto-falantes instalados no carro.',
+      en: 'FiveM 3D audio system with physical speakers, usable items, synchronized carry, per-player persistent playlists, URL playback, volume controls, hotkeys, vehicle playback and optional PR Sound System integration that distributes one track across multiple installed vehicle speakers.'
+    },
+    facts: [
+      ['Version', '2.1.7'],
+      ['Required', 'pr_bridge / pr_3dsound / ox_lib'],
+      ['Playlist storage', 'SQL'],
+      ['Playback engine', 'pr_3dsound'],
+      ['Placement sync', 'Network entity + State Bags'],
+      ['Configured boombox items', '10'],
+      ['Default volume', '50%'],
+      ['Volume range', '0–100'],
+      ['Default open key', 'F7'],
+      ['Play/Pause key', 'F9'],
+      ['Stop key', 'F10'],
+      ['Vehicle integration', 'Optional pr_soundSystem']
+    ],
+    sections: [
+      {
+        id:'overview',
+        title:{pt:'Visão geral',en:'Overview'},
+        text:{
+          pt:'O PR Boombox transforma caixas de som em entidades reais do mundo: o item sai do inventário, o servidor cria um prop networked, grava identidade e estado em State Bags e o player pode abrir o player, carregar a caixa, colocá-la novamente no chão ou guardá-la de volta no inventário. A música é reproduzida via PR 3D Sound e a sessão é sincronizada para todos os clients.',
+          en:'PR Boombox turns speakers into real world entities: the item leaves inventory, the server creates a networked prop, stores identity/state in State Bags, and the player can open the player, carry the speaker, place it back down or return it to inventory. Music is played through PR 3D Sound and the playback session is synchronized to all clients.'
+        },
+        bullets:{
+          pt:[
+            '10 itens/modelos de rádio configurados de fábrica.',
+            'Distância sonora individual por modelo.',
+            'Carry com bone, offset, rotação e animações configuráveis por item.',
+            'Playlists e músicas persistentes no banco de dados.',
+            'Play/Pause, Stop e volume sincronizados.',
+            'Target via pr_bridge, com fallback por teclado quando target não estiver disponível.',
+            'Reprodução em boombox, caixa carregada pelo player ou veículo.',
+            'Integração opcional com pr_soundSystem para som automotivo multi-speaker.',
+            'State Bags mantêm identidade, owner, item, distância e estado de carry da caixa.'
+          ],
+          en:[
+            '10 preconfigured radio/speaker items.',
+            'Per-model sound distance.',
+            'Per-item carry bone, offset, rotation and animations.',
+            'Persistent playlists and songs in SQL.',
+            'Synchronized Play/Pause, Stop and volume.',
+            'Target interaction through pr_bridge with keyboard fallback.',
+            'Playback on a boombox, carried speaker or vehicle.',
+            'Optional pr_soundSystem multi-speaker vehicle integration.',
+            'State Bags store boombox identity, owner, item, distance and carried state.'
+          ]
+        }
+      },
+      {
+        id:'runtime-architecture',
+        title:{pt:'Arquitetura em runtime',en:'Runtime architecture'},
+        table:{
+          headers:['Arquivo','Responsabilidade'],
+          rows:[
+            ['fxmanifest.lua','Dependências e scripts realmente carregados.'],
+            ['shared/config.lua','Itens, modelos, distâncias, carry, hotkeys e integração de áudio.'],
+            ['shared/language.lua','Traduções pt-br / en-Usa / es.'],
+            ['client/main.lua','Props, State Bags, target, carry, player de áudio e integração veicular.'],
+            ['client/menu.lua','Menus ox_lib, playlists, músicas e controles do player.'],
+            ['server/main.lua','Sessões, autoridade de props, playlists, SQL e usable items.'],
+            ['server/version.lua','Verificação de versão no GitHub.'],
+            ['pr_bridge','Fornece pr_lib: callback, DB, framework, inventory, notify e target.'],
+            ['pr_3dsound','Engine de reprodução espacial usada pelo resource.']
+          ]
+        },
+        note:{
+          pt:'O repositório também contém shared/main.lua e shared/bridge.lua, mas eles não estão listados no fxmanifest 2.1.7. Portanto, a documentação considera pr_bridge como o bridge ativo em runtime e trata esses dois arquivos como código legado/auxiliar não carregado pela versão atual.',
+          en:'The repository also contains shared/main.lua and shared/bridge.lua, but they are not listed in the 2.1.7 fxmanifest. This documentation therefore treats pr_bridge as the active runtime bridge and those files as legacy/helper code not loaded by the current version.'
+        }
+      },
+      {
+        id:'installation',
+        title:{pt:'Instalação',en:'Installation'},
+        text:{
+          pt:'O fxmanifest declara três dependências obrigatórias. O PR Boombox também precisa de um provider SQL disponível através do pr_bridge para que playlists sejam persistidas.',
+          en:'The fxmanifest declares three required dependencies. PR Boombox also needs an SQL provider available through pr_bridge for playlist persistence.'
+        },
+        code:"ensure ox_lib\nensure pr_bridge\nensure pr_3dsound\nensure pr_boombox\n\n-- opcional, para áudio multi-speaker em veículos\nensure pr_soundSystem"
+      },
+      {
+        id:'database',
+        title:{pt:'Banco de dados',en:'Database'},
+        text:{
+          pt:'Com PR.autoDb=true, server/main.lua cria automaticamente as duas tabelas que o fluxo atual usa: pr_boomboxplaylists e pr_boomboxsongs. O arquivo shared/database.sql também contém pr_boomboxsounds, porém o código 2.1.7 não consulta essa terceira tabela.',
+          en:'With PR.autoDb=true, server/main.lua automatically creates the two tables used by the current flow: pr_boomboxplaylists and pr_boomboxsongs. shared/database.sql also defines pr_boomboxsounds, but 2.1.7 code does not query that third table.'
+        },
+        code:"PR.autoDb = true"
+      },
+      {
+        id:'database-schema',
+        title:{pt:'Schema das playlists',en:'Playlist schema'},
+        table:{
+          headers:['Tabela / Campo','Uso'],
+          rows:[
+            ['pr_boomboxplaylists.id','ID da playlist.'],
+            ['pr_boomboxplaylists.user','Identifier/citizen/character resolvido pelo pr_bridge.'],
+            ['pr_boomboxplaylists.playlist','Nome, até 50 caracteres.'],
+            ['pr_boomboxplaylists.created_at','Timestamp de criação.'],
+            ['pr_boomboxsongs.id','ID da música.'],
+            ['pr_boomboxsongs.playlist_id','Playlist proprietária.'],
+            ['pr_boomboxsongs.url','URL de áudio, até 255 caracteres.'],
+            ['pr_boomboxsongs.name','Nome da música, até 150 caracteres.'],
+            ['pr_boomboxsongs.author','Autor, até 50 caracteres.'],
+            ['pr_boomboxsongs.maxDuration','Duração informada, em segundos.']
+          ]
+        }
+      },
+      {
+        id:'items',
+        title:{pt:'Itens de boombox configurados',en:'Configured boombox items'},
+        table:{
+          headers:['Item','Prop','Distância'],
+          rows:[
+            ['boombox_radio','prop_boombox_01','45'],
+            ['boombox_radio_01','prop_boombox_01','45'],
+            ['boombox_radio_03','prop_radio_01','15'],
+            ['boombox_radio_04','v_res_mm_audio','25'],
+            ['boombox_radio_06','v_res_fh_speakerdock','28'],
+            ['boombox_radio_07','as_prop_as_speakerdock','28'],
+            ['boombox_radio_08','v_ind_cs_hifi','21'],
+            ['boombox_radio_09','sm_prop_smug_radio_01','19'],
+            ['boombox_radio_10','v_res_j_radio','19'],
+            ['boombox_radio_11','m24_1_prop_m41_radio_01a','31']
+          ]
+        }
+      },
+      {
+        id:'add-item',
+        title:{pt:'Como adicionar uma nova caixa de som',en:'How to add a new speaker'},
+        text:{
+          pt:'O item precisa existir no inventário e também em PR.bomboxItem. Quando PR.useItem=true, o servidor registra todos os nomes dessa tabela como usable item através do pr_bridge.',
+          en:'The item must exist in the inventory and in PR.bomboxItem. With PR.useItem=true, the server registers every configured item name as a usable item through pr_bridge.'
+        },
+        code:"PR.bomboxItem['boombox_custom'] = {\n    prop = 'prop_boombox_01',\n    distance = 30,\n    Carry = {\n        bone = 57005,\n        offset = { x = 0.24, y = 0.04, z = -0.16 },\n        rotation = { x = -90.0, y = 0.0, z = 80.0 },\n        anim = {\n            dict = 'missheistdocksprep1hold_cellphone',\n            name = 'static',\n            flag = 49\n        },\n        pickupAnim = {\n            dict = 'pickup_object',\n            name = 'pickup_low',\n            duration = 1000,\n            flag = 50\n        }\n    }\n}"
+      },
+      {
+        id:'use-item-flow',
+        title:{pt:'Fluxo ao usar o item',en:'Usable item flow'},
+        text:{
+          pt:'O registro tenta primeiro pr_lib.inventory.RegisterUsableItem e também o adapter de framework. Um debounce de 750 ms evita callback duplicado do mesmo source/item/slot. Se o player já possui uma caixa colocada ou um placement pendente, o uso é recusado.',
+          en:'Registration first tries pr_lib.inventory.RegisterUsableItem and also the framework adapter. A 750 ms debounce prevents duplicate callbacks for the same source/item/slot. If the player already has a placed speaker or pending placement, use is rejected.'
+        },
+        code:"usar item\n  ↓\nRemoveItem(source, item, 1, slot)\n  ↓\npendingPlacement[source] = item\n  ↓\nclient:placeProp\n  ↓\nserver:createProp\n  ↓\nnetwork entity + State Bags"
+      },
+      {
+        id:'placement',
+        title:{pt:'Criação e posicionamento da caixa',en:'Speaker creation and placement'},
+        text:{
+          pt:'O client calcula um ponto cerca de 1,2 m à frente do ped, mas a entidade é criada pelo servidor. Depois de obter o Network ID, o servidor congela o objeto, grava os State Bags e registra a caixa em playersPlaced[source].',
+          en:'The client calculates a point roughly 1.2 m in front of the ped, but the entity itself is created by the server. Once a Network ID exists, the server freezes it, writes State Bags and registers the speaker in playersPlaced[source].'
+        }
+      },
+      {
+        id:'statebags',
+        title:{pt:'State Bags da entidade',en:'Entity State Bags'},
+        table:{
+          headers:['State','Conteúdo'],
+          rows:[
+            ['pr_boombox','true — identifica entidade do sistema.'],
+            ['pr_boombox_owner','Server ID do owner.'],
+            ['pr_boombox_item','Nome do item que originou a caixa.'],
+            ['pr_boombox_distance','Distância sonora configurada para o item.'],
+            ['pr_boombox_carried','true/false conforme está sendo carregada.']
+          ]
+        }
+      },
+      {
+        id:'carry',
+        title:{pt:'Carry sincronizado',en:'Synchronized carry'},
+        text:{
+          pt:'Carry não cria outro prop. O mesmo objeto networked é descongelado e anexado ao bone do ped. O servidor altera pr_boombox_carried e transmite syncCarry para todos. Clients que recebem o State Bag também conseguem reconstruir o attach no owner correto.',
+          en:'Carry does not create a second prop. The same networked object is unfrozen and attached to the ped bone. The server updates pr_boombox_carried and broadcasts syncCarry. Clients receiving the State Bag can also rebuild the attachment on the correct owner.'
+        },
+        code:"bone = 57005\noffset = { x = 0.24, y = 0.04, z = -0.16 }\nrotation = { x = -90.0, y = 0.0, z = 80.0 }"
+      },
+      {
+        id:'carry-controls',
+        title:{pt:'Controles ao carregar',en:'Carry controls'},
+        table:{
+          headers:['Controle','Ação'],
+          rows:[
+            ['E / control 38','Colocar a caixa novamente no chão.'],
+            ['G / control 47','Guardar a caixa de volta no inventário.']
+          ]
+        },
+        note:{
+          pt:'O player não pode iniciar carry enquanto estiver dentro de um veículo.',
+          en:'The player cannot start carry while inside a vehicle.'
+        }
+      },
+      {
+        id:'ownership',
+        title:{pt:'Propriedade do prop',en:'Prop ownership'},
+        text:{
+          pt:'Carry, reposicionamento e pickup são validados no servidor contra playersPlaced[source]. Portanto, outro player pode ver o target, mas o servidor não autoriza mover ou guardar uma caixa que não pertence àquele source.',
+          en:'Carry, repositioning and pickup are server-validated against playersPlaced[source]. Another player may see the target, but the server does not authorize moving or storing a speaker owned by another source.'
+        }
+      },
+      {
+        id:'pickup',
+        title:{pt:'Guardar de volta no inventário',en:'Returning the speaker to inventory'},
+        text:{
+          pt:'pickupProp para a sessão ligada à entidade, remove playersPlaced[source], devolve o item configurado ao inventário quando PR.useItem=true, apaga a entidade no servidor e avisa todos os clients para limparem o prop local.',
+          en:'pickupProp stops sessions bound to the entity, clears playersPlaced[source], returns the configured item when PR.useItem=true, deletes the entity server-side and tells all clients to clear local references.'
+        }
+      },
+      {
+        id:'target',
+        title:{pt:'Target e fallback sem target',en:'Target and no-target fallback'},
+        text:{
+          pt:'Quando pr_lib.target.addModel está disponível, todos os props configurados recebem quatro ações. Sem target, o sistema usa TextUI e controles de teclado para a caixa própria colocada.',
+          en:'When pr_lib.target.addModel is available, every configured prop receives four actions. Without a target adapter, the system falls back to TextUI and keyboard controls for the locally owned placed speaker.'
+        },
+        table:{
+          headers:['Ação','Função'],
+          rows:[
+            ['Open music','Abre o menu e seleciona a caixa como output.'],
+            ['Carry radio','Pega a caixa na mão.'],
+            ['Place ground','Coloca a caixa carregada no chão.'],
+            ['Pickup radio','Guarda no inventário.']
+          ]
+        }
+      },
+      {
+        id:'no-target-controls',
+        title:{pt:'Controles quando não há target',en:'Controls without target'},
+        table:{
+          headers:['Controle','Ação'],
+          rows:[
+            ['E / control 38','Abrir o menu quando perto da caixa.'],
+            ['H / control 74','Carregar a caixa.'],
+            ['G / control 47','Guardar a caixa.']
+          ]
+        }
+      },
+      {
+        id:'menu',
+        title:{pt:'Menu principal do player',en:'Main player menu'},
+        text:{
+          pt:'O menu é construído com ox_lib e possui três entradas principais: player atual, playlists e criação de playlist. Se já existe uma sessão ativa, Play abre diretamente os controles; caso contrário leva às playlists.',
+          en:'The menu is built with ox_lib and has three main entries: current player, playlists and playlist creation. If a session is active, Play opens player controls directly; otherwise it opens playlists.'
+        }
+      },
+      {
+        id:'playlist-create',
+        title:{pt:'Criando playlists e músicas',en:'Creating playlists and songs'},
+        steps:{
+          pt:[
+            'Abra /bombox ou F7.',
+            'Selecione Criar Playlist.',
+            'Informe um nome de 2 a 50 caracteres.',
+            'Abra a playlist criada.',
+            'Selecione Adicionar música.',
+            'Informe nome, URL, autor opcional e duração opcional.',
+            'A música passa a ser carregada da tabela pr_boomboxsongs.'
+          ],
+          en:[
+            'Open /bombox or F7.',
+            'Select Create Playlist.',
+            'Enter a 2–50 character name.',
+            'Open the newly created playlist.',
+            'Select Add song.',
+            'Enter name, URL, optional author and optional duration.',
+            'The song is then loaded from pr_boomboxsongs.'
+          ]
+        }
+      },
+      {
+        id:'playlist-security',
+        title:{pt:'Segurança das playlists',en:'Playlist ownership security'},
+        text:{
+          pt:'Adicionar, excluir música e excluir playlist chamam ownsPlaylist no servidor. A query exige simultaneamente o ID da playlist e o identifier do source, impedindo que um player altere playlists de outro apenas enviando outro ID.',
+          en:'Adding/removing songs and deleting playlists call ownsPlaylist server-side. The query requires both playlist ID and source identifier, preventing a player from modifying another player’s playlist by submitting a different ID.'
+        }
+      },
+      {
+        id:'play-target-priority',
+        title:{pt:'Como o output de áudio é escolhido',en:'How the playback output is selected'},
+        text:{
+          pt:'getPlaybackTarget possui prioridade explícita. Isso evita que abrir o menu dentro de um carro substitua uma caixa que o player está carregando ou acabou de selecionar.',
+          en:'getPlaybackTarget uses explicit priority so opening the menu inside a vehicle does not override a speaker the player is carrying or has just selected.'
+        },
+        code:"1. caixa carregada\n2. caixa selecionada recentemente\n3. veículo atual\n4. boombox válido mais próximo\n5. nenhum target"
+      },
+      {
+        id:'session',
+        title:{pt:'Sessão de reprodução',en:'Playback session'},
+        text:{
+          pt:'Cada source possui no máximo uma sessão ativa em playersActive[source]. O ID sonoro é determinístico: pr_boombox:<serverId>. Iniciar outra música sobrescreve a sessão e, no client, playLocalSound destrói primeiro o som com o mesmo ID antes de iniciar o novo.',
+          en:'Each source has at most one active session in playersActive[source]. The sound ID is deterministic: pr_boombox:<serverId>. Starting another song replaces the session and playLocalSound destroys the previous sound with the same ID before starting the next one.'
+        },
+        code:"{\n  id = 'pr_boombox:12',\n  owner = 12,\n  mode = 'prop',\n  entityNetId = 456,\n  song = {...},\n  playlist = {...},\n  songIndex = 1,\n  volume = 50,\n  distance = 45,\n  paused = false\n}"
+      },
+      {
+        id:'sync',
+        title:{pt:'Sincronização para todos os jogadores',en:'Synchronization to all players'},
+        text:{
+          pt:'Play, pause/resume, stop, volume e distance são enviados pelo servidor para todos os clients. Quando um player entra depois, o client aguarda 2 segundos, chama pr_boombox:getActiveSessions e recria localmente cada sessão já ativa.',
+          en:'Play, pause/resume, stop, volume and distance are broadcast by the server to all clients. A joining player waits two seconds, calls pr_boombox:getActiveSessions and recreates every currently active session locally.'
+        }
+      },
+      {
+        id:'3dsound',
+        title:{pt:'Integração com PR 3D Sound',en:'PR 3D Sound integration'},
+        text:{
+          pt:'Quando PR.SoundResource é pr_3dsound, o caminho preferido dispara pr_3dsound:client:playUrlPos e depois attachToEntity quando existe entityNetId. Volume do menu é convertido de 0–100 para 0.0–1.0 antes de ser enviado à engine.',
+          en:'When PR.SoundResource is pr_3dsound, the preferred path triggers pr_3dsound:client:playUrlPos and then attachToEntity when an entityNetId exists. Menu volume is converted from 0–100 into 0.0–1.0 before reaching the audio engine.'
+        },
+        code:"volume3D = session.volume / 100"
+      },
+      {
+        id:'sound-export-compat',
+        title:{pt:'Compatibilidade de exports de som',en:'Sound export compatibility'},
+        text:{
+          pt:'PR.SoundExports lista vários aliases para playAttached, play, pause, resume, destroy, volume e distance. exportCall tenta cada nome e também tenta chamada com self, permitindo compatibilidade com diferentes assinaturas do resource de áudio.',
+          en:'PR.SoundExports lists aliases for playAttached, play, pause, resume, destroy, volume and distance. exportCall tries each name and also retries with self, allowing compatibility with multiple audio-resource signatures.'
+        }
+      },
+      {
+        id:'vehicle',
+        title:{pt:'Reprodução em veículo',en:'Vehicle playback'},
+        text:{
+          pt:'Se não houver boombox carregada/selecionada e o player estiver dentro de um veículo, o veículo vira o playback target. Sem pr_soundSystem, o áudio pode ser anexado ao próprio veículo. Com pr_soundSystem ativo, o PR Boombox exige que o carro possua ao menos um prop de alto-falante reconhecido.',
+          en:'If there is no carried/selected boombox and the player is inside a vehicle, the vehicle becomes the playback target. Without pr_soundSystem the audio can attach to the vehicle itself. With pr_soundSystem running, PR Boombox requires at least one recognized speaker prop installed in the car.'
+        }
+      },
+      {
+        id:'vehicle-multispeaker',
+        title:{pt:'Paredão / múltiplos alto-falantes',en:'Multi-speaker vehicle audio'},
+        text:{
+          pt:'Com pr_soundSystem, o client lê pr_sound_props no State Bag do veículo ou GlobalState.pr_sound_vehicles pela placa. Cada prop cujo model está em PR.SoundSystemWhitelist gera uma fonte 3D independente tocando a mesma URL.',
+          en:'With pr_soundSystem, the client reads pr_sound_props from the vehicle State Bag or GlobalState.pr_sound_vehicles by plate. Every prop whose model appears in PR.SoundSystemWhitelist becomes an independent 3D source playing the same URL.'
+        },
+        code:"música\n  ├─ speaker 1 -> pr_boombox:12:speaker:1\n  ├─ speaker 2 -> pr_boombox:12:speaker:2\n  └─ speaker 3 -> pr_boombox:12:speaker:3"
+      },
+      {
+        id:'vehicle-speaker-position',
+        title:{pt:'Posição real de cada fonte sonora',en:'Real position of each sound source'},
+        text:{
+          pt:'Para cada speaker, getSpeakerCoords usa bone do veículo e offsets ox/oy/oz gravados pelo pr_soundSystem. Se o objeto físico correspondente for encontrado, sua posição real é usada. Um updater roda a cada 250 ms e envia pr_3dsound:client:updateCoords, fazendo o som acompanhar o veículo em movimento.',
+          en:'For each speaker, getSpeakerCoords uses the vehicle bone plus ox/oy/oz offsets saved by pr_soundSystem. If the matching physical object is found, its real coordinates are used. An updater runs every 250 ms and sends pr_3dsound:client:updateCoords so sound sources follow a moving vehicle.'
+        }
+      },
+      {
+        id:'amplifiers',
+        title:{pt:'Amplificadores aumentam o alcance',en:'Amplifiers increase range'},
+        text:{
+          pt:'buildVehicleSoundLayout conta props presentes em PR.SoundSystemAmplifield. A distância do grupo é calculada como SoundSystemDistance + quantidadeDeAmplificadores × SoundSystemDistancePlus.',
+          en:'buildVehicleSoundLayout counts props listed in PR.SoundSystemAmplifield. Group distance is calculated as SoundSystemDistance + amplifierCount × SoundSystemDistancePlus.'
+        },
+        code:"PR.SoundSystemDistance = 45\nPR.SoundSystemDistancePlus = 15\n\n-- 0 amplificadores = 45\n-- 1 amplificador  = 60\n-- 2 amplificadores = 75\n-- 3 amplificadores = 90"
+      },
+      {
+        id:'volume',
+        title:{pt:'Controle de volume',en:'Volume control'},
+        text:{
+          pt:'O player control usa slider de PR.MinVolume até PR.MaxVolume. O servidor também clampa o valor antes de salvar e retransmitir. O padrão atual é 0–100 com volume inicial 50.',
+          en:'Player controls use a slider from PR.MinVolume through PR.MaxVolume. The server also clamps the value before storing and broadcasting it. Current defaults are 0–100 with initial volume 50.'
+        },
+        code:"PR.DefaultVolume = 50\nPR.MinVolume = 0\nPR.MaxVolume = 100"
+      },
+      {
+        id:'distance',
+        title:{pt:'Distância do som',en:'Sound distance'},
+        text:{
+          pt:'Para boombox física, a distância vem prioritariamente de PR.bomboxItem[item].distance, então o evento setDistance não consegue alterar livremente uma caixa colocada: o servidor volta ao valor do item. PR.DefaultDistance é fallback.',
+          en:'For physical boomboxes, range primarily comes from PR.bomboxItem[item].distance, so setDistance cannot freely override a placed speaker: the server restores the item-defined range. PR.DefaultDistance is the fallback.'
+        }
+      },
+      {
+        id:'hotkeys',
+        title:{pt:'Comando e atalhos',en:'Command and hotkeys'},
+        table:{
+          headers:['Entrada','Padrão','Função'],
+          rows:[
+            ['/bombox','PR.Command','Abrir o menu.'],
+            ['F7','PR.Keybinds.open','Abrir o menu.'],
+            ['F9','PR.Keybinds.playPause','Alternar pause/resume da sessão do próprio player.'],
+            ['F10','PR.Keybinds.stop','Parar a sessão do próprio player.']
+          ]
+        }
+      },
+      {
+        id:'playlist-current-behavior',
+        title:{pt:'Playlist: comportamento implementado hoje',en:'Playlist: currently implemented behavior'},
+        text:{
+          pt:'Ao tocar uma playlist, o menu permite marcar Randomizar e escolher a música inicial. Randomizar escolhe um índice aleatório. O checkbox Order é exibido, mas input[2] não é utilizado depois do dialog. Também não existe listener de término da música para avançar automaticamente para songIndex+1.',
+          en:'When starting a playlist, the dialog allows Randomize and selecting an initial song. Randomize chooses a random index. The Order checkbox is rendered, but input[2] is not used after the dialog. There is also no end-of-track listener that automatically advances to songIndex+1.'
+        },
+        note:{
+          pt:'Na versão 2.1.7, “playlist” funciona como biblioteca/seleção de músicas; reprodução sequencial automática ainda não está implementada neste código.',
+          en:'In version 2.1.7, a playlist acts as a music library/selection; automatic sequential playback is not implemented in this code.'
+        }
+      },
+      {
+        id:'duration',
+        title:{pt:'Campo maxDuration',en:'maxDuration field'},
+        text:{
+          pt:'maxDuration é salvo e retornado pelo banco, porém client/main.lua e client/menu.lua não usam esse valor para cortar, avançar ou encerrar reprodução automaticamente.',
+          en:'maxDuration is stored and returned by the database, but client/main.lua and client/menu.lua do not use it to cut, advance or automatically stop playback.'
+        }
+      },
+      {
+        id:'security-playback',
+        title:{pt:'Validação de reprodução — ponto de atenção',en:'Playback validation — important caveat'},
+        text:{
+          pt:'pr_boombox:server:play valida apenas a existência de data.song.url. O servidor não confirma se a música pertence a uma playlist do source, não valida domínio/URL e não confirma que entityNetId pertence ao player antes de retransmitir a sessão. Para servidor público, o recomendado é validar URL e target no server.',
+          en:'pr_boombox:server:play only checks that data.song.url exists. The server does not verify that the song belongs to the source playlist, validate URL/domain, or confirm target entity ownership before broadcasting the session. Public servers should validate URL and target server-side.'
+        }
+      },
+      {
+        id:'prop-lifecycle',
+        title:{pt:'Persistência e ciclo de vida dos props',en:'Prop persistence and lifecycle'},
+        text:{
+          pt:'playersPlaced, pendingPlacement e playersActive são tabelas em memória. Não existe tabela SQL para posições de boombox, portanto a caixa não é persistida como mundo permanente entre restarts.',
+          en:'playersPlaced, pendingPlacement and playersActive are in-memory tables. There is no SQL table for boombox world positions, so placed speakers are not persistent world objects across resource/server restarts.'
+        },
+        note:{
+          pt:'No playerDropped atual, a sessão e os registros em memória são limpos, mas o código não chama DeleteEntity no prop colocado. Isso pode deixar uma entidade órfã até a limpeza natural/restart, sem owner registrado em playersPlaced. Vale adicionar cleanup explícito.',
+          en:'On the current playerDropped path, playback and in-memory records are cleared, but the placed entity is not explicitly deleted. This can leave an orphan entity until natural cleanup/restart with no owner entry in playersPlaced. Explicit cleanup is recommended.'
+        }
+      },
+      {
+        id:'version-check',
+        title:{pt:'Version checker — inconsistência atual',en:'Version checker — current inconsistency'},
+        text:{
+          pt:'server/version.lua usa Config.VersionCheck, Config.Debug e Lang:t(...), enquanto a configuração principal desta versão usa PR.Debug, PR.* e a função L(...). Como Config não é definido pelo próprio repositório, esse arquivo depende de um global externo ou precisa ser alinhado ao padrão PR antes de ser considerado confiável.',
+          en:'server/version.lua uses Config.VersionCheck, Config.Debug and Lang:t(...), while the main configuration in this version uses PR.Debug, PR.* and L(...). Because this repository does not define Config itself, that file depends on an external global or should be aligned with the PR configuration pattern before being considered reliable.'
+        }
+      },
+      {
+        id:'legacy-files',
+        title:{pt:'Arquivos bridge legados no repositório',en:'Legacy bridge files in the repository'},
+        text:{
+          pt:'shared/main.lua e shared/bridge.lua contêm detecção própria de frameworks, inventários, SQL, minigames e chaves, inclusive comentários herdados de pr_soundSystem. Porém o fxmanifest não carrega esses arquivos. Alterá-los não muda o runtime atual do PR Boombox enquanto eles continuarem fora de shared_scripts.',
+          en:'shared/main.lua and shared/bridge.lua contain their own framework, inventory, SQL, minigame and vehicle-key detection, including inherited pr_soundSystem comments. However, fxmanifest does not load these files. Editing them does not affect current PR Boombox runtime while they remain outside shared_scripts.'
+        }
+      },
+      {
+        id:'performance',
+        title:{pt:'Performance e loops',en:'Performance and loops'},
+        table:{
+          headers:['Sistema','Cadência'],
+          rows:[
+            ['Session restore','Uma vez, ~2 s após iniciar o client.'],
+            ['Carry help/animation','0 ms enquanto carregando.'],
+            ['No-target proximity','750 ms longe; 0 ms quando próximo da caixa.'],
+            ['Vehicle speaker coordinates','250 ms enquanto um grupo multi-speaker está tocando.'],
+            ['Network entity resolve','Loops temporários com timeout, não permanentes.']
+          ]
+        }
+      },
+      {
+        id:'troubleshooting',
+        title:{pt:'Diagnóstico rápido',en:'Quick troubleshooting'},
+        bullets:{
+          pt:[
+            'Item não cria caixa: confirme o item no inventário, PR.useItem=true e o mesmo nome em PR.bomboxItem.',
+            'Item some e prop falha: o servidor possui placeFailed/createProp failure paths que tentam devolver o item; confira logs e model.',
+            'Target não aparece: confirme adapter target no pr_bridge; existe fallback por teclado.',
+            'Player não consegue pegar caixa de outro: comportamento esperado pela validação de ownership.',
+            'Música não toca: confirme pr_3dsound iniciado e URL reproduzível.',
+            'Música no carro não toca com pr_soundSystem: o veículo precisa ter um prop listado em SoundSystemWhitelist.',
+            'Alto-falantes do carro estão sem posição correta: confira bone e offsets ox/oy/oz produzidos pelo pr_soundSystem.',
+            'Volume funciona mas distance não muda na boombox: a distância da caixa é reimposta pelo config do item.',
+            'Playlist não avança automaticamente: esse comportamento ainda não existe na 2.1.7.',
+            'Caixa pode ficar órfã após disconnect: playerDropped não deleta explicitamente o prop.',
+            'Version checker gera erro de Config: version.lua usa nomenclatura diferente da configuração PR.'
+          ],
+          en:[
+            'Item does not create a speaker: verify the inventory item, PR.useItem=true and matching PR.bomboxItem key.',
+            'Item disappears and prop creation fails: failure paths try to return the item; inspect logs and model validity.',
+            'Target missing: verify the pr_bridge target adapter; keyboard fallback exists.',
+            'Player cannot pick up another player’s speaker: expected ownership validation.',
+            'No music: verify pr_3dsound and that the URL is playable.',
+            'Vehicle music fails with pr_soundSystem: the vehicle needs a prop listed in SoundSystemWhitelist.',
+            'Vehicle speakers have wrong positions: verify bone and ox/oy/oz from pr_soundSystem.',
+            'Volume changes but boombox range does not: item configuration reasserts its distance.',
+            'Playlist does not auto-advance: this behavior is not implemented in 2.1.7.',
+            'Speaker may become orphaned after disconnect: playerDropped does not explicitly delete the entity.',
+            'Version checker Config error: version.lua uses a different configuration namespace.'
+          ]
+        }
+      },
+      {
+        id:'customization-checklist',
+        title:{pt:'Checklist para criar uma nova caixa de som',en:'New speaker checklist'},
+        steps:{
+          pt:[
+            'Crie o item no inventário.',
+            'Adicione a mesma key em PR.bomboxItem.',
+            'Escolha um prop válido do GTA/custom stream.',
+            'Defina a distância sonora desejada.',
+            'Ajuste bone, offset e rotation do Carry.',
+            'Ajuste anim e pickupAnim se necessário.',
+            'Use o item e confirme que ele é removido uma única vez.',
+            'Teste criação server-side e Network ID.',
+            'Teste Open, Carry, Place e Pickup via target.',
+            'Teste o fallback sem target.',
+            'Teste reprodução com dois jogadores.',
+            'Teste pause/resume, stop e volume.',
+            'Teste reconnect de um terceiro client enquanto música está tocando.',
+            'Se usar pr_soundSystem, teste cada speaker e amplificador instalado no veículo.',
+            'Teste disconnect do owner e defina uma política de cleanup para produção.'
+          ],
+          en:[
+            'Create the item in your inventory system.',
+            'Add the same key to PR.bomboxItem.',
+            'Choose a valid GTA/custom streamed prop.',
+            'Set the desired sound range.',
+            'Tune carry bone, offset and rotation.',
+            'Adjust carry/pickup animations if necessary.',
+            'Use the item and confirm it is removed exactly once.',
+            'Test server-side object creation and Network ID.',
+            'Test Open, Carry, Place and Pickup through target.',
+            'Test the no-target fallback.',
+            'Test playback with two players.',
+            'Test pause/resume, stop and volume.',
+            'Test a third client joining while music is already playing.',
+            'If using pr_soundSystem, test every installed speaker and amplifier.',
+            'Test owner disconnect and define a production cleanup policy.'
+          ]
+        }
+      }
+    ]
+  },
   pr_wep: {
     name: 'PR WEP',
     code: 'pr_wep',
