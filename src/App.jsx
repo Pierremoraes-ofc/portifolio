@@ -70,6 +70,14 @@ const HOBBY_PROJECTS = [
     en: 'Elevator system for FiveM with PR ecosystem integration and a decoupled interaction flow.',
   },
   {
+    name: 'PR Boombox',
+    repo: 'https://github.com/Pierremoraes-ofc/pr_boombox',
+    code: 'pr_boombox',
+    tags: ['FiveM', '3D Audio', 'Playlists', 'Vehicle Sound'],
+    pt: 'Sistema de som 3D com boombox físico, playlists persistentes, carry e reposicionamento, áudio sincronizado, atalhos, múltiplos modelos e integração com sistemas de som automotivo por múltiplos alto-falantes.',
+    en: '3D audio system with physical boomboxes, persistent playlists, carry/repositioning, synchronized playback, hotkeys, multiple models and multi-speaker vehicle sound-system integration.',
+  },
+  {
     name: 'PR WEP',
     repo: 'https://github.com/Pierremoraes-ofc/pr-wep',
     code: 'pr_wep',
