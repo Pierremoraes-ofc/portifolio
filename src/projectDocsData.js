@@ -3892,25 +3892,555 @@ pr_lib.notify(source, {
     ]
   },
   pr_elevator: {
-    name:'PR Elevator',code:'pr_elevator',repo:'https://github.com/Pierremoraes-ofc/pr_elevator',
-    category:{pt:'Hobby • World Interaction',en:'Hobby • World Interaction'},
-    lead:{pt:'Sistema de elevadores e controle de acesso com painéis físicos DUI, criação in-game, permissões por andar, cartões, senhas, grupos, character IDs e integração completa com PR Bridge.',en:'Elevator and access-control system with physical DUI panels, in-game creation, per-floor permissions, keycards, passwords, groups, character IDs and PR Bridge integration.'},
-    facts:[['Version','1.1.2'],['Dependency','PR Bridge'],['Persistence','MariaDB'],['Locales','PT / EN / ES / FR']],
+    name:'PR Elevator',
+    code:'pr_elevator',
+    repo:'https://github.com/Pierremoraes-ofc/pr_elevator',
+    category:{pt:'Hobby • World Interaction & Access Control',en:'Hobby • World Interaction & Access Control'},
+    lead:{
+      pt:'Sistema completo de elevadores, transporte entre andares e controle de acesso para FiveM. Cada andar pode ter seu próprio destino, painel físico DUI, código, aparência, distância de interação e política de autorização, com suporte a empregos, gangs, grades, Character IDs, cartões físicos com metadata, senhas e combinações de requisitos. O mesmo runtime transporta jogadores a pé ou o veículo em que estejam, permitindo desde elevadores sociais e áreas VIP até plataformas de garagem e elevadores veiculares.',
+      en:'Complete FiveM elevator, floor transport and access-control system. Each floor can define its own destination, physical DUI panel, code, appearance, interaction distance and authorization policy, with jobs, gangs, grades, Character IDs, physical metadata keycards, passwords and combined requirements. The same runtime transports a player on foot or the vehicle they are currently inside, enabling passenger elevators, VIP areas, garages and vehicle lifts.'
+    },
+    facts:[
+      ['Access modes','9'],
+      ['Panel','Physical DUI keypad'],
+      ['Transport','Pedestrian + vehicle'],
+      ['Interaction','PR Bridge Target / Interact'],
+      ['Persistence','MariaDB + JSON settings'],
+      ['Locales','PT-BR / EN-US / ES-ES / FR-FR'],
+      ['Dependency','PR Bridge']
+    ],
     sections:[
-      {id:'overview',title:{pt:'Elevador físico',en:'Physical elevator'},text:{pt:'Cada elevador é uma entidade persistente com andares independentes. Cada andar possui destino, código, ordem, posição física do painel, metadata visual, distância de interação e sua própria política de acesso.',en:'Each elevator is a persistent entity with independent floors. Every floor stores destination, code, order, physical panel placement, visual metadata, interaction distance and its own access policy.'}},
-      {id:'creator',title:{pt:'Fluxo de criação',en:'Creation workflow'},bullets:{pt:['Crie o elevador pai e nomeie-o.','Em cada andar, capture posição/heading de destino.','Posicione o keypad físico usando gizmo do PR Bridge.','Configure código, ordem, distância, cores e política de acesso.','Alterações disparam refresh para reconstruir o runtime.'],en:['Create and name the parent elevator.','Capture destination position/heading per floor.','Place physical keypad using PR Bridge gizmo.','Configure code, order, distance, colors and access policy.','Changes broadcast refresh to rebuild runtime.']}},
-      {id:'access',title:{pt:'Controle de acesso por andar',en:'Per-floor access control'},cards:[['Public','Sem restrição.'],['Job / gang','Grupo configurado + grade mínima.'],['Citizen ID','Lista de identificadores de personagem.'],['Keycard','Item/metadado de cartão exigido.'],['Password','Senha validada server-side.'],['Combined','job_keycard, job_password e job_citizenid.']]},
-      {id:'dui',title:{pt:'Keypad DUI',en:'DUI keypad'},text:{pt:'O sistema cria uma textura browser-driven para o keypad físico, controla câmera/foco, detecta botões, reproduz feedback e apresenta estados como CHECKING, ERROR, SUCCESS, andar inválido e senha incorreta.',en:'System creates a browser-driven texture for the physical keypad, controls camera/focus, detects buttons, provides feedback and exposes CHECKING, ERROR, SUCCESS, invalid floor and invalid password states.'}},
-      {id:'interaction',title:{pt:'Target e Interact',en:'Target & Interact'},text:{pt:'Runtime pode usar Target, Interact ou ambos via PR Bridge. Preferências incluem respeito a paredes/LOS, offset frontal do painel e distância. Um fallback de proximidade pode operar quando o provider/registro não está disponível.',en:'Runtime can use Target, Interact or both through PR Bridge. Preferences include wall/LOS behavior, front offset and distance. A proximity fallback can operate when provider/registration is unavailable.'}},
-      {id:'database',title:{pt:'Banco e migrations',en:'Database & migrations'},text:{pt:'Duas tabelas principais armazenam elevadores e andares. Startup cria/migra schema, adiciona campos modernos de acesso e pode migrar restrições antigas do nível do elevador para os andares.',en:'Two main tables store elevators and floors. Startup creates/migrates schema, adds modern access fields and can migrate older elevator-level restrictions into floor records.'},code:`pr_elevator_elevator
-  └─ parent / name / legacy access
-
-pr_elevator_floor
-  └─ code / order / distance
-  └─ destination / interact_coords
-  └─ colors / access policy`},
-      {id:'exports',title:{pt:'Exports',en:'Exports'},bullets:{pt:['OpenCreatorMenu / OpenCreateElevatorMenu','OpenCreateFloorMenu / OpenCreateKeycardMenu','CreateDUI / CreateKeypad','CreateKeypadFromInteract / OpenKeypadEntity','DeleteKeypad'],en:['OpenCreatorMenu / OpenCreateElevatorMenu','OpenCreateFloorMenu / OpenCreateKeycardMenu','CreateDUI / CreateKeypad','CreateKeypadFromInteract / OpenKeypadEntity','DeleteKeypad']}},
-      {id:'diagnostics',title:{pt:'Diagnóstico',en:'Diagnostics'},bullets:{pt:['prelevator_refresh','prelevator_dui_status','prelevator_dui_preview','prelevator_dui_reset','createkeypad / testkeypad'],en:['prelevator_refresh','prelevator_dui_status','prelevator_dui_preview','prelevator_dui_reset','createkeypad / testkeypad']}}
+      {
+        id:'overview',
+        title:{pt:'Visão geral',en:'Overview'},
+        text:{
+          pt:'O PR Elevator trata um elevador como uma estrutura persistente composta por um elevador pai e vários andares independentes. A configuração de segurança fica no andar, não apenas no elevador inteiro. Isso permite que o mesmo conjunto tenha, por exemplo, térreo público, estacionamento liberado por cartão, cobertura exclusiva para um emprego e sala técnica protegida por emprego + senha.',
+          en:'PR Elevator models an elevator as a persistent parent with multiple independent floors. Security is configured per floor rather than only at elevator level. The same elevator can therefore have a public lobby, keycard parking level, job-restricted penthouse and a technical floor protected by job plus password.'
+        },
+        cards:[
+          ['Andares independentes','Cada destino possui nome/código, ordem, distância, cores, coordenadas, painel e política de acesso próprios.'],
+          ['Painel físico','O keypad é um prop real no mundo com textura DUI, câmera de interação, botões e estados visuais.'],
+          ['Validação server-side','Job, gang, grade, Character ID, cartão e senha são verificados no servidor antes do transporte.'],
+          ['Pedestre ou veículo','O runtime detecta se o jogador está em um veículo e transporta a entity apropriada.'],
+          ['Criação in-game','Elevadores, andares, painéis e cartões podem ser administrados por menus integrados ao PR Bridge.'],
+          ['Persistência','Elevadores/andares usam MariaDB; preferências globais de interação usam JSON revisionado.']
+        ]
+      },
+      {
+        id:'architecture',
+        title:{pt:'Arquitetura do sistema',en:'System architecture'},
+        text:{
+          pt:'A arquitetura separa persistência, interação física, autorização e transporte. O banco define elevadores e andares; o client cria os painéis e registra as interações; o servidor resolve a política de acesso; e somente depois da autorização o client executa o transporte.',
+          en:'The architecture separates persistence, physical interaction, authorization and transport. Database rows define elevators and floors; the client renders keypads and registers interactions; the server resolves access policy; and transport only happens after authorization.'
+        },
+        code:'pr_elevator_elevator\n   ↓ 1:N\npr_elevator_floor\n   ↓ interact_coords\nPhysical keypad prop + DUI\n   ↓ PR Bridge Target / Interact\nFloor code selection\n   ↓ server:checkFloorAccess\nAccess policy validation\n   ↓ allowed\nPedestrian or current vehicle transport'
+      },
+      {
+        id:'floor-model',
+        title:{pt:'Modelo de cada andar',en:'Per-floor model'},
+        text:{
+          pt:'Cada andar é uma unidade funcional completa. Além do destino, ele armazena como o player chama o andar, onde o painel existe no mundo e quais requisitos precisam ser satisfeitos. Por isso, dois andares do mesmo elevador podem se comportar de maneiras totalmente diferentes.',
+          en:'Each floor is a complete functional unit. Besides destination coordinates, it stores how players call the floor, where its physical keypad exists and which requirements must be satisfied. Two floors in the same elevator can therefore behave completely differently.'
+        },
+        table:{
+          headers:['Campo','Função'],
+          rows:[
+            ['name','Código/nome exibido e aceito no keypad, como T, S1, 1, 15 ou 50.'],
+            ['floor','Ordem/número lógico usado também como código alternativo.'],
+            ['distance','Distância associada ao andar.'],
+            ['theme_color','Cor principal configurada para apresentação.'],
+            ['theme_background','Cor de fundo configurada para apresentação.'],
+            ['coords','Destino final, incluindo posição e heading.'],
+            ['interact_coords','Posição/rotação/modelo do painel DUI ou formato legado de interação.'],
+            ['access_type','Política de acesso aplicada somente àquele andar.'],
+            ['access_job / grade','Grupo e nível mínimo quando a política exige emprego/gang.'],
+            ['access_password','Senha server-side quando usada.'],
+            ['access_key / item','Chave lógica e item físico exigidos para cartão.'],
+            ['access_citizenid','Character ID autorizado quando usado.']
+          ]
+        }
+      },
+      {
+        id:'access-modes',
+        title:{pt:'9 modos reais de controle de acesso',en:'9 implemented access-control modes'},
+        text:{
+          pt:'O menu atual expõe nove políticas de acesso. As combinações são avaliadas com lógica AND: quando um modo exige dois fatores, os dois precisam ser válidos.',
+          en:'The current menu exposes nine access policies. Combined policies use AND semantics: when a mode requires two factors, both must be valid.'
+        },
+        table:{
+          headers:['Modo','Requisito','Exemplo de uso'],
+          rows:[
+            ['public','Nenhum','Elevador social, recepção, metrô interno ou área comum.'],
+            ['job','Emprego/grupo + grade mínima','Andar de hospital, polícia, mecânica ou empresa.'],
+            ['gang','Gang/grupo + grade mínima','Base de facção ou área restrita de organização.'],
+            ['citizenid','Character ID específico','Apartamento, sala privada ou acesso nominal.'],
+            ['password','Senha','Sala técnica, cofre, bunker ou acesso compartilhado por código.'],
+            ['keycard','Cartão + access_key','Hotel, laboratório, segurança, VIP ou bunker.'],
+            ['job_citizenid','Job/grupo + Character ID','Cargo autorizado, mas limitado a uma pessoa específica.'],
+            ['job_keycard','Job/grupo + cartão','Funcionário autorizado que também precisa portar credencial física.'],
+            ['job_password','Job/grupo + senha','Equipe autorizada que também precisa conhecer um código.']
+          ]
+        },
+        note:{
+          pt:'No código existem aliases para nomes legados como job_card, gang_card, emprego_cartao, job_senha e outros; eles são normalizados para os modos atuais.',
+          en:'The runtime also normalizes legacy aliases such as job_card, gang_card, emprego_cartao and job_senha into the current access modes.'
+        }
+      },
+      {
+        id:'access-combinations',
+        title:{pt:'Como montar combinações de acesso',en:'How to build access combinations'},
+        text:{
+          pt:'Como a segurança é definida por andar, as combinações podem ser usadas para construir zonas progressivamente mais restritas dentro do mesmo prédio. O painel não precisa mudar; quem muda é a política do destino selecionado.',
+          en:'Because security is configured per floor, combinations can create progressively restricted zones inside the same building. The physical panel can remain identical while the selected destination determines the policy.'
+        },
+        table:{
+          headers:['Cenário','Configuração recomendada'],
+          rows:[
+            ['Recepção → escritórios','T = public; escritórios = job com grade mínima.'],
+            ['Hospital','T = public; enfermaria = job; direção = job com grade maior; laboratório = job_keycard.'],
+            ['Delegacia','Recepção = public; garagem = job; evidências = job_keycard; comando = job_password.'],
+            ['Hotel/VIP','Lobby = public; suítes = keycard; cobertura = keycard com access_key exclusivo.'],
+            ['Bunker','Entrada = password; operação = job_password; sala crítica = job_keycard.'],
+            ['Residência privada','Garagem = citizenid; cobertura = citizenid ou job_citizenid conforme o projeto.'],
+            ['Facção','Entrada = gang; arsenal = job_keycard usando o grupo/gang configurado; liderança = job_password.']
+          ]
+        }
+      },
+      {
+        id:'group-grade',
+        title:{pt:'Empregos, gangs e grades mínimas',en:'Jobs, gangs and minimum grades'},
+        text:{
+          pt:'As políticas baseadas em grupo leem dados do personagem e comparam o nome do emprego/gang com o grupo configurado. A grade mínima permite que um mesmo prédio tenha níveis hierárquicos de acesso. O runtime contém leitura compatível com estruturas de QB/QBX e também resolve dados de ESX quando disponíveis.',
+          en:'Group-based policies read character data and compare the configured job/gang name with the player group. Minimum grade enables hierarchical access in the same building. Runtime logic understands QB/QBX-style structures and resolves ESX data when available.'
+        },
+        code:"-- exemplo conceitual por andar\naccess_type      = 'job'\naccess_job       = 'police'\naccess_job_grade = 2\n\n-- resultado\n-- police grade 0/1 -> negado\n-- police grade 2+  -> permitido"
+      },
+      {
+        id:'citizenid',
+        title:{pt:'Acesso por Character ID',en:'Character ID access'},
+        text:{
+          pt:'O modo citizenid restringe o andar a um identificador de personagem. O resolvedor também normaliza diferentes nomes de campos usados por frameworks, como citizenid, citizenId, cid, charid e identifier. Isso é útil para áreas privadas que não devem depender apenas de profissão.',
+          en:'citizenid mode restricts a floor to a character identifier. The resolver also normalizes common framework field names such as citizenid, citizenId, cid, charid and identifier, making it useful for private areas that should not depend only on profession.'
+        },
+        cards:[
+          ['Residência','Liberar um andar para o morador específico.'],
+          ['Escritório executivo','Combinar job + Character ID para limitar a um funcionário nominal.'],
+          ['Evento/quest','Liberar um destino somente para determinado personagem.'],
+          ['Área administrativa RP','Criar acesso individual sem expor uma senha compartilhada.']
+        ]
+      },
+      {
+        id:'password',
+        title:{pt:'Senha com validação no servidor',en:'Server-validated password'},
+        text:{
+          pt:'A senha não é tratada como uma confirmação puramente visual do client. Ao selecionar um andar protegido, o painel primeiro consulta o servidor. Se o destino exigir senha, a mesma interface muda para o estado de autenticação e somente transporta após nova validação server-side.',
+          en:'Passwords are not treated as a client-only visual confirmation. When a protected floor is selected, the keypad first asks the server. If a password is required, the same interface switches to authentication mode and transport only happens after a second server-side validation.'
+        },
+        steps:{
+          pt:[
+            'Player digita o código/nome do andar.',
+            'Painel mostra estado de verificação.',
+            'Servidor carrega a política daquele andar.',
+            'Se houver senha, o visor muda para a etapa SENHA.',
+            'Player digita a senha.',
+            'Servidor compara o valor esperado.',
+            'Senha incorreta mantém o painel disponível para nova tentativa.',
+            'Senha correta mostra sucesso e libera o transporte.'
+          ],
+          en:[
+            'Player enters the floor code/name.',
+            'Keypad switches to checking state.',
+            'Server loads the selected floor policy.',
+            'If password is required, display switches to password mode.',
+            'Player enters the password.',
+            'Server validates the expected value.',
+            'Invalid password keeps the keypad available for retry.',
+            'Valid password shows success and allows transport.'
+          ]
+        }
+      },
+      {
+        id:'keycards',
+        title:{pt:'Cartões físicos e metadata',en:'Physical keycards and metadata'},
+        text:{
+          pt:'O cartão é validado como item físico de inventário e pode exigir uma chave lógica específica em metadata. O sistema procura access_key em variantes compatíveis de metadata, permitindo que o mesmo modelo de item represente credenciais diferentes.',
+          en:'Keycards are validated as physical inventory items and can require a specific logical key in metadata. The system searches compatible access_key metadata variants, allowing the same item model to represent different credentials.'
+        },
+        table:{
+          headers:['Configuração','Função'],
+          rows:[
+            ['PR.ItemList','Lista de modelos de cartões oferecidos pelo sistema.'],
+            ['access_item','Opcionalmente força um item específico para aquele andar.'],
+            ['access_key','Valor lógico que a metadata do cartão precisa possuir.'],
+            ['Any keycard','Quando access_item não é definido, o sistema percorre os itens configurados.'],
+            ['Metadata aliases','Reconhece acesso, access, access_key e accessKey.']
+          ]
+        },
+        code:"-- cartões padrão em shared/config.lua\nPR.ItemList = {\n    { item = 'key_card_ilegal',  labelKey = 'items.illegal' },\n    { item = 'key_card_security', labelKey = 'items.security' },\n    { item = 'key_card_gold',     labelKey = 'items.vip' }\n}\n\n-- exemplo de metadata lógica\nmetadata = { access_key = 'hospital_lab' }"
+      },
+      {
+        id:'keycard-examples',
+        title:{pt:'Exemplos de hierarquia com cartões',en:'Keycard hierarchy examples'},
+        table:{
+          headers:['Cartão','access_key sugerida','Uso'],
+          rows:[
+            ['Security','security_level_1','Áreas gerais de segurança.'],
+            ['Security','security_evidence','Sala de evidências.'],
+            ['Gold/VIP','vip_rooftop','Cobertura, lounge ou suíte premium.'],
+            ['Illegal','bunker_alpha','Bunker/facção específica.'],
+            ['Mesmo item, outra metadata','lab_bio_03','Laboratório ou setor técnico específico.']
+          ]
+        },
+        note:{
+          pt:'O nome do item e a access_key são conceitos diferentes. Um único item visual pode representar várias credenciais, desde que cada instância tenha metadata adequada.',
+          en:'Item name and access_key are separate concepts. A single visual card item can represent multiple credentials when each instance carries the appropriate metadata.'
+        }
+      },
+      {
+        id:'dui-panel',
+        title:{pt:'Painel físico DUI',en:'Physical DUI keypad'},
+        text:{
+          pt:'O PR Elevator usa o prop ch_prop_casino_keypad_01 como painel físico padrão e substitui sua textura de display por uma página DUI. O painel não é apenas uma NUI sobreposta: ele existe no mundo, recebe posição e rotação, pode ser colocado com gizmo e acompanha uma câmera dedicada durante a interação.',
+          en:'PR Elevator uses ch_prop_casino_keypad_01 as its default physical panel and replaces its display texture with a DUI page. It is not merely a screen overlay: the keypad exists in the world, stores position and rotation, can be placed with a gizmo and uses a dedicated camera during interaction.'
+        },
+        cards:[
+          ['Prop real','ch_prop_casino_keypad_01 é criado na posição salva do andar.'],
+          ['DUI','Uma página browser-driven alimenta a textura do display.'],
+          ['Botões físicos','Dígitos, S, #, cancelar e confirmar são mapeados no modelo.'],
+          ['Câmera','A interação abre foco/câmera adequada ao teclado.'],
+          ['Persistência','coords, rotation, heading, model e modelName podem viver em interact_coords.'],
+          ['Sem CDN crítica','O display foi ajustado para não depender de fonte/biblioteca externa para aparecer.']
+        ]
+      },
+      {
+        id:'dui-states',
+        title:{pt:'Estados do visor e autenticação',en:'Display and authentication states'},
+        text:{
+          pt:'O visor preserva o contexto da sessão e diferencia seleção de andar, autenticação e erros. Confirmações duplicadas são bloqueadas enquanto uma consulta está em andamento e respostas antigas de sessões canceladas são descartadas.',
+          en:'The display preserves session context and separates floor selection, authentication and error states. Duplicate confirmations are blocked while a request is pending and stale responses from cancelled sessions are ignored.'
+        },
+        table:{
+          headers:['Estado','Quando aparece'],
+          rows:[
+            ['ANDAR','Estado inicial para digitar o destino.'],
+            ['CHECKING / VERIFICANDO','Enquanto aguarda validação server-side.'],
+            ['SENHA','Quando a política do andar exige password.'],
+            ['SUCCESS / SUCESSO','Após autorização válida.'],
+            ['INVALID FLOOR','Código digitado não corresponde a nenhum andar.'],
+            ['CURRENT FLOOR','Destino é o mesmo andar atual.'],
+            ['DENIED','Job/gang/grade/Character ID/cartão não atendem à política.'],
+            ['INVALID PASSWORD','Senha incorreta; permite nova tentativa.'],
+            ['ERROR','Falha de consulta ou condição inesperada.']
+          ]
+        }
+      },
+      {
+        id:'interaction',
+        title:{pt:'Target, Interact ou ambos',en:'Target, Interact or both'},
+        text:{
+          pt:'A interação dos painéis é fornecida diretamente pelo PR Bridge. O administrador pode escolher Target, Interact ou ambos, decidir se paredes/obstáculos devem bloquear a interação e ajustar o ponto frontal e a distância.',
+          en:'Panel interaction is provided directly by PR Bridge. Administrators can choose Target, Interact or both, decide whether walls/obstacles should block interaction and adjust front offset and usable distance.'
+        },
+        table:{
+          headers:['Opção','Faixa / valores','Padrão'],
+          rows:[
+            ['mode','target / interact / both','target'],
+            ['respectWalls','true / false','true'],
+            ['frontOffset','0.05 a 1.00 m','0.18 m'],
+            ['distance','0.5 a 5.0 m','2.0 m']
+          ]
+        },
+        note:{
+          pt:'Essas quatro opções são persistidas em data/settings.json e sincronizadas para todos os clientes. Ao alterar o modo, registros antigos são removidos antes da recriação para evitar Target/Interact duplicado.',
+          en:'These four options persist in data/settings.json and synchronize to all clients. When interaction mode changes, old registrations are removed before rebuilding to avoid duplicate Target/Interact entries.'
+        }
+      },
+      {
+        id:'interaction-walls',
+        title:{pt:'Paredes, offset e posicionamento',en:'Walls, offset and positioning'},
+        text:{
+          pt:'RespectWalls controla a disponibilidade da interação através de obstáculos, não a colisão do prop. O ponto do Interact é deslocado para a frente do keypad porque registrar exatamente no centro do modelo pode fazer o próprio painel obstruir a interação. No modelo padrão, a frente está no eixo Y local negativo.',
+          en:'RespectWalls controls interaction visibility through obstacles, not prop collision. The Interact point is offset in front of the keypad because registering at model center can let the panel obstruct itself. On the default model, the front side is local negative Y.'
+        },
+        code:"PR.Target = 'target'\nPR.RespectWalls = true\nPR.KeypadInteractDistance = 2.0\nPR.KeypadInteractOffset = vector3(0.0, -0.18, 0.03)"
+      },
+      {
+        id:'creation',
+        title:{pt:'Fluxo completo de criação in-game',en:'Complete in-game creation workflow'},
+        steps:{
+          pt:[
+            'Abra o menu de gerenciamento autorizado.',
+            'Crie o elevador pai e defina um nome administrativo.',
+            'Adicione um andar e escolha o nome/código, como T, S1, 1 ou 25.',
+            'Defina a ordem lógica do andar.',
+            'Capture as coordenadas e heading do destino.',
+            'Posicione o keypad físico com o gizmo.',
+            'Ajuste distância e propriedades visuais disponíveis.',
+            'Escolha uma das 9 políticas de acesso.',
+            'Preencha grupo/grade, senha, cartão/access_key ou Character ID quando exigido.',
+            'Salve; o servidor persiste o andar e envia refresh para reconstruir o runtime.',
+            'Repita para os demais andares, combinando políticas diferentes no mesmo elevador.'
+          ],
+          en:[
+            'Open the authorized management menu.',
+            'Create the parent elevator and assign an administrative name.',
+            'Add a floor and choose a code such as T, S1, 1 or 25.',
+            'Set its logical order.',
+            'Capture destination coordinates and heading.',
+            'Place the physical keypad using the gizmo.',
+            'Adjust interaction distance and available visual properties.',
+            'Choose one of the 9 access policies.',
+            'Fill group/grade, password, card/access_key or Character ID when required.',
+            'Save; the server persists the floor and broadcasts a runtime refresh.',
+            'Repeat for remaining floors, mixing different policies in the same elevator.'
+          ]
+        }
+      },
+      {
+        id:'use-models',
+        title:{pt:'Modelos de elevador que podem ser construídos',en:'Elevator usage models'},
+        text:{
+          pt:'O recurso não precisa de uma classe rígida para cada cenário. O tipo de elevador emerge das coordenadas, dos painéis e das regras de acesso definidas para seus andares. Isso permite reutilizar a mesma base para vários formatos de gameplay.',
+          en:'The resource does not require a rigid class for every scenario. Elevator behavior emerges from floor destinations, keypad placement and access policies, allowing the same system to represent many gameplay models.'
+        },
+        table:{
+          headers:['Modelo','Como configurar'],
+          rows:[
+            ['Elevador social','Andares public; destinos internos; painel em cada piso.'],
+            ['Elevador corporativo','Lobby public; demais pisos job com grades diferentes.'],
+            ['Elevador hospitalar','Áreas comuns public; setores job; laboratórios job_keycard.'],
+            ['Elevador VIP/hotel','Lobby public; andares keycard; cobertura com access_key exclusiva.'],
+            ['Elevador residencial','Andares citizenid ou cartões por apartamento.'],
+            ['Elevador policial','Garagem job; evidências job_keycard; comando job_password.'],
+            ['Elevador de facção','Gang/grupo para base; cartão ou senha para setores internos.'],
+            ['Plataforma de garagem','Destinos amplos; player entra com veículo e o veículo inteiro é transportado.'],
+            ['Elevador híbrido','O mesmo conjunto atende player a pé e player dentro de veículo.']
+          ]
+        }
+      },
+      {
+        id:'vehicle-elevators',
+        title:{pt:'Elevadores para veículos e garagens',en:'Vehicle lifts and garages'},
+        text:{
+          pt:'O transporte atual escolhe automaticamente a entity. Se o player estiver a pé, move o ped. Se estiver dentro de um veículo, move o veículo atual e aplica o heading do destino. Isso permite construir plataformas de garagem, elevadores de oficina, acesso a estacionamento subterrâneo ou transporte de carros entre pisos.',
+          en:'The current transport automatically chooses the entity. On foot, it moves the player ped. When the player is inside a vehicle, it moves the current vehicle and applies destination heading. This supports garage platforms, workshop lifts, underground parking access and multi-level vehicle transport.'
+        },
+        code:"local vehicle = nil\nif IsPedInAnyVehicle(ped, false) then\n    vehicle = GetVehiclePedIsIn(ped, false)\nend\n\nlocal entity = vehicle and vehicle ~= 0 and vehicle or ped\nSetEntityCoords(entity, coords.x, coords.y, coords.z, false, false, false, false)\nSetEntityHeading(entity, coords.heading or 0.0)",
+        note:{
+          pt:'Atualmente não existe um campo elevator_type separado no banco para limitar explicitamente um elevador a player/vehicle/both. O comportamento é automático. Para um elevador exclusivamente veicular, o design do mapa, o espaço do destino e as regras de acesso devem conduzir esse uso.',
+          en:'There is currently no separate elevator_type database field that explicitly restricts an elevator to player/vehicle/both. Behavior is automatic. For a vehicle-only lift, map design, destination space and access rules should guide usage.'
+        }
+      },
+      {
+        id:'vehicle-design',
+        title:{pt:'Boas práticas para elevadores veiculares',en:'Vehicle elevator best practices'},
+        bullets:{
+          pt:[
+            'Use destinos com área livre suficiente para o comprimento e largura dos veículos esperados.',
+            'Evite spawn encostado em paredes, pilares, props ou portões fechados.',
+            'Configure heading coerente com a saída da garagem para reduzir manobras e colisões.',
+            'Posicione o keypad onde o motorista consiga interagir sem abandonar a área do elevador.',
+            'Use job, keycard ou job_keycard em oficinas, garagens policiais e estacionamentos privados.',
+            'Considere um andar público de entrada e andares internos restritos.',
+            'Teste veículos grandes separadamente; o transporte move a entity, mas não redimensiona o espaço físico do mapa.'
+          ],
+          en:[
+            'Use destinations with enough free area for expected vehicle length and width.',
+            'Avoid spawning against walls, pillars, props or closed gates.',
+            'Align heading with garage exits to reduce maneuvering and collisions.',
+            'Place the keypad where drivers can interact without leaving the lift area.',
+            'Use job, keycard or job_keycard for workshops, police garages and private parking.',
+            'Consider a public entry level with restricted internal levels.',
+            'Test large vehicles separately; transport moves the entity but does not resize physical map space.'
+          ]
+        }
+      },
+      {
+        id:'runtime-flow',
+        title:{pt:'Fluxo de uso pelo jogador',en:'Player runtime flow'},
+        steps:{
+          pt:[
+            'Player se aproxima do painel físico.',
+            'PR Bridge Target/Interact disponibiliza a ação conforme distância e visibilidade.',
+            'O keypad abre com o prompt de andar.',
+            'Player digita o nome ou número do destino.',
+            'O client resolve o andar correspondente.',
+            'O servidor verifica a política de acesso daquele destino.',
+            'Se necessário, o keypad solicita senha.',
+            'Após autorização, o progress de espera do elevador é executado.',
+            'A tela faz fade-out.',
+            'O runtime move ped ou veículo para coords + heading do andar.',
+            'A tela retorna com fade-in.'
+          ],
+          en:[
+            'Player approaches the physical keypad.',
+            'PR Bridge Target/Interact exposes the action according to distance and visibility.',
+            'The keypad opens with the floor prompt.',
+            'Player enters a destination name or number.',
+            'Client resolves the matching floor.',
+            'Server checks that destination access policy.',
+            'If required, keypad asks for a password.',
+            'After authorization, the elevator wait progress runs.',
+            'Screen fades out.',
+            'Runtime moves ped or vehicle to floor coords + heading.',
+            'Screen fades back in.'
+          ]
+        }
+      },
+      {
+        id:'wait-animation',
+        title:{pt:'Espera e transição do elevador',en:'Elevator wait and transition'},
+        text:{
+          pt:'Antes do transporte, o sistema usa PR.elevatorWaitTime, com padrão de 3000 ms. Quando o PR Bridge oferece progressBar, movimento, uso de carro e combate são bloqueados durante a espera e a animação anim@apt_trans@elevator / elev_1 é usada. Depois ocorre fade-out, teleporte e fade-in.',
+          en:'Before transport, the system uses PR.elevatorWaitTime, defaulting to 3000 ms. When PR Bridge progressBar is available, movement, vehicle controls and combat are disabled during the wait while anim@apt_trans@elevator / elev_1 plays. The system then fades out, transports and fades back in.'
+        },
+        code:"PR.elevatorWaitTime = 3000\n\n-- runtime\nprogressBar -> fade out -> move entity -> apply heading -> fade in"
+      },
+      {
+        id:'creator-permissions',
+        title:{pt:'Permissões para criação e administração',en:'Creator and administration permissions'},
+        text:{
+          pt:'O menu exportado de criação pode ser liberado por jobs/gangs específicos e grade mínima. Isso é separado da permissão para alterar configurações globais do resource. Assim, por exemplo, um corretor pode criar elevadores sem receber poderes para mudar o provider de interação de todo o servidor.',
+          en:'The exported creator menu can be restricted to specific jobs/gangs and minimum grades. This is separate from permission to change global resource settings. A realtor can therefore create elevators without gaining permission to change interaction providers server-wide.'
+        },
+        code:"PR.ExportCreatorMenu = {\n    enabled = true,\n    jobs = { realestate = 2, realtor = 0 },\n    gangs = {}\n}",
+        note:{
+          pt:'Se jobs e gangs estiverem vazios, o export de criação pode ser aberto por qualquer player conforme o fluxo do recurso consumidor.',
+          en:'When jobs and gangs are empty, the creator export can be opened by any player according to the calling resource flow.'
+        }
+      },
+      {
+        id:'settings-permissions',
+        title:{pt:'Quem pode alterar configurações globais',en:'Who can change global settings'},
+        text:{
+          pt:'As preferências globais de Target/Interact são protegidas server-side. O recurso aceita autorização pela integração Forge Core quando disponível, whitelist administrativa do PR Bridge, ACE pr_elevator.admin/admin/group.admin/god e permissões admin/god expostas pelo framework.',
+          en:'Global Target/Interact preferences are server-side protected. The resource accepts Forge Core server-settings authorization when available, PR Bridge admin whitelist, ACE pr_elevator.admin/admin/group.admin/god and framework admin/god permissions.'
+        },
+        cards:[
+          ['Forge Core','CanManageServerSettings quando o resource está iniciado.'],
+          ['PR Bridge ACE','Whitelist administrativa centralizada.'],
+          ['ACE explícito','pr_elevator.admin e aliases administrativos.'],
+          ['Framework','Fallback para HasPermission admin/god.']
+        ]
+      },
+      {
+        id:'database',
+        title:{pt:'Banco de dados e migrations',en:'Database and migrations'},
+        text:{
+          pt:'O recurso mantém uma tabela para o elevador pai e outra para os andares. O startup cria o schema quando necessário e adiciona campos modernos em instalações antigas. Restrições legadas do elevador podem ser migradas para a política por andar.',
+          en:'The resource keeps one parent elevator table and one floor table. Startup creates schema when needed and adds modern fields to older installations. Legacy elevator-level restrictions can be migrated into per-floor access policies.'
+        },
+        code:'pr_elevator_elevator\n  id / name\n  type / job / job_grade / password / access_key / citizenid  (legacy compatibility)\n\npr_elevator_floor\n  id / elevator_id\n  name / floor / distance\n  theme_color / theme_background\n  coords / interact_coords\n  access_type / access_job / access_job_grade\n  access_password / access_key / access_item / access_citizenid'
+      },
+      {
+        id:'interaction-storage',
+        title:{pt:'Como o painel é salvo em interact_coords',en:'How keypad placement is stored'},
+        text:{
+          pt:'O formato moderno de interact_coords pode guardar não só uma coordenada, mas todo o payload do prop DUI. O normalizador também aceita formatos legados, permitindo evolução do schema sem quebrar painéis antigos.',
+          en:'Modern interact_coords can store more than a coordinate: it can persist the full DUI prop placement payload. The normalizer also accepts legacy formats, allowing schema evolution without breaking older panels.'
+        },
+        code:"{\n  mode = 'dui',\n  type = 'prop',\n  model = joaat('ch_prop_casino_keypad_01'),\n  modelName = 'ch_prop_casino_keypad_01',\n  coords = { x = 0.0, y = 0.0, z = 0.0 },\n  rotation = { x = 0.0, y = 0.0, z = 90.0 },\n  heading = 90.0\n}"
+      },
+      {
+        id:'exports',
+        title:{pt:'Exports disponíveis',en:'Available exports'},
+        text:{
+          pt:'O recurso expõe funções para abrir menus de criação e também para criar/manipular keypads DUI a partir de outros scripts.',
+          en:'The resource exposes functions for opening creation menus and for creating/manipulating DUI keypads from other resources.'
+        },
+        table:{
+          headers:['Export','Uso'],
+          rows:[
+            ['OpenCreatorMenu / OpenCreateElevatorMenu','Abre o fluxo principal de criação/gerenciamento.'],
+            ['OpenCreateFloorMenu','Abre criação de andar para um elevador.'],
+            ['OpenCreateKeycardMenu','Abre criação/configuração relacionada a cartões.'],
+            ['CreateDUI / CreateKeypad','Cria a infraestrutura visual/keypad.'],
+            ['CreateKeypadFromInteract','Cria keypad usando payload de posicionamento salvo.'],
+            ['OpenKeypadEntity','Abre uma entity de keypad existente para entrada.'],
+            ['DeleteKeypad','Remove keypad e limpa recursos associados.']
+          ]
+        }
+      },
+      {
+        id:'locales',
+        title:{pt:'Idiomas e textos do painel',en:'Locales and keypad text'},
+        text:{
+          pt:'PT-BR, EN-US, ES-ES e FR-FR compartilham o mesmo conjunto de chaves. Menus, notificações, visor, cartões e diagnósticos usam o locale do PR Bridge. Nomes administrativos de elevadores, códigos de andar e identificadores técnicos permanecem como dados e não são traduzidos automaticamente.',
+          en:'PT-BR, EN-US, ES-ES and FR-FR share the same locale key set. Menus, notifications, display states, cards and diagnostics use PR Bridge locale resolution. Administrator-defined elevator names, floor codes and technical identifiers remain data and are not automatically translated.'
+        }
+      },
+      {
+        id:'diagnostics',
+        title:{pt:'Diagnóstico da DUI e runtime',en:'DUI and runtime diagnostics'},
+        text:{
+          pt:'O resource possui comandos de diagnóstico específicos para separar problema de página DUI, aplicação da textura no modelo e reconstrução do runtime. O status não registra senha nem os dígitos digitados.',
+          en:'The resource includes diagnostics specifically designed to separate DUI page issues, model texture replacement and runtime rebuild problems. Status output does not log passwords or entered digits.'
+        },
+        table:{
+          headers:['Comando','Objetivo'],
+          rows:[
+            ['prelevator_refresh','Força/reexecuta atualização dos elevadores no client.'],
+            ['prelevator_dui_status','Mostra instância, prontidão, URL, modelo e textura em uso.'],
+            ['prelevator_dui_preview','Desenha uma prévia temporária da mesma textura para isolar falhas.'],
+            ['prelevator_dui_reset','Reinicializa estado/instância da DUI.'],
+            ['createkeypad / testkeypad','Ferramentas de desenvolvimento e teste do keypad.']
+          ]
+        }
+      },
+      {
+        id:'security',
+        title:{pt:'Segurança e autoridade do servidor',en:'Security and server authority'},
+        bullets:{
+          pt:[
+            'A seleção visual do andar não concede acesso por si só.',
+            'Políticas são resolvidas usando dados server-side do andar e do personagem.',
+            'Senha precisa ser confirmada pelo servidor antes do transporte.',
+            'Cartão precisa existir no inventário e carregar a access_key esperada.',
+            'Combinações exigem todos os fatores previstos pelo modo.',
+            'Configurações globais possuem validação de permissão, whitelist de campos, limites e controle de revisão.',
+            'Falha ao persistir settings não aplica parcialmente uma configuração nova.'
+          ],
+          en:[
+            'Visually selecting a floor does not grant access by itself.',
+            'Policies are resolved using server-side floor and character data.',
+            'Passwords must be confirmed by the server before transport.',
+            'Keycards must exist in inventory and carry the expected access_key.',
+            'Combined modes require every configured factor.',
+            'Global settings use permission checks, field validation, limits and revision control.',
+            'A settings persistence failure does not partially apply a new configuration.'
+          ]
+        }
+      },
+      {
+        id:'production-patterns',
+        title:{pt:'Padrões recomendados de configuração',en:'Recommended configuration patterns'},
+        bullets:{
+          pt:[
+            'Use public somente em andares realmente públicos; restrinja o destino, não apenas o painel de origem.',
+            'Prefira grade mínima em áreas hierárquicas para não criar elevadores duplicados por cargo.',
+            'Use keycard quando quiser uma credencial física transferível; use citizenid quando o acesso deve seguir a identidade do personagem.',
+            'Use job_keycard para áreas onde pertencer ao grupo não basta sem portar a credencial.',
+            'Use job_password para operações em que um código compartilhado deve continuar limitado ao grupo correto.',
+            'Mantenha códigos de andar curtos e claros, especialmente em keypads físicos.',
+            'Para garagens, valide espaço, heading e veículos grandes antes de liberar em produção.',
+            'Ao reposicionar painéis, prefira o payload DUI completo com rotation em vez de coordenada simples.',
+            'Use Target ou Interact como padrão global consistente; habilite both somente quando realmente quiser as duas experiências.',
+            'Mantenha RespectWalls ativo em áreas onde interagir através de paredes quebraria a imersão ou a segurança.'
+          ],
+          en:[
+            'Use public only for genuinely public floors; secure the destination rather than only the source keypad.',
+            'Prefer minimum grades in hierarchical areas instead of duplicating elevators per rank.',
+            'Use keycard for transferable physical credentials; use citizenid when access must follow character identity.',
+            'Use job_keycard where group membership alone is insufficient without carrying a credential.',
+            'Use job_password when a shared code should still be limited to the correct group.',
+            'Keep floor codes short and clear, especially on physical keypads.',
+            'For garages, validate space, heading and large vehicles before production rollout.',
+            'When repositioning keypads, prefer the full DUI payload with rotation over a bare coordinate.',
+            'Use either Target or Interact as the consistent global default; enable both only when both experiences are intentionally desired.',
+            'Keep RespectWalls enabled where through-wall interaction would break immersion or security.'
+          ]
+        }
+      }
     ]
   }
 };
