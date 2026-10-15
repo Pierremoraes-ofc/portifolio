@@ -4260,6 +4260,190 @@ pr_lib.notify(source, {
         }
       },
       {
+        id:'inventory-usage',
+        title:{pt:'Como usar o item pelo inventário',en:'How to use an item from inventory'},
+        text:{
+          pt:'O PR Placeable precisa receber o item ou slot selecionado no inventário para iniciar o placement. O ponto comum entre os providers é o export client-side placeItem. Cada inventário apenas precisa oferecer uma ação como Colocar/Place e encaminhar o slot ou os dados do item para esse export.',
+          en:'PR Placeable needs the selected inventory item or slot to start placement. The common entry point for all providers is the client-side placeItem export. Each inventory only needs to expose an action such as Place and forward the selected slot or item data to that export.'
+        },
+        code:"exports['pr_placeable']:placeItem(slot)\n\n-- o export identifica o provider definido em Config.Inventory\n-- resolve o item selecionado\n-- consulta Config.Items[item.name]\n-- fecha o inventário\n-- inicia placement individual, sequencial ou caixa/lote",
+        note:{
+          pt:'O item também precisa existir em Config.Items. A integração do botão do inventário apenas inicia o fluxo; modelo, stackable, maxPlace, maxBox, Freeze e animações continuam sendo definidos pelo PR Placeable.',
+          en:'The item must also exist in Config.Items. The inventory button only starts the flow; model, stackable behavior, maxPlace, maxBox, Freeze and carry animations are still defined by PR Placeable.'
+        }
+      },
+      {
+        id:'inventory-provider',
+        title:{pt:'Selecionando o inventário',en:'Selecting the inventory provider'},
+        text:{
+          pt:'Defina em config.lua qual inventário está sendo usado. O mesmo export placeItem adapta a leitura do slot conforme o provider selecionado.',
+          en:'Set the inventory provider in config.lua. The same placeItem export adapts slot lookup according to the selected provider.'
+        },
+        code:"-- ox_inventory\nConfig.Inventory = 'ox_inventory'\n\n-- qb-inventory\nConfig.Inventory = 'qb-inventory'\n\n-- core_inventory\nConfig.Inventory = 'core_inventory'",
+        table:{
+          headers:['Provider','Como o PR Placeable resolve o item'],
+          rows:[
+            ['ox_inventory',"exports['ox_inventory']:GetPlayerItems()[slot] ou recebe a tabela do item diretamente."],
+            ['qb-inventory',"exports['qb-inventory']:GetInventoryItem(slot)."],
+            ['core_inventory',"exports['core_inventory']:GetItem(slot)."]
+          ]
+        }
+      },
+      {
+        id:'ox-inventory-usage',
+        title:{pt:'ox_inventory — configurar a ação de colocar',en:'ox_inventory — configure the place action'},
+        text:{
+          pt:'No ox_inventory, a forma mais direta é registrar no próprio item um client export apontando para pr_placeable.placeItem. Ao usar a ação do item, o ox_inventory entrega o slot/dados ao export e o PR Placeable inicia o placement.',
+          en:'With ox_inventory, the most direct integration is to register a client export on the item pointing to pr_placeable.placeItem. When that item action is used, ox_inventory forwards the slot/item data and PR Placeable starts placement.'
+        },
+        code:"-- exemplo no arquivo de itens do ox_inventory\n['water'] = {\n    label = 'Água',\n    weight = 500,\n    stack = true,\n    close = true,\n\n    client = {\n        export = 'pr_placeable.placeItem'\n    }\n}",
+        steps:{
+          pt:[
+            "Defina Config.Inventory = 'ox_inventory'.",
+            'Cadastre o item normalmente no ox_inventory.',
+            "No bloco client do item, adicione export = 'pr_placeable.placeItem'.",
+            'Cadastre o mesmo nome do item em Config.Items do PR Placeable.',
+            'Ao acionar o item pelo inventário, o export recebe o slot/tabela.',
+            'O PR Placeable fecha o inventário e verifica stackable, maxPlace e maxBox.',
+            'O placement é iniciado com o modelo configurado para aquele item.'
+          ],
+          en:[
+            "Set Config.Inventory = 'ox_inventory'.",
+            'Register the item normally in ox_inventory.',
+            "Add export = 'pr_placeable.placeItem' to the item client block.",
+            'Register the same item name in PR Placeable Config.Items.',
+            'Using the inventory item forwards its slot/table to the export.',
+            'PR Placeable closes the inventory and checks stackable, maxPlace and maxBox.',
+            'Placement starts with the configured model.'
+          ]
+        }
+      },
+      {
+        id:'ox-complete-example',
+        title:{pt:'ox_inventory — exemplo completo com Config.Items',en:'ox_inventory — complete Config.Items example'},
+        text:{
+          pt:'O nome usado pelo inventário deve corresponder à chave usada em Config.Items. O inventário define como o jogador chama o resource; o PR Placeable define como aquele item se comporta fisicamente.',
+          en:'The inventory item name must match the key used in Config.Items. Inventory configuration defines how the player invokes the resource; PR Placeable defines how the item behaves physically.'
+        },
+        code:"-- ox_inventory/data/items.lua\n['water'] = {\n    label = 'Água',\n    weight = 500,\n    stack = true,\n    close = true,\n    client = { export = 'pr_placeable.placeItem' }\n}\n\n-- pr_placeable/config.lua\nConfig.Items['water'] = {\n    prop = 'prop_ld_flow_bottle',\n    propbox = 'v_serv_abox_02',\n    stackable = true,\n    maxPlace = 10,\n    maxBox = 24,\n    Freeze = false,\n    is_pickup = false,\n    onehand = { /* animação */ },\n    twohand = { /* animação */ }\n}"
+      },
+      {
+        id:'qb-inventory-usage',
+        title:{pt:'qb-inventory — adicionar opção PLACE',en:'qb-inventory — add a PLACE action'},
+        text:{
+          pt:'No qb-inventory, o padrão documentado é criar uma área/opção PLACE na interface e encaminhar o item selecionado para um NUI callback. Na implementação atual, esse callback pode chamar diretamente o export placeItem do PR Placeable, passando data.item ou o slot correspondente.',
+          en:'For qb-inventory, the documented pattern is to add a PLACE area/action to the UI and forward the selected item through a NUI callback. In the current implementation, that callback can call the PR Placeable placeItem export directly with data.item or the corresponding slot.'
+        },
+        code:"<!-- qb-inventory/html/ui.html -->\n<div class=\"inv-option-item\" id=\"item-use\"><p>USE</p></div>\n<div class=\"inv-option-item\" id=\"item-place\"><p>PLACE</p></div>",
+        note:{
+          pt:'Essa abordagem segue a integração apresentada no README original, mas usando o entry point atual do PR Placeable.',
+          en:'This follows the integration pattern shown in the original README while using the current PR Placeable entry point.'
+        }
+      },
+      {
+        id:'qb-inventory-js',
+        title:{pt:'qb-inventory — ação da interface',en:'qb-inventory — UI action'},
+        text:{
+          pt:'No JavaScript do qb-inventory, faça a área PLACE receber o item arrastado e enviar os dados para o callback PlaceItem.',
+          en:'In qb-inventory JavaScript, make the PLACE area accept the dragged item and post its data to the PlaceItem callback.'
+        },
+        code:"$('#item-place').droppable({\n    hoverClass: 'button-hover',\n    drop: function (event, ui) {\n        setTimeout(function () {\n            IsDragging = false\n        }, 300)\n\n        fromData = ui.draggable.data('item')\n\n        if (fromData.useable) {\n            Inventory.Close()\n            $.post(\n                'https://qb-inventory/PlaceItem',\n                JSON.stringify({ item: fromData })\n            )\n        }\n    }\n})"
+      },
+      {
+        id:'qb-inventory-callback',
+        title:{pt:'qb-inventory — callback client',en:'qb-inventory — client callback'},
+        text:{
+          pt:'No client do qb-inventory, registre o NUI callback e repasse o item para o export do PR Placeable. O export atual aceita uma tabela de item quando o fluxo fornece os dados diretamente.',
+          en:'In the qb-inventory client, register the NUI callback and forward the item to PR Placeable. The current export accepts item data directly when the integration provides a table.'
+        },
+        code:"RegisterNUICallback('PlaceItem', function(data, cb)\n    exports['pr_placeable']:placeItem(data.item)\n    cb('ok')\nend)"
+      },
+      {
+        id:'core-inventory-usage',
+        title:{pt:'core_inventory — adicionar opção PLACE',en:'core_inventory — add a PLACE action'},
+        text:{
+          pt:'Para core_inventory, o README original adiciona uma nova ação PLACE ao menu contextual. O princípio continua o mesmo: a interface envia o item escolhido a um NUI callback e o callback chama o PR Placeable.',
+          en:'For core_inventory, the original README adds a new PLACE action to the contextual menu. The same principle applies: the UI forwards the selected item to a NUI callback and that callback invokes PR Placeable.'
+        },
+        code:"-- core_inventory/config.lua\n['use']   = 'USE',\n['place'] = 'PLACE',"
+      },
+      {
+        id:'core-inventory-nui',
+        title:{pt:'core_inventory — callback NUI',en:'core_inventory — NUI callback'},
+        text:{
+          pt:'Adicione um callback para a ação Place. Se sua versão do core_inventory entregar o item completo, encaminhe essa tabela; se entregar apenas slot/id, encaminhe esse identificador, pois placeItem também resolve o item através do provider core_inventory.',
+          en:'Add a callback for the Place action. If your core_inventory version provides the complete item, forward that table; if it provides only slot/id, forward that identifier because placeItem can resolve it through the core_inventory provider.'
+        },
+        code:"RegisterNUICallback('placeItem', function(data, cb)\n    local itemOrSlot = data.item or data.slot or data.exact\n    exports['pr_placeable']:placeItem(itemOrSlot)\n    cb('ok')\nend)"
+      },
+      {
+        id:'core-inventory-js',
+        title:{pt:'core_inventory — função PLACE na interface',en:'core_inventory — PLACE UI function'},
+        text:{
+          pt:'No JavaScript do inventário, crie a função responsável por fechar a interface e disparar o callback NUI.',
+          en:'In the inventory JavaScript, create a function that closes the interface and triggers the NUI callback.'
+        },
+        code:"function placeItem(item) {\n    closeMenu()\n\n    $.post('https://core_inventory/placeItem', JSON.stringify({\n        item: item\n    }))\n}"
+      },
+      {
+        id:'inventory-flow',
+        title:{pt:'Fluxo completo: inventário → mundo',en:'Complete flow: inventory → world'},
+        steps:{
+          pt:[
+            'O jogador abre o inventário.',
+            'Seleciona um item configurado como colocável.',
+            'Usa a ação PLACE/Colocar ou o client export do item.',
+            "O inventário chama exports['pr_placeable']:placeItem(...).",
+            'PR Placeable resolve nome, slot e quantidade de acordo com Config.Inventory.',
+            'O nome do item é procurado em Config.Items.',
+            'O inventário é fechado.',
+            'Se stackable=false ou houver uma unidade, abre placement simples.',
+            'Se stackable=true, o jogador escolhe quantidade e, quando disponível, caixa/lote.',
+            'Ao confirmar a posição, o servidor persiste a entity e remove a quantidade correta do inventário.'
+          ],
+          en:[
+            'Player opens the inventory.',
+            'Selects an item configured as placeable.',
+            'Uses the PLACE action or item client export.',
+            "Inventory calls exports['pr_placeable']:placeItem(...).",
+            'PR Placeable resolves item name, slot and quantity based on Config.Inventory.',
+            'Item name is looked up in Config.Items.',
+            'Inventory is closed.',
+            'If stackable=false or only one unit exists, simple placement starts.',
+            'If stackable=true, player chooses quantity and optional box/batch mode.',
+            'After confirmation, the server persists the entity and removes the correct inventory amount.'
+          ]
+        }
+      },
+      {
+        id:'inventory-checklist',
+        title:{pt:'Checklist para um item funcionar',en:'Checklist for a working item'},
+        bullets:{
+          pt:[
+            'Config.Inventory precisa corresponder ao inventário realmente usado pelo servidor.',
+            'O item precisa existir no inventário.',
+            'O mesmo nome precisa existir em Config.Items.',
+            'O inventário precisa chamar pr_placeable.placeItem ao usar a ação Colocar.',
+            'prop precisa apontar para um model GTA válido.',
+            'Para caixas, configure propbox/box e maxBox.',
+            'Para múltiplas unidades individuais, use stackable=true e maxPlace.',
+            'Se o modelo for tratado pelo GTA como pickup e não receber Target corretamente, marque is_pickup=true.',
+            'Teste a ação de inventário antes de depurar o placement: se placeItem não for chamado, o problema está na integração do inventário.'
+          ],
+          en:[
+            'Config.Inventory must match the inventory actually used by the server.',
+            'The item must exist in inventory.',
+            'The same name must exist in Config.Items.',
+            'Inventory must invoke pr_placeable.placeItem from its Place action.',
+            'prop must reference a valid GTA model.',
+            'For boxes, configure propbox/box and maxBox.',
+            'For multiple individual units, use stackable=true and maxPlace.',
+            'If GTA treats the model as a native pickup and Target fails, set is_pickup=true.',
+            'Test the inventory action before debugging placement: if placeItem is never called, the issue is in inventory integration.'
+          ]
+        }
+      },
+      {
         id:'export',
         title:{pt:'Export para integração com inventários',en:'Inventory integration export'},
         text:{
