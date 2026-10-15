@@ -70,6 +70,14 @@ const HOBBY_PROJECTS = [
     en: 'Elevator system for FiveM with PR ecosystem integration and a decoupled interaction flow.',
   },
   {
+    name: 'PR WEP',
+    repo: 'https://github.com/Pierremoraes-ofc/pr-wep',
+    code: 'pr_wep',
+    tags: ['FiveM', 'Weapons', 'Sling', 'Weapon Systems'],
+    pt: 'Sistema avançado de armas com sling visual, posicionamento por gizmo, coldres, modos de disparo, recoil realista, peso, lanterna persistente, animações, rádio, lançamento e recuperação física de armas.',
+    en: 'Advanced weapon system with visual sling, gizmo positioning, holsters, fire modes, realistic recoil, weight, persistent flashlight, animations, radio, physical weapon throwing and recovery.',
+  },
+  {
     name: 'PR Trailer',
     repo: 'https://github.com/Pierremoraes-ofc/pr_trailer',
     code: 'pr_trailer',
