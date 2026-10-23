@@ -141,9 +141,6 @@ const COPY = {
     education: 'Formação',
     current: 'Atual',
     footer: 'Projetado e desenvolvido por Pierre Moraes.',
-    supportLabel: 'Gostou do meu trabalho?',
-    supportText: 'Se meus projetos, documentações ou ferramentas te ajudaram, você pode apoiar meu trabalho.',
-    supportAction: 'Apoiar no Buy Me a Coffee',
     repoLabel: 'GitHub',
     linkedinLabel: 'LinkedIn',
     docsLabel: 'GitBook',
@@ -175,9 +172,6 @@ const COPY = {
     education: 'Education',
     current: 'Present',
     footer: 'Designed and developed by Pierre Moraes.',
-    supportLabel: 'Enjoying my work?',
-    supportText: 'If my projects, documentation or tools helped you, you can support my work.',
-    supportAction: 'Support on Buy Me a Coffee',
     repoLabel: 'GitHub',
     linkedinLabel: 'LinkedIn',
     docsLabel: 'GitBook',
@@ -330,20 +324,9 @@ function App() {
           <a href={PROFILE.gitbook} target="_blank" rel="noreferrer" aria-label="GitBook"><Icon name="book" /></a>
         </div>
 
-        <a
-          className="sidebar-support-link"
-          href="https://buymeacoffee.com/PierreMoraes"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Buy me a coffee"
-        >
-          <span className="sidebar-support-icon"><Icon name="coffee" size={16} /></span>
-          <span>
-            <small>{locale === 'pt-BR' ? 'APOIE MEU TRABALHO' : 'SUPPORT MY WORK'}</small>
-            <strong>Buy me a coffee</strong>
-          </span>
-          <Icon name="external" size={14} />
-        </a>
+        <div className="sidebar-support-official">
+          <BuyMeACoffeeButton />
+        </div>
       </div>
     </aside>
   );
@@ -556,11 +539,7 @@ function App() {
               <span>© {new Date().getFullYear()} Pierre Moraes</span>
               <span>{d.footer}</span>
             </div>
-            <div className="support-footer-official">
-              <div className="support-footer-copy">
-                <small>{d.supportLabel}</small>
-                <em>{d.supportText}</em>
-              </div>
+            <div className="support-footer-official support-footer-official--button-only">
               <BuyMeACoffeeButton />
             </div>
           </footer>
