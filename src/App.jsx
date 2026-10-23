@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ProjectDocumentation from './ProjectDocumentation';
-import BuyMeACoffeeButton from './BuyMeACoffeeButton';
 
 const PROFILE = {
   name: 'Pierre Moraes',
@@ -324,9 +323,23 @@ function App() {
           <a href={PROFILE.gitbook} target="_blank" rel="noreferrer" aria-label="GitBook"><Icon name="book" /></a>
         </div>
 
-        <div className="sidebar-support-official">
-          <BuyMeACoffeeButton />
-        </div>
+        <a
+          className="sidebar-bmc-button"
+          href="https://buymeacoffee.com/PierreMoraes"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Buy me a coffee"
+        >
+          <span className="sidebar-bmc-cup" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M6.5 7.5h9v6.1a4.5 4.5 0 0 1-4.5 4.5A4.5 4.5 0 0 1 6.5 13.6Z"/>
+              <path d="M15.5 9h1.7a2.5 2.5 0 0 1 0 5h-1.7"/>
+              <path d="M7 4.5c2.5-1 5.5-1 8 0"/>
+              <path d="M7.5 3c2.2-.8 4.8-.8 7 0"/>
+            </svg>
+          </span>
+          <strong>Buy me a coffee</strong>
+        </a>
       </div>
     </aside>
   );
@@ -538,9 +551,6 @@ function App() {
             <div className="site-footer-meta">
               <span>© {new Date().getFullYear()} Pierre Moraes</span>
               <span>{d.footer}</span>
-            </div>
-            <div className="support-footer-official support-footer-official--button-only">
-              <BuyMeACoffeeButton />
             </div>
           </footer>
         </section>
