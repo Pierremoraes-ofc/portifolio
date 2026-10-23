@@ -1023,3 +1023,56 @@ footer{display:flex;justify-content:space-between;padding-top:30px;color:#4d4d56
     align-items:center;
   }
 }
+
+
+/* Buy Me a Coffee — sidebar only */
+.sidebar-bmc-button{
+  width:100%;
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:9px 12px;
+  border:1px solid #ffdd00;
+  border-radius:9px;
+  background:#ffdd00;
+  color:#000;
+  box-shadow:0 8px 22px rgba(0,0,0,.16);
+  transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
+}
+.sidebar-bmc-button:hover{
+  filter:brightness(1.04);
+  transform:translateY(-1px);
+  box-shadow:0 10px 28px rgba(0,0,0,.22);
+}
+.sidebar-bmc-button strong{
+  font-family:"Bree Serif",Georgia,serif;
+  font-size:14px;
+  font-weight:700;
+  line-height:1;
+  white-space:nowrap;
+}
+.sidebar-bmc-cup{
+  width:22px;
+  height:22px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+}
+.sidebar-bmc-cup svg{
+  width:22px;
+  height:22px;
+  fill:none;
+  stroke:#000;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.documentation-support-footer--signature{
+  padding-top:22px;
+  border-top:1px solid var(--line-soft);
+}
+
+.sidebar-support-official:empty,
+.support-footer-official:empty{display:none!important}
