@@ -988,3 +988,38 @@ footer{display:flex;justify-content:space-between;padding-top:30px;color:#4d4d56
     justify-content:flex-start;
   }
 }
+
+
+/* Official Buy Me a Coffee placement */
+.sidebar-support-official{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  padding-top:1px;
+}
+.sidebar-support-official .bmc-official-button{
+  width:100%;
+  min-height:48px;
+  justify-content:center;
+}
+.sidebar-support-official .bmc-official-button > a,
+.sidebar-support-official .bmc-official-button > div{
+  max-width:100%;
+}
+.support-footer-official--button-only{
+  min-height:auto;
+  justify-content:center;
+  padding:16px;
+}
+.support-footer-official--button-only .bmc-official-button{
+  width:auto;
+  justify-content:center;
+}
+@media (max-width:820px){
+  .sidebar-support-official{
+    width:100%;
+  }
+  .support-footer-official--button-only{
+    align-items:center;
+  }
+}
