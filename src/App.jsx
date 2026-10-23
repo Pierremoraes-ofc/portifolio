@@ -140,6 +140,9 @@ const COPY = {
     education: 'Formação',
     current: 'Atual',
     footer: 'Projetado e desenvolvido por Pierre Moraes.',
+    supportLabel: 'Gostou do meu trabalho?',
+    supportText: 'Se meus projetos, documentações ou ferramentas te ajudaram, você pode apoiar meu trabalho.',
+    supportAction: 'Apoiar no Buy Me a Coffee',
     repoLabel: 'GitHub',
     linkedinLabel: 'LinkedIn',
     docsLabel: 'GitBook',
@@ -171,6 +174,9 @@ const COPY = {
     education: 'Education',
     current: 'Present',
     footer: 'Designed and developed by Pierre Moraes.',
+    supportLabel: 'Enjoying my work?',
+    supportText: 'If my projects, documentation or tools helped you, you can support my work.',
+    supportAction: 'Support on Buy Me a Coffee',
     repoLabel: 'GitHub',
     linkedinLabel: 'LinkedIn',
     docsLabel: 'GitBook',
@@ -528,7 +534,21 @@ function App() {
               <a href={PROFILE.gitbook} target="_blank" rel="noreferrer"><Icon name="book" /><span><small>{d.docsLabel}</small>pierremoraes.gitbook.io/home</span><Icon name="external" size={16} /></a>
             </div>
           </div>
-          <footer><span>© {new Date().getFullYear()} Pierre Moraes</span><span>{d.footer}</span></footer>
+          <footer className="site-footer">
+            <div className="site-footer-meta">
+              <span>© {new Date().getFullYear()} Pierre Moraes</span>
+              <span>{d.footer}</span>
+            </div>
+            <a className="support-footer-card" href="https://buymeacoffee.com/pierremoraes" target="_blank" rel="noreferrer">
+              <span className="support-footer-icon" aria-hidden="true">☕</span>
+              <span className="support-footer-copy">
+                <small>{d.supportLabel}</small>
+                <strong>{d.supportAction}</strong>
+                <em>{d.supportText}</em>
+              </span>
+              <Icon name="external" size={16} />
+            </a>
+          </footer>
         </section>
       </main>
     </div>
