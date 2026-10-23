@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PROJECT_DOCS } from './projectDocsData';
 import PrBridgeLibrary from './PrBridgeLibrary';
-import BuyMeACoffeeButton from './BuyMeACoffeeButton';
 
 function Arrow({ left = false }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={left ? 'm15 18-6-6 6-6' : 'm9 18 6-6-6-6'} /></svg>;
@@ -181,10 +180,7 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
             <a href={doc.repo} target="_blank" rel="noreferrer"><GithubIcon/>{doc.repo.replace('https://github.com/', '')}<ExternalIcon/></a>
           </section>
 
-          <footer className="documentation-support-footer">
-            <div className="support-footer-official support-footer-official--button-only">
-              <BuyMeACoffeeButton />
-            </div>
+          <footer className="documentation-support-footer documentation-support-footer--signature">
             <span className="documentation-footer-signature">© {new Date().getFullYear()} Pierre Moraes</span>
           </footer>
         </div>
