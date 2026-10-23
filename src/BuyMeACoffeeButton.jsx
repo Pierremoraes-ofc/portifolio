@@ -17,7 +17,7 @@ export default function BuyMeACoffeeButton() {
     script.setAttribute('data-slug', 'PierreMoraes');
     script.setAttribute('data-color', '#FFDD00');
     script.setAttribute('data-emoji', '');
-    script.setAttribute('data-font', 'Inter');
+    script.setAttribute('data-font', 'Bree');
     script.setAttribute('data-text', 'Buy me a coffee');
     script.setAttribute('data-outline-color', '#000000');
     script.setAttribute('data-font-color', '#000000');
