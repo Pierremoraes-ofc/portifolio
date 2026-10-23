@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ProjectDocumentation from './ProjectDocumentation';
+import BuyMeACoffeeButton from './BuyMeACoffeeButton';
 
 const PROFILE = {
   name: 'Pierre Moraes',
@@ -539,15 +540,13 @@ function App() {
               <span>© {new Date().getFullYear()} Pierre Moraes</span>
               <span>{d.footer}</span>
             </div>
-            <a className="support-footer-card" href="https://buymeacoffee.com/pierremoraes" target="_blank" rel="noreferrer">
-              <span className="support-footer-icon" aria-hidden="true">☕</span>
-              <span className="support-footer-copy">
+            <div className="support-footer-official">
+              <div className="support-footer-copy">
                 <small>{d.supportLabel}</small>
-                <strong>{d.supportAction}</strong>
                 <em>{d.supportText}</em>
-              </span>
-              <Icon name="external" size={16} />
-            </a>
+              </div>
+              <BuyMeACoffeeButton />
+            </div>
           </footer>
         </section>
       </main>
