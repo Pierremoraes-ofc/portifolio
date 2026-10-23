@@ -7,6 +7,7 @@ const PROFILE = {
   linkedin: 'https://www.linkedin.com/in/pierre-moraes-483b21263/',
   gitbook: 'https://pierremoraes.gitbook.io/home',
   avatar: 'https://avatars.githubusercontent.com/u/185448687?v=4',
+  brand: './pierre-brand.svg',
 };
 
 const PROJECTS = [
@@ -280,7 +281,7 @@ function App() {
   const Sidebar = ({ mobile = false }) => (
     <aside className={mobile ? 'sidebar sidebar--mobile' : 'sidebar'}>
       <div className="sidebar-profile">
-        <img src={PROFILE.avatar} alt="Pierre Moraes" />
+        <img className="brand-mark brand-mark--sidebar" src={PROFILE.brand} alt="Logo Pierre Moraes" />
         <div>
           <strong>Pierre Moraes</strong>
           <span>Developer</span>
@@ -330,7 +331,8 @@ function App() {
 
       <header className="mobile-header">
         <button className="mobile-brand" onClick={() => scrollTo('home')}>
-          <span>PM</span><strong>Pierre Moraes</strong>
+          <img src={PROFILE.brand} alt="" aria-hidden="true" />
+          <strong>Pierre Moraes</strong>
         </button>
         <button className="mobile-menu-button" onClick={() => setMobileOpen(true)} aria-label="Open menu"><Icon name="menu" /></button>
       </header>
@@ -349,6 +351,7 @@ function App() {
         <section id="home" ref={(el) => { sectionsRef.current[0] = el; }} className="hero section">
           <div className="hero-grid">
             <div className="hero-copy">
+              <img className="hero-brand-mark" src={PROFILE.brand} alt="Pierre Moraes" />
               <div className="eyebrow"><span />{d.availability}</div>
               <p className="hero-overline">PIERRE MORAES / DEVELOPER</p>
               <h1>{d.titleA}<br /><span>{d.titleB}</span><br />{d.titleC}</h1>
