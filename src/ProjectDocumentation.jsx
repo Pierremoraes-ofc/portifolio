@@ -29,6 +29,11 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
     repo: pt ? 'Repositório' : 'Repository',
     index: pt ? 'Nesta documentação' : 'In this documentation',
     source: pt ? 'Documentação baseada no código e nos materiais atuais do repositório.' : 'Documentation based on the repository current code and materials.',
+    supportLabel: pt ? 'Gostou do meu trabalho?' : 'Enjoying my work?',
+    supportAction: pt ? 'Apoiar no Buy Me a Coffee' : 'Support on Buy Me a Coffee',
+    supportText: pt
+      ? 'Se meus projetos, documentações ou ferramentas te ajudaram, você pode apoiar meu trabalho.'
+      : 'If my projects, documentation or tools helped you, you can support my work.',
   }), [pt]);
 
   useEffect(() => {
@@ -179,6 +184,19 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
             <p>{labels.source}</p>
             <a href={doc.repo} target="_blank" rel="noreferrer"><GithubIcon/>{doc.repo.replace('https://github.com/', '')}<ExternalIcon/></a>
           </section>
+
+          <footer className="documentation-support-footer">
+            <a className="support-footer-card" href="https://buymeacoffee.com/pierremoraes" target="_blank" rel="noreferrer">
+              <span className="support-footer-icon" aria-hidden="true">☕</span>
+              <span className="support-footer-copy">
+                <small>{labels.supportLabel}</small>
+                <strong>{labels.supportAction}</strong>
+                <em>{labels.supportText}</em>
+              </span>
+              <ExternalIcon/>
+            </a>
+            <span className="documentation-footer-signature">© {new Date().getFullYear()} Pierre Moraes</span>
+          </footer>
         </div>
       </main>
     </div>
