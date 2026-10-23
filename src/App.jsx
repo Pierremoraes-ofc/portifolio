@@ -205,6 +205,7 @@ function Icon({ name, size = 18 }) {
     external: <><path d="M15 3h6v6"/><path d="m10 14 11-11"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></>,
     chevron: <path d="m9 18 6-6-6-6"/>,
     book: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></>,
+    coffee: <><path d="M5 8h10v6a5 5 0 0 1-5 5 5 5 0 0 1-5-5Z"/><path d="M15 10h2.5a2.5 2.5 0 0 1 0 5H15"/><path d="M7 3v2M10 2v3M13 3v2"/><path d="M4 21h13"/></>,
     menu: <><path d="M4 7h16M4 12h16M4 17h16"/></>,
     close: <><path d="m6 6 12 12M18 6 6 18"/></>,
   };
@@ -328,6 +329,21 @@ function App() {
           <a href={PROFILE.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn"><Icon name="linkedin" /></a>
           <a href={PROFILE.gitbook} target="_blank" rel="noreferrer" aria-label="GitBook"><Icon name="book" /></a>
         </div>
+
+        <a
+          className="sidebar-support-link"
+          href="https://buymeacoffee.com/PierreMoraes"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Buy me a coffee"
+        >
+          <span className="sidebar-support-icon"><Icon name="coffee" size={16} /></span>
+          <span>
+            <small>{locale === 'pt-BR' ? 'APOIE MEU TRABALHO' : 'SUPPORT MY WORK'}</small>
+            <strong>Buy me a coffee</strong>
+          </span>
+          <Icon name="external" size={14} />
+        </a>
       </div>
     </aside>
   );
