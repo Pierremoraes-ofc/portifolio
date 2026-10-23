@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PROJECT_DOCS } from './projectDocsData';
 import PrBridgeLibrary from './PrBridgeLibrary';
+import BuyMeACoffeeButton from './BuyMeACoffeeButton';
 
 function Arrow({ left = false }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={left ? 'm15 18-6-6 6-6' : 'm9 18 6-6-6-6'} /></svg>;
@@ -186,15 +187,13 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
           </section>
 
           <footer className="documentation-support-footer">
-            <a className="support-footer-card" href="https://buymeacoffee.com/pierremoraes" target="_blank" rel="noreferrer">
-              <span className="support-footer-icon" aria-hidden="true">☕</span>
-              <span className="support-footer-copy">
+            <div className="support-footer-official">
+              <div className="support-footer-copy">
                 <small>{labels.supportLabel}</small>
-                <strong>{labels.supportAction}</strong>
                 <em>{labels.supportText}</em>
-              </span>
-              <ExternalIcon/>
-            </a>
+              </div>
+              <BuyMeACoffeeButton />
+            </div>
             <span className="documentation-footer-signature">© {new Date().getFullYear()} Pierre Moraes</span>
           </footer>
         </div>
