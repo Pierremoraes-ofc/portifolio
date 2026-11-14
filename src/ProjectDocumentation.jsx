@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PROJECT_DOCS } from './projectDocsData';
+import { MACRO_CONTROL_DOC } from './macroControlDocs';
 import PrBridgeLibrary from './PrBridgeLibrary';
 
 function Arrow({ left = false }) {
@@ -15,7 +16,7 @@ function GithubIcon() {
 }
 
 export default function ProjectDocumentation({ projectKey, locale, onBack }) {
-  const doc = PROJECT_DOCS[projectKey];
+  const doc = projectKey === 'pr_macrocontrol' ? MACRO_CONTROL_DOC : PROJECT_DOCS[projectKey];
   const extraSections = projectKey === 'pr_bridge' ? [
     { id: 'bridge-interfaces', title: { pt: 'Interfaces & perfis', en: 'Interfaces & profiles' } },
     { id: 'bridge-api', title: { pt: 'Catálogo de funções', en: 'Function catalog' } },
