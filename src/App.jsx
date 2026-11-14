@@ -20,6 +20,14 @@ const PROJECTS = [
     en: 'Universal data-driven dashboard with analytical charts, KPIs, insights and AI-assisted queries. The project connects SQL models to an intelligence layer using PHP, MySQL and Groq AI.',
   },
   {
+    name: 'PR MacroControl',
+    repo: 'https://github.com/Pierremoraes-ofc/PR-MacroControl',
+    code: 'pr_macrocontrol',
+    tags: ['C#', '.NET 10', 'WinForms', 'WinAPI', 'Macros', 'Desktop'],
+    pt: 'Aplicação desktop de automação com editor de macros, gravação e execução de teclado/mouse, perfis independentes, atalhos globais, DPI em software, persistência JSON, temas e internacionalização.',
+    en: 'Desktop automation app with a macro editor, keyboard/mouse recording and playback, independent profiles, global shortcuts, software pointer scaling, JSON persistence, themes, and localization.',
+  },
+  {
     name: 'Master — Windows Forms',
     repo: 'https://github.com/Pierremoraes-ofc/Master-Windows-Form-CSharp-',
     code: 'master_windows_forms',
