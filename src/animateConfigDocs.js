@@ -77,29 +77,29 @@ export const ANIMATE_CONFIG_DOC = {
         "en": "Gallery and screenshots"
       },
       "text": {
-        "pt": "As imagens desta galeria são ilustrações esquemáticas produzidas a partir das cinco capturas compartilhadas. Elas representam editor de animações, seleção de ossos, fundo chroma, ajuste por gizmo e geração de configurações. Consulte as capturas originais para observar textos e controles exatos da interface.",
-        "en": "The five diagrams in this gallery are schematic illustrations based on the provided screenshots. They portray the animation editor, bone picker, chroma preview, gizmo manipulation, and generated output; consult the original captures for exact labels and controls."
+        "pt": "A galeria prioriza os cinco prints originais do sistema enviados pelo desenvolvedor: edição de animações, seleção de bones, chroma key, gizmo 3D e exportação. Enquanto os arquivos PNG originais não estiverem publicados na pasta de imagens, serão exibidas versões ilustrativas de reserva. Clique em qualquer imagem para ampliar.",
+        "en": "This gallery prioritizes five original screenshots provided by the developer: animation editing, bone selection, chroma key, 3D gizmo, and export. Until the original PNGs are uploaded to the image directory, illustrative fallbacks are displayed. Open an image to enlarge."
       },
       "gallery": [
         [
           "Editor de animações e conexão de props",
-          "./animate-config/capture-01.svg"
+          "./animate-config/capture-01.png"
         ],
         [
           "Seleção de ossos sobre o personagem",
-          "./animate-config/capture-02.svg"
+          "./animate-config/capture-02.png"
         ],
         [
           "Prévia com chroma verde",
-          "./animate-config/capture-03.svg"
+          "./animate-config/capture-03.png"
         ],
         [
           "Edição de posicionamento com gizmo",
-          "./animate-config/capture-04.svg"
+          "./animate-config/capture-04.png"
         ],
         [
           "Geração de configurações e exportações",
-          "./animate-config/capture-05.svg"
+          "./animate-config/capture-05.png"
         ]
       ]
     },
