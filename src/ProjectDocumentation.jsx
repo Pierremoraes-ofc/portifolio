@@ -120,7 +120,12 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
                 <div className="documentation-gallery">
                   {section.gallery.map(([label, src]) => (
                     <a href={src} target="_blank" rel="noreferrer" key={src}>
-                      <img src={src} alt={label} loading="lazy" />
+                      <img src={src} alt={label} loading="lazy" onError={(event) => {
+                        if (projectKey === 'pr_animateconfig' && src.endsWith('.png')) {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = src.replace(/\.png$/, '.svg');
+                        }
+                      }} />
                       <span>{label}</span>
                     </a>
                   ))}
