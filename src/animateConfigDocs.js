@@ -71,39 +71,6 @@ export const ANIMATE_CONFIG_DOC = {
       ]
     },
     {
-      "id": "gallery",
-      "title": {
-        "pt": "Demonstrações e capturas",
-        "en": "Gallery and screenshots"
-      },
-      "text": {
-        "pt": "A galeria prioriza os cinco prints originais do sistema enviados pelo desenvolvedor: edição de animações, seleção de bones, chroma key, gizmo 3D e exportação. Enquanto os arquivos PNG originais não estiverem publicados na pasta de imagens, serão exibidas versões ilustrativas de reserva. Clique em qualquer imagem para ampliar.",
-        "en": "This gallery prioritizes five original screenshots provided by the developer: animation editing, bone selection, chroma key, 3D gizmo, and export. Until the original PNGs are uploaded to the image directory, illustrative fallbacks are displayed. Open an image to enlarge."
-      },
-      "gallery": [
-        [
-          "Editor de animações e conexão de props",
-          "./animate-config/capture-01.png"
-        ],
-        [
-          "Seleção de ossos sobre o personagem",
-          "./animate-config/capture-02.png"
-        ],
-        [
-          "Prévia com chroma verde",
-          "./animate-config/capture-03.png"
-        ],
-        [
-          "Edição de posicionamento com gizmo",
-          "./animate-config/capture-04.png"
-        ],
-        [
-          "Geração de configurações e exportações",
-          "./animate-config/capture-05.png"
-        ]
-      ]
-    },
-    {
       "id": "requirements",
       "title": {
         "pt": "Requisitos e instalação",
