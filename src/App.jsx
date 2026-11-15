@@ -39,7 +39,7 @@ const PROJECTS = [
 
 const HOBBY_PROJECTS = [
   {
-    name: 'PR Animate Config · Forge Animated',
+    name: 'PR Animate Config',
     repo: 'https://github.com/Pierremoraes-ofc/pr_animateConfig',
     code: 'pr_animateconfig',
     tags: ['FiveM', 'Lua', 'NUI', '3D Gizmo', 'Animations', 'Exports'],
