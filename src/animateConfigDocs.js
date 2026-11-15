@@ -77,8 +77,8 @@ export const ANIMATE_CONFIG_DOC = {
         "en": "Gallery and screenshots"
       },
       "text": {
-        "pt": "As cinco capturas fornecidas apresentam o editor de animações, seleção visual de ossos, fundo chroma, ajuste por gizmo e saída de configurações. Clique nas imagens da galeria para ampliar e observar os detalhes da interface.",
-        "en": "The five provided screenshots demonstrate the animation editor, visual bone selection, chroma background, gizmo-based adjustment, and configuration output. Open each gallery image for a closer look."
+        "pt": "As imagens desta galeria são ilustrações esquemáticas produzidas a partir das cinco capturas compartilhadas. Elas representam editor de animações, seleção de ossos, fundo chroma, ajuste por gizmo e geração de configurações. Consulte as capturas originais para observar textos e controles exatos da interface.",
+        "en": "The five diagrams in this gallery are schematic illustrations based on the provided screenshots. They portray the animation editor, bone picker, chroma preview, gizmo manipulation, and generated output; consult the original captures for exact labels and controls."
       },
       "gallery": [
         [
