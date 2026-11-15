@@ -123,7 +123,10 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
                       <img src={src} alt={label} loading="lazy" onError={(event) => {
                         if (projectKey === 'pr_animateconfig' && src.endsWith('.png')) {
                           event.currentTarget.onerror = null;
-                          event.currentTarget.src = src.replace(/\.png$/, '.svg');
+                          const fallback = src.replace(/\.png$/, '.svg');
+                          event.currentTarget.src = fallback;
+                          const galleryLink = event.currentTarget.closest('a');
+                          if (galleryLink) galleryLink.href = fallback;
                         }
                       }} />
                       <span>{label}</span>
