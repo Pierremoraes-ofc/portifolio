@@ -1,5 +1,5 @@
 export const ANIMATE_CONFIG_DOC = {
-  "name": "PR Animate Config · Forge Animated",
+  "name": "PR Animate Config",
   "code": "pr_animateconfig",
   "repo": "https://github.com/Pierremoraes-ofc/pr_animateConfig",
   "category": {
