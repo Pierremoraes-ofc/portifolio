@@ -39,6 +39,14 @@ const PROJECTS = [
 
 const HOBBY_PROJECTS = [
   {
+    name: 'PR Animate Config · Forge Animated',
+    repo: 'https://github.com/Pierremoraes-ofc/pr_animateConfig',
+    code: 'pr_animateconfig',
+    tags: ['FiveM', 'Lua', 'NUI', '3D Gizmo', 'Animations', 'Exports'],
+    pt: 'Editor visual de animações e props com seleção de bones, ajustes 3D por gizmo, prévia, geração de Lua/JSON/Scully e catálogo persistente para reutilização via exports.',
+    en: 'Visual animation and prop editor with bone selection, 3D gizmo transforms, preview, Lua/JSON/Scully output and a persistent catalog reusable through exports.',
+  },
+  {
     name: 'PR Bridge',
     repo: 'https://github.com/Pierremoraes-ofc/pr_bridge',
     code: 'pr_bridge',
