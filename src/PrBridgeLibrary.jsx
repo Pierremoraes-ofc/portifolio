@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { PR_BRIDGE_API, PR_BRIDGE_MODULES, PR_BRIDGE_API_COUNT } from './data/prBridgeApi.generated';
+import { useEffect, useMemo, useState } from 'react';
+import { PR_BRIDGE_API, PR_BRIDGE_MODULES, PR_BRIDGE_API_COUNT, PR_BRIDGE_SOURCE_VERSION } from './data/prBridgeApi.generated';
 
 const UI_EXAMPLES = [
   {
@@ -391,12 +391,75 @@ function isReturnFunction(signature) {
   return /^(get|fetch|find|search|read|load|resolve|list|has|can|is|await|request|query|single|scalar|insert|remember|call|create|exists|zoneexists)/.test(fn);
 }
 
+
+function describeParameter(raw, context, pt) {
+  const arg = raw.replace(/\\?$/, '').toLowerCase();
+  const info = {
+    source: ['ID do jogador no servidor (source).', 'Server player ID (source).'],
+    src: ['ID do jogador no servidor.', 'Server player ID.'],
+    callback: ['Função chamada quando a operação responder.', 'Function called when the operation responds.'],
+    cb: ['Callback de resposta.', 'Response callback.'],
+    timeout: ['Tempo máximo de espera (geralmente ms).', 'Timeout, generally in milliseconds.'],
+    options: ['Tabela de opções definida pelo contrato do módulo.', 'Options table defined by the module contract.'],
+    metadata: ['Dados adicionais vinculados à entidade ou ao item.', 'Additional metadata bound to the item/entity.'],
+    account: ['Conta bancária/carteira mapeada pelo provider.', 'Provider-mapped bank account or wallet.'],
+    resource: ['Nome exato do resource FiveM.', 'Exact FiveM resource name.'],
+    path: ['Caminho de arquivo/módulo aceito pela API.', 'File/module path accepted by this API.'],
+    key: ['Chave/identificador utilizado pela operação.', 'Key/identifier used by the operation.'],
+    name: ['Nome do registro/ação conforme o contrato.', 'Record/action name defined by the contract.'],
+    value: ['Valor a ler/gravar; observe o tipo esperado no módulo.', 'Value read/written; check the module type contract.'],
+    data: ['Tabela/dados de entrada; confira o schema do provider.', 'Input data/table; follow the provider schema.'],
+    id: ['Identificador do objeto ou registro.', 'Object or record identifier.'],
+  };
+  const text = info[arg] || (pt ? 'Consulte a descrição e o código-fonte para o tipo e restrições deste argumento.' : 'See the description and source code for the argument type and constraints.');
+  return (pt ? text[0] || text : text[1] || text) + (raw.endsWith('?') ? (pt ? ' Opcional.' : ' Optional.') : '');
+}
+
+function returnDescription(entry, pt) {
+  const detail = entry.detail || '';
+  const match = detail.match(/(?:^|[.;]\\s*)(Retorna[^.!?]*(?:[.!?]|$))/i);
+  if (pt && match) return match[1].trim();
+  if (pt && /(nil|false|erro|falha|indisponível)/i.test(detail)) {
+    return 'Possui condições de falha/indisponibilidade descritas acima. Não presuma sucesso sem conferir o valor retornado.';
+  }
+  return pt
+    ? 'O tipo e a disponibilidade do retorno dependem do contrato e do adapter indicado na descrição; funções sem retorno podem resultar em nil.'
+    : 'Return types and availability depend on the module/provider contract; no-return operations may yield nil.';
+}
+
+function sourceLink(entry) {
+  const first = (entry.directory || '').split(';')[0].trim().replace(/^pr_bridge\\//, '');
+  if (!first || /[{}*]/.test(first) || !/^(bridge|imports|shared|interface|docs)\\//.test(first)) return '';
+  return 'https://github.com/Pierremoraes-ofc/pr_bridge/blob/main/' + first;
+}
+
+const LUA_TOKENS = /(--[^\\n]*|'(?:\\\\.|[^'\\\\])*'|"(?:\\\\.|[^"\\\\])*"|\\b(?:local|function|if|then|else|elseif|end|return|true|false|nil|not|and|or|for|do|while|repeat|until|in)\\b|\\b\\d+(?:\\.\\d+)?\\b|\\b(?:pr_lib|print|json|RegisterCommand|PlayerPedId)\\b)/g;
+function LuaExample({ code }) {
+  const parts = [];
+  let last = 0;
+  for (const match of code.matchAll(LUA_TOKENS)) {
+    const start = match.index ?? 0;
+    if (start > last) parts.push(code.slice(last, start));
+    const token = match[0];
+    const kind = token.startsWith('--') ? 'comment'
+      : token.startsWith("'") || token.startsWith('"') ? 'string'
+      : /^\\d/.test(token) ? 'number'
+      : /^(pr_lib|print|json|RegisterCommand|PlayerPedId)$/.test(token) ? 'builtin'
+      : 'keyword';
+    parts.push(<span className={`bridge-lua-${kind}`} key={start}>{token}</span>);
+    last = start + token.length;
+  }
+  if (last < code.length) parts.push(code.slice(last));
+  return <code>{parts}</code>;
+}
+
 export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
   const pt = locale === 'pt-BR';
   const [query, setQuery] = useState('');
   const [module, setModule] = useState('all');
   const [context, setContext] = useState('all');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(60);
 
   const availableTags = useMemo(() => {
     const count = new Map();
@@ -429,6 +492,9 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
       return haystack.includes(q);
     });
   }, [query, module, context, selectedTags]);
+
+  useEffect(() => setVisibleCount(60), [query, module, context, selectedTags]);
+  const visibleRows = rows.slice(0, visibleCount);
 
   const toggleTag = (tag) => {
     setSelectedTags((current) => current.includes(tag) ? current.filter((value) => value !== tag) : [...current, tag]);
@@ -536,7 +602,7 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
         )}
 
         <div className="bridge-api-list">
-          {rows.map((entry, index) => {
+          {visibleRows.map((entry, index) => {
             const parsed = parseSignature(entry.signature);
             const tags = tagList(entry);
             return (
@@ -560,30 +626,36 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
                 <div className="bridge-api-meta">
                   <div>
                     <span>{pt ? 'Parâmetros' : 'Parameters'}</span>
-                    <div>{parsed.args.length ? parsed.args.map((arg) => <code key={arg}>{arg}</code>) : <em>{pt ? 'Sem parâmetros' : 'No parameters'}</em>}</div>
+                    <div>{parsed.args.length ? parsed.args.map((arg) => <code key={arg} title={describeParameter(arg, entry.context, pt)}>{arg}</code>) : <em>{pt ? 'Sem parâmetros' : 'No parameters'}</em>}</div>
                   </div>
                   <div>
                     <span>{pt ? 'Retorno' : 'Return'}</span>
-                    <p>{isReturnFunction(entry.signature)
-                      ? (pt ? 'Retorna valor/resultado conforme o contrato e provider ativo.' : 'Returns a value/result according to the contract and active provider.')
-                      : (pt ? 'Executa a operação; consulte a descrição quando houver retorno específico.' : 'Executes the operation; see description when a specific return is documented.')}</p>
+                    <p>{returnDescription(entry, pt)}</p>
                   </div>
                   {entry.directory && (
                     <div>
                       <span>{pt ? 'Fonte' : 'Source'}</span>
-                      <code>{entry.directory}</code>
+                      {sourceLink(entry) ? <a href={sourceLink(entry)} target="_blank" rel="noreferrer"><code>{entry.directory}</code></a> : <code>{entry.directory}</code>}
                     </div>
                   )}
                 </div>
 
                 <div className="bridge-api-example">
                   <span>{pt ? 'Exemplo de uso' : 'Usage example'}</span>
-                  <pre><code>{entry.example}</code></pre>
+                  <pre><LuaExample code={entry.example} /></pre>
                 </div>
               </article>
             );
           })}
         </div>
+        {visibleCount < rows.length && (
+          <div className="bridge-api-more">
+            <span>{pt ? `Exibindo ${Math.min(visibleCount, rows.length)} de ${rows.length} funções` : `Showing ${Math.min(visibleCount, rows.length)} of ${rows.length} functions`}</span>
+            <button type="button" onClick={() => setVisibleCount(count => count + 60)}>
+              {pt ? 'Mostrar mais 60 funções' : 'Show 60 more functions'}
+            </button>
+          </div>
+        )}
       </section>
     </>
   );
