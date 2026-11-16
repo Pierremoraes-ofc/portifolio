@@ -1,6 +1,6 @@
-// Catálogo documentado para PR Bridge 1.4.8; fonte: código atual e docs/functions_datails.md.
-// Chamadas de providers variam por adapter e contexto; exemplos são modelos de integração.
-// Funções de módulos opt-in exigem import explícito. Recursos sem provider podem retornar nil/false.
+// PR Bridge API 1.4.8 — catálogo consolidado do código e documentação.
+// Tags preservam indexação por módulo, contexto e termos semânticos; filtros combinam tags com AND.
+// Entradas de fachada podem depender de provider opcional: consulte `detail` e `directory`.
 export const PR_BRIDGE_API = [
   {
     "module": "core",
@@ -10050,7 +10050,7 @@ export const PR_BRIDGE_API = [
     "module": "cache",
     "context": "client/server",
     "signature": "pr_lib.cache.GetResourceState(resource, key)",
-    "detail": "Consulta o export GetCachedState(key) de um recurso iniciado e retorna cópia defensiva de record.data; recurso parado, export ausente ou registro inválido retornam nil. Aceita chamada com ponto ou dois-pontos.",
+    "detail": "Consulta cópia defensiva de dados anteriormente publicados sob resource + domain no cache local. Não consulta exports do produtor no momento da leitura, não faz snapshot inicial nem cria replicação automática.",
     "directory": "bridge/cache/resources.lua",
     "tags": "cache, client/server, cache entre recursos, get, resource, state",
     "example": "local result = pr_lib.cache.GetResourceState('my_resource', 'example_key')\nprint('Resultado:', result)"
@@ -10059,7 +10059,7 @@ export const PR_BRIDGE_API = [
     "module": "cache",
     "context": "client/server",
     "signature": "pr_lib.cache.OnResourceState(resource, key, callback)",
-    "detail": "Escuta pr_bridge:resourceState:changed e entrega cópia defensiva dos dados desse domínio. Retorna função para cancelar a assinatura. Não faz snapshot inicial nem cria replicação automática.",
+    "detail": "Registra observador de mudanças do domínio no cache local e retorna handle/função de cancelamento conforme onChange. Não entrega snapshot inicial; faça GetResourceState separadamente quando necessário.",
     "directory": "bridge/cache/resources.lua",
     "tags": "cache, client/server, cache entre recursos, on, resource, state",
     "example": "local result = pr_lib.cache.OnResourceState('my_resource', 'example_key', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
@@ -10918,6 +10918,438 @@ export const PR_BRIDGE_API = [
     "directory": "bridge/locale.lua",
     "tags": "locale.lua, client/server, locale: snapshot das traduções, get, all",
     "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:getAll()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "frameworkRouting",
+    "context": "shared",
+    "signature": "pr_lib.frameworkRouting.getActive()",
+    "detail": "Retorna o backend de framework selecionado pelo PR Bridge, ou 'default'. Diferencia o core realmente ativo dos aliases estáticos anunciados por `provide`. ",
+    "directory": "bridge/compat/framework_routing.lua",
+    "tags": "frameworkRouting, shared, provider, framework, roteamento, native",
+    "example": "local result = pr_lib.frameworkRouting.getActive()\nprint('Framework ativo:', result)"
+  },
+  {
+    "module": "frameworkRouting",
+    "context": "shared",
+    "signature": "pr_lib.frameworkRouting.isNative(name)",
+    "detail": "Normaliza um nome/alias e verifica se é o core nativo selecionado. Em um backend QBX, o adaptador QB pode também ser considerado nativo para compatibilidade.",
+    "directory": "bridge/compat/framework_routing.lua",
+    "tags": "frameworkRouting, shared, provider, framework, native, compatibilidade",
+    "example": "local result = pr_lib.frameworkRouting.isNative('qb')\nprint('QB é nativo/compatível?', result)"
+  },
+  {
+    "module": "frameworkRouting",
+    "context": "shared",
+    "signature": "pr_lib.frameworkRouting.select(supported)",
+    "detail": "Escolhe um único destino dentre uma lista de frameworks aceitos pelo consumidor, dando prioridade ao core realmente ativo; só considera fachadas quando permitido em Config.compatFramework. Retorna nome canônico ou nil.",
+    "directory": "bridge/compat/framework_routing.lua",
+    "tags": "frameworkRouting, shared, provider, framework, roteamento, seleção",
+    "example": "local supported = { 'qb', 'esx' }\nlocal result = pr_lib.frameworkRouting.select(supported)\nprint('Rota selecionada:', result)"
+  },
+  {
+    "module": "frameworkRouting",
+    "context": "shared",
+    "signature": "pr_lib.frameworkRouting.assertAllowed(source, owner)",
+    "detail": "Verifica se o consumidor pode adquirir uma fachada de framework; lê declarações pr_bridge_framework do manifesto e bloqueia compatibilidade incorreta contra um core nativo. Pode lançar erro.",
+    "directory": "bridge/compat/framework_routing.lua",
+    "tags": "frameworkRouting, shared, provider, framework, segurança, contrato",
+    "example": "local consumer = GetCurrentResourceName()\nlocal ok, err = pcall(pr_lib.frameworkRouting.assertAllowed, 'esx', consumer)\nprint('Permitido:', ok, err)"
+  },
+  {
+    "module": "frameworkRouting",
+    "context": "shared",
+    "signature": "pr_lib.frameworkRouting.forget(owner)",
+    "detail": "Invalida o cache de declarações de framework de um resource consumidor; usado em lifecycle/stop para evitar estado antigo.",
+    "directory": "bridge/compat/framework_routing.lua",
+    "tags": "frameworkRouting, shared, provider, framework, lifecycle",
+    "example": "local consumer = GetCurrentResourceName()\npr_lib.frameworkRouting.forget(consumer)\nprint('Declarações invalidadas:', consumer)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getProvider()",
+    "detail": "Informa o resource `forge-appearance` quando está iniciado e disponível. A disponibilidade é cacheada e invalidada por eventos de start/stop; nil indica provider ausente ou ainda inicializando.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, aparência, disponibilidade",
+    "example": "local provider = pr_lib.appearance.getProvider()\nprint('Provider de aparência:', provider or 'indisponível')"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.getProvider()",
+    "detail": "Informa o resource `forge-appearance` quando está iniciado e disponível. A disponibilidade é cacheada e invalidada por eventos de start/stop; nil indica provider ausente ou ainda inicializando.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, aparência, disponibilidade",
+    "example": "local provider = pr_lib.appearance.getProvider()\nprint('Provider de aparência:', provider or 'indisponível')"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getPedModel(...)",
+    "detail": "Encaminha a operação 'getPedModel' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getpedmodel",
+    "example": "local ped = PlayerPedId()\nlocal result, err = pr_lib.appearance.getPedModel(ped)\nprint('getPedModel:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getPedComponents(...)",
+    "detail": "Encaminha a operação 'getPedComponents' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getpedcomponents",
+    "example": "local ped = PlayerPedId()\nlocal result, err = pr_lib.appearance.getPedComponents(ped)\nprint('getPedComponents:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getPedProps(...)",
+    "detail": "Encaminha a operação 'getPedProps' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getpedprops",
+    "example": "local ped = PlayerPedId()\nlocal result, err = pr_lib.appearance.getPedProps(ped)\nprint('getPedProps:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getPedHeadBlend(...)",
+    "detail": "Encaminha a operação 'getPedHeadBlend' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getpedheadblend",
+    "example": "-- Complete os parâmetros segundo o export getPedHeadBlend do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.getPedHeadBlend(table.unpack(args))\nprint('getPedHeadBlend:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getPedFaceFeatures(...)",
+    "detail": "Encaminha a operação 'getPedFaceFeatures' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getpedfacefeatures",
+    "example": "-- Complete os parâmetros segundo o export getPedFaceFeatures do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.getPedFaceFeatures(table.unpack(args))\nprint('getPedFaceFeatures:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getPedHeadOverlays(...)",
+    "detail": "Encaminha a operação 'getPedHeadOverlays' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getpedheadoverlays",
+    "example": "-- Complete os parâmetros segundo o export getPedHeadOverlays do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.getPedHeadOverlays(table.unpack(args))\nprint('getPedHeadOverlays:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getPedHair(...)",
+    "detail": "Encaminha a operação 'getPedHair' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getpedhair",
+    "example": "-- Complete os parâmetros segundo o export getPedHair do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.getPedHair(table.unpack(args))\nprint('getPedHair:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.getPedAppearance(...)",
+    "detail": "Encaminha a operação 'getPedAppearance' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getpedappearance",
+    "example": "local ped = PlayerPedId()\nlocal result, err = pr_lib.appearance.getPedAppearance(ped)\nprint('getPedAppearance:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPlayerModel(...)",
+    "detail": "Encaminha a operação 'setPlayerModel' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setplayermodel",
+    "example": "-- Complete os parâmetros segundo o export setPlayerModel do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPlayerModel(table.unpack(args))\nprint('setPlayerModel:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedHeadBlend(...)",
+    "detail": "Encaminha a operação 'setPedHeadBlend' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedheadblend",
+    "example": "-- Complete os parâmetros segundo o export setPedHeadBlend do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedHeadBlend(table.unpack(args))\nprint('setPedHeadBlend:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedFaceFeatures(...)",
+    "detail": "Encaminha a operação 'setPedFaceFeatures' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedfacefeatures",
+    "example": "-- Complete os parâmetros segundo o export setPedFaceFeatures do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedFaceFeatures(table.unpack(args))\nprint('setPedFaceFeatures:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedHeadOverlays(...)",
+    "detail": "Encaminha a operação 'setPedHeadOverlays' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedheadoverlays",
+    "example": "-- Complete os parâmetros segundo o export setPedHeadOverlays do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedHeadOverlays(table.unpack(args))\nprint('setPedHeadOverlays:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedHair(...)",
+    "detail": "Encaminha a operação 'setPedHair' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedhair",
+    "example": "-- Complete os parâmetros segundo o export setPedHair do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedHair(table.unpack(args))\nprint('setPedHair:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedEyeColor(...)",
+    "detail": "Encaminha a operação 'setPedEyeColor' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedeyecolor",
+    "example": "-- Complete os parâmetros segundo o export setPedEyeColor do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedEyeColor(table.unpack(args))\nprint('setPedEyeColor:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedComponent(...)",
+    "detail": "Encaminha a operação 'setPedComponent' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedcomponent",
+    "example": "-- Complete os parâmetros segundo o export setPedComponent do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedComponent(table.unpack(args))\nprint('setPedComponent:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedComponents(...)",
+    "detail": "Encaminha a operação 'setPedComponents' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedcomponents",
+    "example": "-- Complete os parâmetros segundo o export setPedComponents do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedComponents(table.unpack(args))\nprint('setPedComponents:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedProp(...)",
+    "detail": "Encaminha a operação 'setPedProp' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedprop",
+    "example": "-- Complete os parâmetros segundo o export setPedProp do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedProp(table.unpack(args))\nprint('setPedProp:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedProps(...)",
+    "detail": "Encaminha a operação 'setPedProps' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedprops",
+    "example": "-- Complete os parâmetros segundo o export setPedProps do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedProps(table.unpack(args))\nprint('setPedProps:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPlayerAppearance(...)",
+    "detail": "Encaminha a operação 'setPlayerAppearance' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setplayerappearance",
+    "example": "-- Complete os parâmetros segundo o export setPlayerAppearance do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPlayerAppearance(table.unpack(args))\nprint('setPlayerAppearance:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedAppearance(...)",
+    "detail": "Encaminha a operação 'setPedAppearance' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedappearance",
+    "example": "-- Complete os parâmetros segundo o export setPedAppearance do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedAppearance(table.unpack(args))\nprint('setPedAppearance:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.setPedTattoos(...)",
+    "detail": "Encaminha a operação 'setPedTattoos' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, setpedtattoos",
+    "example": "-- Complete os parâmetros segundo o export setPedTattoos do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.setPedTattoos(table.unpack(args))\nprint('setPedTattoos:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.startPlayerCustomization(...)",
+    "detail": "Encaminha a operação 'startPlayerCustomization' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, startplayercustomization",
+    "example": "-- Complete os parâmetros segundo o export startPlayerCustomization do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.startPlayerCustomization(table.unpack(args))\nprint('startPlayerCustomization:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.OpenAdminMenu(...)",
+    "detail": "Encaminha a operação 'OpenAdminMenu' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, openadminmenu",
+    "example": "-- Complete os parâmetros segundo o export OpenAdminMenu do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.OpenAdminMenu(table.unpack(args))\nprint('OpenAdminMenu:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.Reapply(...)",
+    "detail": "Encaminha a operação 'Reapply' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, escrita, reapply",
+    "example": "-- Complete os parâmetros segundo o export Reapply do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.Reapply(table.unpack(args))\nprint('Reapply:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "client",
+    "signature": "pr_lib.appearance.GetBaseDecorations(...)",
+    "detail": "Encaminha a operação 'GetBaseDecorations' do contrato client ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, client, provider, forge-appearance, leitura, getbasedecorations",
+    "example": "-- Complete os parâmetros segundo o export GetBaseDecorations do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.GetBaseDecorations(table.unpack(args))\nprint('GetBaseDecorations:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.IsAppearanceAdmin(...)",
+    "detail": "Encaminha a operação 'IsAppearanceAdmin' do contrato server ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, forge-appearance, leitura, isappearanceadmin",
+    "example": "local source = source -- ID do jogador obtido pelo comando/evento\nlocal result, err = pr_lib.appearance.IsAppearanceAdmin(source)\nprint('Permissão de aparência:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.AppearanceInkStorage(...)",
+    "detail": "Encaminha a operação 'AppearanceInkStorage' do contrato server ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, forge-appearance, leitura, appearanceinkstorage",
+    "example": "-- Complete os parâmetros segundo o export AppearanceInkStorage do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.AppearanceInkStorage(table.unpack(args))\nprint('AppearanceInkStorage:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.ClothingCatalogImage(...)",
+    "detail": "Encaminha a operação 'ClothingCatalogImage' do contrato server ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, forge-appearance, leitura, clothingcatalogimage",
+    "example": "-- Complete os parâmetros segundo o export ClothingCatalogImage do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.ClothingCatalogImage(table.unpack(args))\nprint('ClothingCatalogImage:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.ClothingCatalogReference(...)",
+    "detail": "Encaminha a operação 'ClothingCatalogReference' do contrato server ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, forge-appearance, leitura, clothingcatalogreference",
+    "example": "-- Complete os parâmetros segundo o export ClothingCatalogReference do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.ClothingCatalogReference(table.unpack(args))\nprint('ClothingCatalogReference:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.ImageGenerationBegin(...)",
+    "detail": "Encaminha a operação 'ImageGenerationBegin' do contrato server ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, forge-appearance, escrita, imagegenerationbegin",
+    "example": "-- Complete os parâmetros segundo o export ImageGenerationBegin do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.ImageGenerationBegin(table.unpack(args))\nprint('ImageGenerationBegin:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.ImageGenerationCheck(...)",
+    "detail": "Encaminha a operação 'ImageGenerationCheck' do contrato server ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para leitura, consulte o resultado retornado pelo provider.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, forge-appearance, leitura, imagegenerationcheck",
+    "example": "-- Complete os parâmetros segundo o export ImageGenerationCheck do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.ImageGenerationCheck(table.unpack(args))\nprint('ImageGenerationCheck:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.ImageGenerationFail(...)",
+    "detail": "Encaminha a operação 'ImageGenerationFail' do contrato server ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, forge-appearance, escrita, imagegenerationfail",
+    "example": "-- Complete os parâmetros segundo o export ImageGenerationFail do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.ImageGenerationFail(table.unpack(args))\nprint('ImageGenerationFail:', result, err)"
+  },
+  {
+    "module": "appearance",
+    "context": "server",
+    "signature": "pr_lib.appearance.ImageGenerationFinish(...)",
+    "detail": "Encaminha a operação 'ImageGenerationFinish' do contrato server ao resource forge-appearance. A assinatura dos argumentos é definida pelo export do provider, não pelo PR Bridge; sem ele, retorna nil, 'appearance_provider_unavailable'. Para alteração, valide permissões e os argumentos exigidos antes de executar.",
+    "directory": "bridge/appearance/api.lua",
+    "tags": "appearance, server, provider, forge-appearance, escrita, imagegenerationfinish",
+    "example": "-- Complete os parâmetros segundo o export ImageGenerationFinish do forge-appearance.\nlocal args = {} -- parâmetros do contrato do provider\nlocal result, err = pr_lib.appearance.ImageGenerationFinish(table.unpack(args))\nprint('ImageGenerationFinish:', result, err)"
+  },
+  {
+    "module": "library",
+    "context": "shared",
+    "signature": "pr_lib.library.hasLoaded()",
+    "detail": "Confirma que a biblioteca canônica lazy foi inicializada no consumidor; não indica que todos os módulos opcionais foram carregados.",
+    "directory": "bridge/library/init.lua",
+    "tags": "library, shared, library, lazy, initialization",
+    "example": "local ready = pr_lib.library.hasLoaded()\nprint('Biblioteca pronta:', ready)"
+  },
+  {
+    "module": "library",
+    "context": "shared",
+    "signature": "pr_lib.library.module(path)",
+    "detail": "Carrega um módulo de forma lazy a partir de um caminho relativo à raiz pr_bridge; mantém cache local e falha explicitamente para import inválido.",
+    "directory": "bridge/library/init.lua",
+    "tags": "library, shared, library, modules, lazy",
+    "example": "local module = pr_lib.library.module('bridge/utils/numbers')\nprint('Módulo carregado:', type(module))"
+  },
+  {
+    "module": "library",
+    "context": "shared",
+    "signature": "pr_lib.library.getLocaleKey()",
+    "detail": "Consulta o identificador de idioma no módulo local de configurações do consumidor.",
+    "directory": "bridge/library/init.lua",
+    "tags": "library, shared, library, locale, configuração",
+    "example": "local locale = pr_lib.library.getLocaleKey()\nprint('Idioma atual:', locale)"
+  },
+  {
+    "module": "library",
+    "context": "shared",
+    "signature": "pr_lib.library.setLocale(key)",
+    "detail": "Solicita a atualização do idioma na camada de localeSettings do consumidor. Requer chave/idioma suportado pelo sistema de localização.",
+    "directory": "bridge/library/init.lua",
+    "tags": "library, shared, library, locale, configuração",
+    "example": "local result = pr_lib.library.setLocale('pt-br')\nprint('Alteração de idioma:', result)"
+  },
+  {
+    "module": "library",
+    "context": "client",
+    "signature": "pr_lib.library.requestModel(asset, timeout?)",
+    "detail": "Solicita e valida o carregamento do asset pela mesma camada nativa de streaming de PR Bridge; usa timeout padrão do loader e lança erro quando o asset não carrega. Disponível somente no client.",
+    "directory": "bridge/library/init.lua",
+    "tags": "library, client, library, assets, streaming, client",
+    "example": "local asset = 'prop_ld_flow_bottle'\nlocal result = pr_lib.library.requestModel(asset, 5000)\nprint('Asset carregado:', result)"
+  },
+  {
+    "module": "library",
+    "context": "client",
+    "signature": "pr_lib.library.requestScaleformMovie(asset, timeout?)",
+    "detail": "Solicita e valida o carregamento do asset pela mesma camada nativa de streaming de PR Bridge; usa timeout padrão do loader e lança erro quando o asset não carrega. Disponível somente no client.",
+    "directory": "bridge/library/init.lua",
+    "tags": "library, client, library, assets, streaming, client",
+    "example": "local asset = 'instructional_buttons'\nlocal result = pr_lib.library.requestScaleformMovie(asset, 5000)\nprint('Asset carregado:', result)"
+  },
+  {
+    "module": "library",
+    "context": "client",
+    "signature": "pr_lib.library.requestStreamedTextureDict(asset, timeout?)",
+    "detail": "Solicita e valida o carregamento do asset pela mesma camada nativa de streaming de PR Bridge; usa timeout padrão do loader e lança erro quando o asset não carrega. Disponível somente no client.",
+    "directory": "bridge/library/init.lua",
+    "tags": "library, client, library, assets, streaming, client",
+    "example": "local asset = 'commonmenu'\nlocal result = pr_lib.library.requestStreamedTextureDict(asset, 5000)\nprint('Asset carregado:', result)"
+  },
+  {
+    "module": "cache",
+    "context": "client/server",
+    "signature": "pr_lib.cache.SetResourceState(resource, domain, data)",
+    "detail": "Publica explicitamente um estado de domínio no cache, criando uma cópia defensiva. Não faz coleta automática de recursos nem substitui replicação explícita quando ela for necessária.",
+    "directory": "bridge/cache/resources.lua",
+    "tags": "cache, client/server, cache, provider, estado, publicação",
+    "example": "local resource = GetCurrentResourceName()\nlocal result = pr_lib.cache.SetResourceState(resource, 'status', { ready = true })\nprint('Publicação no cache:', result)"
   }
 ];
 export const PR_BRIDGE_MODULES = [
@@ -10926,6 +11358,7 @@ export const PR_BRIDGE_MODULES = [
   "addcommand",
   "addkeybind",
   "alert",
+  "appearance",
   "banking",
   "cache",
   "callback",
@@ -10956,6 +11389,7 @@ export const PR_BRIDGE_MODULES = [
   "fivem.vehicleProperties",
   "fivem.vehicleState",
   "framework",
+  "frameworkRouting",
   "fuel",
   "garage",
   "getLocales",
@@ -10966,6 +11400,7 @@ export const PR_BRIDGE_MODULES = [
   "interface",
   "inventory",
   "jsonDraft",
+  "library",
   "loadJsonRecovery",
   "locale",
   "locale.lua",
@@ -11001,6 +11436,6 @@ export const PR_BRIDGE_MODULES = [
   "wrapJsonMutations",
   "zones"
 ];
-export const PR_BRIDGE_API_COUNT = 1213;
+export const PR_BRIDGE_API_COUNT = 1261;
 export const PR_BRIDGE_SOURCE_VERSION = "1.4.8";
 export const PR_BRIDGE_SOURCE_REVISION = "59fbcb60eddeb15aac35b62061c5ef5c330623ae";
