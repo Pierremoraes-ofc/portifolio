@@ -1087,3 +1087,9 @@ footer{display:flex;justify-content:space-between;padding-top:30px;color:#4d4d56
 .bridge-api-more button { border: 1px solid var(--line, #3a414b); background: transparent; color: inherit; border-radius: 8px; padding: 11px 18px; cursor: pointer; }
 .bridge-api-more button:hover { border-color: #72a9e7; color: #ffffff; }
 .bridge-api-meta a code { color: #8fbef5; }
+
+/* Function-level argument definitions, preserving original signatures. */
+.bridge-api-parameters { display: flex; flex-direction: column; gap: 7px; }
+.bridge-api-param { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.bridge-api-param code { flex-shrink: 0; }
+.bridge-api-param span { font-size: 12px; line-height: 1.55; color: var(--muted, #a0a7b4); }
