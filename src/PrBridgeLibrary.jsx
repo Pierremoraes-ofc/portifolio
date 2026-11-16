@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PR_BRIDGE_API, PR_BRIDGE_MODULES, PR_BRIDGE_API_COUNT, PR_BRIDGE_SOURCE_VERSION } from './data/prBridgeApi.generated';
+import { localizedDetail, parameterDescription, returnDescription as localizedReturnDescription, localizedExample } from './prBridgeApiI18n';
 
 const UI_EXAMPLES = [
   {
@@ -392,42 +393,6 @@ function isReturnFunction(signature) {
 }
 
 
-function describeParameter(raw, context, pt) {
-  const arg = raw.replace(/\?$/, '').toLowerCase();
-  const info = {
-    source: ['ID do jogador no servidor (source).', 'Server player ID (source).'],
-    src: ['ID do jogador no servidor.', 'Server player ID.'],
-    callback: ['Função chamada quando a operação responder.', 'Function called when the operation responds.'],
-    cb: ['Callback de resposta.', 'Response callback.'],
-    timeout: ['Tempo máximo de espera (geralmente ms).', 'Timeout, generally in milliseconds.'],
-    options: ['Tabela de opções definida pelo contrato do módulo.', 'Options table defined by the module contract.'],
-    metadata: ['Dados adicionais vinculados à entidade ou ao item.', 'Additional metadata bound to the item/entity.'],
-    account: ['Conta bancária/carteira mapeada pelo provider.', 'Provider-mapped bank account or wallet.'],
-    resource: ['Nome exato do resource FiveM.', 'Exact FiveM resource name.'],
-    path: ['Caminho de arquivo/módulo aceito pela API.', 'File/module path accepted by this API.'],
-    key: ['Chave/identificador utilizado pela operação.', 'Key/identifier used by the operation.'],
-    name: ['Nome do registro/ação conforme o contrato.', 'Record/action name defined by the contract.'],
-    value: ['Valor a ler/gravar; observe o tipo esperado no módulo.', 'Value read/written; check the module type contract.'],
-    data: ['Tabela/dados de entrada; confira o schema do provider.', 'Input data/table; follow the provider schema.'],
-    id: ['Identificador do objeto ou registro.', 'Object or record identifier.'],
-  };
-  const text = info[arg];
-  const description = Array.isArray(text) ? text[pt ? 0 : 1] : (pt ? 'Consulte a descrição e o código-fonte para os tipos e restrições deste argumento.' : 'See the description and source for this argument type and constraints.');
-  return description + (raw.endsWith('?') ? (pt ? ' Opcional.' : ' Optional.') : '');
-}
-
-function returnDescription(entry, pt) {
-  const detail = entry.detail || '';
-  const match = detail.match(/(?:^|[.;]\s*)(Retorna[^.!?]*(?:[.!?]|$))/i);
-  if (pt && match) return match[1].trim();
-  if (pt && /(nil|false|erro|falha|indisponível)/i.test(detail)) {
-    return 'Possui condições de falha/indisponibilidade descritas acima. Não presuma sucesso sem conferir o valor retornado.';
-  }
-  return pt
-    ? 'O tipo e a disponibilidade do retorno dependem do contrato e do adapter indicado na descrição; funções sem retorno podem resultar em nil.'
-    : 'Return types and availability depend on the module/provider contract; no-return operations may yield nil.';
-}
-
 function sourceLink(entry) {
   const first = (entry.directory || '').split(';')[0].trim().replace(/^pr_bridge\//, '');
   if (!first || /[{}*]/.test(first) || !/^(bridge|imports|shared|interface|docs)\//.test(first)) return '';
@@ -484,6 +449,7 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
       const haystack = [
         entry.signature,
         entry.detail,
+        localizedDetail(entry, 'en-US'),
         entry.module,
         entry.context,
         entry.tags,
@@ -507,7 +473,7 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
         <header>
           <span>09</span>
           <div>
-            <small>INTERFACE TOOLKIT</small>
+            <small>{pt ? 'FERRAMENTAS DE INTERFACE' : 'INTERFACE TOOLKIT'}</small>
             <h2>{pt ? 'Menus, perfis visuais, Target e Interact com exemplos completos.' : 'Menus, visual profiles, Target and Interact with complete examples.'}</h2>
           </div>
         </header>
@@ -535,7 +501,7 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
         <header>
           <span>10</span>
           <div>
-            <small>FUNCTION CATALOG</small>
+            <small>{pt ? 'CATÁLOGO DE FUNÇÕES' : 'FUNCTION CATALOG'} · v{PR_BRIDGE_SOURCE_VERSION}</small>
             <h2>{pt ? 'Catálogo pesquisável de todas as funções documentadas do PR Bridge.' : 'Searchable catalog of all documented PR Bridge functions.'}</h2>
           </div>
         </header>
@@ -567,10 +533,10 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
             <span>{pt ? 'Contexto' : 'Context'}</span>
             <select value={context} onChange={(event) => setContext(event.target.value)}>
               <option value="all">{pt ? 'Todos' : 'All'}</option>
-              <option value="shared">shared</option>
-              <option value="client">client</option>
-              <option value="server">server</option>
-              <option value="client/server">client/server</option>
+              <option value="shared">{pt ? 'compartilhado' : 'shared'}</option>
+              <option value="client">{pt ? 'cliente' : 'client'}</option>
+              <option value="server">{pt ? 'servidor' : 'server'}</option>
+              <option value="client/server">{pt ? 'cliente/servidor' : 'client/server'}</option>
             </select>
           </label>
 
@@ -613,10 +579,10 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
                     <span>{entry.module}</span>
                     <code>{entry.signature}</code>
                   </div>
-                  <b className={`context-${entry.context.replace('/', '-')}`}>{entry.context}</b>
+                  <b className={`context-${entry.context.replace('/', '-')}`}>{pt ? ({shared:'compartilhado',client:'cliente',server:'servidor','client/server':'cliente/servidor'}[entry.context] || entry.context) : entry.context}</b>
                 </div>
 
-                <p>{entry.detail || (pt ? 'Função disponível no contrato público do módulo.' : 'Function available in the module public contract.')}</p>
+                <p lang={locale}>{localizedDetail(entry, locale) || (pt ? 'Função disponível no contrato público do módulo.' : 'Function available in the module public contract.')}</p>
 
                 <div className="bridge-api-card-tags">
                   {tags.slice(0, 12).map((tag) => (
@@ -627,23 +593,23 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
                 <div className="bridge-api-meta">
                   <div>
                     <span>{pt ? 'Parâmetros' : 'Parameters'}</span>
-                    <div className="bridge-api-parameters">{parsed.args.length ? parsed.args.map((arg, argIndex) => <div className="bridge-api-param" key={`${arg}-${argIndex}`}><code>{arg}</code><span>{describeParameter(arg, entry.context, pt)}</span></div>) : <em>{pt ? 'Sem parâmetros' : 'No parameters'}</em>}</div>
+                    <div className="bridge-api-parameters">{parsed.args.length ? parsed.args.map((arg, argIndex) => <div className="bridge-api-param" key={`${arg}-${argIndex}`}><code>{arg}</code><span lang={locale}>{parameterDescription(arg, locale)}</span></div>) : <em>{pt ? 'Sem parâmetros' : 'No parameters'}</em>}</div>
                   </div>
                   <div>
                     <span>{pt ? 'Retorno' : 'Return'}</span>
-                    <p>{returnDescription(entry, pt)}</p>
+                    <p lang={locale}>{localizedReturnDescription(entry, locale)}</p>
                   </div>
                   {entry.directory && (
                     <div>
-                      <span>{pt ? 'Fonte' : 'Source'}</span>
+                      <span>{pt ? 'Arquivo de origem' : 'Source file'}</span>
                       {sourceLink(entry) ? <a href={sourceLink(entry)} target="_blank" rel="noreferrer"><code>{entry.directory}</code></a> : <code>{entry.directory}</code>}
                     </div>
                   )}
                 </div>
 
                 <div className="bridge-api-example">
-                  <span>{pt ? 'Exemplo de uso' : 'Usage example'}</span>
-                  <pre><LuaExample code={entry.example} /></pre>
+                  <span>{pt ? 'Exemplo de construção e uso' : 'Construction and usage example'}</span>
+                  <pre><LuaExample code={localizedExample(entry, locale)} /></pre>
                 </div>
               </article>
             );
