@@ -157,7 +157,7 @@ export default function ProjectDocumentation({ projectKey, locale, onBack }) {
 
               {section.cards && (
                 <div className="documentation-cards">
-                  {section.cards.map(([title, description]) => (
+                  {(pt || !section.cardsEn ? section.cards : section.cardsEn).map(([title, description]) => (
                     <article key={title}><span>{title}</span><p>{description}</p></article>
                   ))}
                 </div>
