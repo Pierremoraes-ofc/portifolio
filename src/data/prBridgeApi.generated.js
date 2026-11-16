@@ -1,6 +1,5 @@
-// PR Bridge API 1.4.8 — catálogo consolidado do código e documentação.
-// Tags preservam indexação por módulo, contexto e termos semânticos; filtros combinam tags com AND.
-// Entradas de fachada podem depender de provider opcional: consulte `detail` e `directory`.
+// PR Bridge API 1.4.8 — documentação do código e arquivos docs; provider-specific APIs dependem de adapter.
+// Tags são indexáveis individualmente e selecionadas por AND no catálogo do site.
 export const PR_BRIDGE_API = [
   {
     "module": "core",
@@ -11350,6 +11349,735 @@ export const PR_BRIDGE_API = [
     "directory": "bridge/cache/resources.lua",
     "tags": "cache, client/server, cache, provider, estado, publicação",
     "example": "local resource = GetCurrentResourceName()\nlocal result = pr_lib.cache.SetResourceState(resource, 'status', { ready = true })\nprint('Publicação no cache:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array.from(iter)",
+    "detail": "Constrói uma coleção a partir de uma tabela, iterador ou sequência. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre o construtor/objeto do tipo.",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, from",
+    "example": "local result = pr_lib.collections.array.from({1, 2, 3})\nprint('from:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:at(index)",
+    "detail": "Obtém o item localizado no índice solicitado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, at",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:at(1)\nprint('at:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:merge(...)",
+    "detail": "Cria uma nova sequência combinando outras coleções. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, merge",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:merge(40, 50)\nprint('merge:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:every(testFn)",
+    "detail": "Retorna true quando todos os elementos satisfazem o predicado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, every",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:every(function(item) return item ~= nil end)\nprint('every:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:fill(value, start, endIndex)",
+    "detail": "Preenche um intervalo da sequência com o valor informado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, fill",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:fill(42, 1, 3)\nprint('fill:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:filter(testFn)",
+    "detail": "Retorna nova sequência contendo somente itens aprovados pelo predicado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, filter",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:filter(function(item) return item ~= nil end)\nprint('filter:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:find(testFn, last)",
+    "detail": "Localiza o primeiro item aceito pelo predicado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, find",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:find(function(item) return item ~= nil end, false)\nprint('find:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:findIndex(testFn, last)",
+    "detail": "Encontra o índice do item aprovado pelo predicado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, findindex",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:findIndex(function(item) return item ~= nil end, false)\nprint('findIndex:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:indexOf(value, last)",
+    "detail": "Localiza o índice do valor informado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, indexof",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:indexOf(42, false)\nprint('indexOf:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:forEach(cb)",
+    "detail": "Executa o callback para cada elemento da coleção. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, foreach",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:forEach(function(item) print('Item:', item) end)\nprint('forEach:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:includes(element, fromIndex)",
+    "detail": "Verifica se o valor informado existe na coleção. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, includes",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:includes(10, 1)\nprint('includes:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:join(seperator)",
+    "detail": "Concatena os elementos usando o separador. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, join",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:join(', ')\nprint('join:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:map(cb)",
+    "detail": "Transforma cada elemento e cria uma nova coleção. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, map",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:map(function(item) print('Item:', item) end)\nprint('map:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:pop()",
+    "detail": "Remove e retorna o último elemento. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, pop",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:pop()\nprint('pop:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:push(...)",
+    "detail": "Insere um ou mais elementos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, push",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:push(40, 50)\nprint('push:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:reduce(reducer, initialValue, reverse)",
+    "detail": "Acumula os itens conforme o callback e valor inicial. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, reduce",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:reduce(function(sum, item) return sum + item end, 0, false)\nprint('reduce:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:reverse()",
+    "detail": "Inverte a ordem dos itens. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, reverse",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:reverse()\nprint('reverse:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:shift()",
+    "detail": "Remove o primeiro item. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, shift",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:shift()\nprint('shift:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:slice(start, finish)",
+    "detail": "Obtém uma fatia da sequência. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, slice",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:slice(1, 2)\nprint('slice:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:toReversed()",
+    "detail": "Retorna uma cópia com elementos em ordem inversa. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, toreversed",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:toReversed()\nprint('toReversed:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array:unshift(...)",
+    "detail": "Insere elemento no início da sequência. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, unshift",
+    "example": "local collection = pr_lib.collections.array:new(10, 20, 30)\nlocal result = collection:unshift(40, 50)\nprint('unshift:', result)"
+  },
+  {
+    "module": "collections.array",
+    "context": "shared",
+    "signature": "pr_lib.collections.array.isArray(tbl)",
+    "detail": "Confirma se uma tabela/instância tem semântica de array. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre o construtor/objeto do tipo.",
+    "directory": "bridge/collections/array.lua",
+    "tags": "collections.array, shared, collections, estrutura de dados, array, isarray",
+    "example": "local result = pr_lib.collections.array.isArray(nil)\nprint('isArray:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:set(key, value)",
+    "detail": "Grava ou atualiza valor na chave, mantendo semântica do mapa/cache. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, set",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:set('a', 42)\nprint('set:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:get(key)",
+    "detail": "Obtém o elemento indexado pelo identificador informado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, get",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\n-- A chave/posição deve existir na instância para retornar um valor\nlocal result = collection:get('a')\nprint('get:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:has(key)",
+    "detail": "Verifica a presença do elemento/chave. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, has",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:has('a')\nprint('has:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:delete(key)",
+    "detail": "Remove o par de chave/valor. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, delete",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:delete('a')\nprint('delete:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:size()",
+    "detail": "Retorna a quantidade de elementos atualmente armazenados. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, size",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:size()\nprint('size:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:isEmpty()",
+    "detail": "Verifica se a coleção está vazia. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, isempty",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:isEmpty()\nprint('isEmpty:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:clear()",
+    "detail": "Remove todos os elementos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, clear",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:clear()\nprint('clear:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:entries()",
+    "detail": "Obtém uma sequência/iterador de pares chave/valor. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, entries",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:entries()\nprint('entries:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:keys()",
+    "detail": "Obtém as chaves atualmente armazenadas. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, keys",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:keys()\nprint('keys:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:values()",
+    "detail": "Obtém os valores atualmente armazenados. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, values",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:values()\nprint('values:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:toTable()",
+    "detail": "Converte a estrutura para uma tabela Lua regular. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, totable",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:toTable()\nprint('toTable:', result)"
+  },
+  {
+    "module": "collections.map",
+    "context": "shared",
+    "signature": "pr_lib.collections.map:toArray()",
+    "detail": "Converte os valores para uma sequência Lua. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/map.lua",
+    "tags": "collections.map, shared, collections, estrutura de dados, map, toarray",
+    "example": "local collection = pr_lib.collections.map:new({ a = 10, b = 20 })\nlocal result = collection:toArray()\nprint('toArray:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:add(value)",
+    "detail": "Adiciona elemento ao conjunto, sem repetir. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, add",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:add(42)\nprint('add:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:remove(value)",
+    "detail": "Remove elemento do conjunto. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, remove",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:remove(42)\nprint('remove:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:has(value)",
+    "detail": "Verifica a presença do elemento/chave. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, has",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:has(42)\nprint('has:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:size()",
+    "detail": "Retorna a quantidade de elementos atualmente armazenados. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, size",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:size()\nprint('size:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:isEmpty()",
+    "detail": "Verifica se a coleção está vazia. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, isempty",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:isEmpty()\nprint('isEmpty:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:clear()",
+    "detail": "Remove todos os elementos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, clear",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:clear()\nprint('clear:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:each()",
+    "detail": "Executa a operação 'each' da coleção set. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, each",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:each()\nprint('each:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:toArray()",
+    "detail": "Converte os valores para uma sequência Lua. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, toarray",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:toArray()\nprint('toArray:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:union(other)",
+    "detail": "Cria/retorna a união de dois conjuntos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, union",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:union(pr_lib.collections.set:new('b', 'c'))\nprint('union:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:intersection(other)",
+    "detail": "Calcula valores presentes em ambos os conjuntos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, intersection",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:intersection(pr_lib.collections.set:new('b', 'c'))\nprint('intersection:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:difference(other)",
+    "detail": "Calcula a diferença de conjuntos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, difference",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:difference(pr_lib.collections.set:new('b', 'c'))\nprint('difference:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:equals(other)",
+    "detail": "Compara igualdade entre os conjuntos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, equals",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:equals(pr_lib.collections.set:new('b', 'c'))\nprint('equals:', result)"
+  },
+  {
+    "module": "collections.set",
+    "context": "shared",
+    "signature": "pr_lib.collections.set:isSubsetOf(other)",
+    "detail": "Verifica se o conjunto é subconjunto do outro. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/set.lua",
+    "tags": "collections.set, shared, collections, estrutura de dados, set, issubsetof",
+    "example": "local collection = pr_lib.collections.set:new('a', 'b')\nlocal result = collection:isSubsetOf(pr_lib.collections.set:new('b', 'c'))\nprint('isSubsetOf:', result)"
+  },
+  {
+    "module": "collections.heap",
+    "context": "shared",
+    "signature": "pr_lib.collections.heap:push(...)",
+    "detail": "Insere um ou mais elementos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/heap.lua",
+    "tags": "collections.heap, shared, collections, estrutura de dados, heap, push",
+    "example": "local collection = pr_lib.collections.heap:new(function(a, b) return a < b end)\nlocal result = collection:push(3, 1, 2)\nprint('push:', result)"
+  },
+  {
+    "module": "collections.heap",
+    "context": "shared",
+    "signature": "pr_lib.collections.heap:pop()",
+    "detail": "Remove e retorna o último elemento. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/heap.lua",
+    "tags": "collections.heap, shared, collections, estrutura de dados, heap, pop",
+    "example": "local collection = pr_lib.collections.heap:new(function(a, b) return a < b end)\nlocal result = collection:pop()\nprint('pop:', result)"
+  },
+  {
+    "module": "collections.heap",
+    "context": "shared",
+    "signature": "pr_lib.collections.heap:peek()",
+    "detail": "Consulta a próxima entrada sem removê-la. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/heap.lua",
+    "tags": "collections.heap, shared, collections, estrutura de dados, heap, peek",
+    "example": "local collection = pr_lib.collections.heap:new(function(a, b) return a < b end)\nlocal result = collection:peek()\nprint('peek:', result)"
+  },
+  {
+    "module": "collections.heap",
+    "context": "shared",
+    "signature": "pr_lib.collections.heap:size()",
+    "detail": "Retorna a quantidade de elementos atualmente armazenados. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/heap.lua",
+    "tags": "collections.heap, shared, collections, estrutura de dados, heap, size",
+    "example": "local collection = pr_lib.collections.heap:new(function(a, b) return a < b end)\nlocal result = collection:size()\nprint('size:', result)"
+  },
+  {
+    "module": "collections.heap",
+    "context": "shared",
+    "signature": "pr_lib.collections.heap:isEmpty()",
+    "detail": "Verifica se a coleção está vazia. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/heap.lua",
+    "tags": "collections.heap, shared, collections, estrutura de dados, heap, isempty",
+    "example": "local collection = pr_lib.collections.heap:new(function(a, b) return a < b end)\nlocal result = collection:isEmpty()\nprint('isEmpty:', result)"
+  },
+  {
+    "module": "collections.heap",
+    "context": "shared",
+    "signature": "pr_lib.collections.heap:clear()",
+    "detail": "Remove todos os elementos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/heap.lua",
+    "tags": "collections.heap, shared, collections, estrutura de dados, heap, clear",
+    "example": "local collection = pr_lib.collections.heap:new(function(a, b) return a < b end)\nlocal result = collection:clear()\nprint('clear:', result)"
+  },
+  {
+    "module": "collections.heap",
+    "context": "shared",
+    "signature": "pr_lib.collections.heap:drain()",
+    "detail": "Consome entradas remanescentes conforme a semântica do heap. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/heap.lua",
+    "tags": "collections.heap, shared, collections, estrutura de dados, heap, drain",
+    "example": "local collection = pr_lib.collections.heap:new(function(a, b) return a < b end)\nlocal result = collection:drain()\nprint('drain:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:get(key)",
+    "detail": "Obtém o elemento indexado pelo identificador informado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, get",
+    "example": "local collection = pr_lib.collections.lru:new(16)\n-- A chave/posição deve existir na instância para retornar um valor\nlocal result = collection:get('a')\nprint('get:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:set(key, value)",
+    "detail": "Grava ou atualiza valor na chave, mantendo semântica do mapa/cache. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, set",
+    "example": "local collection = pr_lib.collections.lru:new(16)\nlocal result = collection:set('a', 42)\nprint('set:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:has(key)",
+    "detail": "Verifica a presença do elemento/chave. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, has",
+    "example": "local collection = pr_lib.collections.lru:new(16)\nlocal result = collection:has('a')\nprint('has:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:peek(key)",
+    "detail": "Consulta a próxima entrada sem removê-la. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, peek",
+    "example": "local collection = pr_lib.collections.lru:new(16)\nlocal result = collection:peek('a')\nprint('peek:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:delete(key)",
+    "detail": "Remove o par de chave/valor. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, delete",
+    "example": "local collection = pr_lib.collections.lru:new(16)\nlocal result = collection:delete('a')\nprint('delete:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:size()",
+    "detail": "Retorna a quantidade de elementos atualmente armazenados. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, size",
+    "example": "local collection = pr_lib.collections.lru:new(16)\nlocal result = collection:size()\nprint('size:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:capacity()",
+    "detail": "Retorna a capacidade definida para a estrutura. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, capacity",
+    "example": "local collection = pr_lib.collections.lru:new(16)\nlocal result = collection:capacity()\nprint('capacity:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:clear()",
+    "detail": "Remove todos os elementos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, clear",
+    "example": "local collection = pr_lib.collections.lru:new(16)\nlocal result = collection:clear()\nprint('clear:', result)"
+  },
+  {
+    "module": "collections.lru",
+    "context": "shared",
+    "signature": "pr_lib.collections.lru:each()",
+    "detail": "Executa a operação 'each' da coleção lru. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/lru.lua",
+    "tags": "collections.lru, shared, collections, estrutura de dados, lru, each",
+    "example": "local collection = pr_lib.collections.lru:new(16)\nlocal result = collection:each()\nprint('each:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:push(value)",
+    "detail": "Insere um ou mais elementos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, push",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\nlocal result = collection:push(42)\nprint('push:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:get(i)",
+    "detail": "Obtém o elemento indexado pelo identificador informado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, get",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\n-- A chave/posição deve existir na instância para retornar um valor\nlocal result = collection:get(1)\nprint('get:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:size()",
+    "detail": "Retorna a quantidade de elementos atualmente armazenados. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, size",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\nlocal result = collection:size()\nprint('size:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:capacity()",
+    "detail": "Retorna a capacidade definida para a estrutura. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, capacity",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\nlocal result = collection:capacity()\nprint('capacity:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:isFull()",
+    "detail": "Indica se a capacidade do buffer foi atingida. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, isfull",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\nlocal result = collection:isFull()\nprint('isFull:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:isEmpty()",
+    "detail": "Verifica se a coleção está vazia. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, isempty",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\nlocal result = collection:isEmpty()\nprint('isEmpty:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:clear()",
+    "detail": "Remove todos os elementos. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, clear",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\nlocal result = collection:clear()\nprint('clear:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:each()",
+    "detail": "Executa a operação 'each' da coleção ringbuffer. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, each",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\nlocal result = collection:each()\nprint('each:', result)"
+  },
+  {
+    "module": "collections.ringbuffer",
+    "context": "shared",
+    "signature": "pr_lib.collections.ringbuffer:toArray()",
+    "detail": "Converte os valores para uma sequência Lua. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/ringbuffer.lua",
+    "tags": "collections.ringbuffer, shared, collections, estrutura de dados, ringbuffer, toarray",
+    "example": "local collection = pr_lib.collections.ringbuffer:new(5)\nlocal result = collection:toArray()\nprint('toArray:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:getRandom(setName)",
+    "detail": "Seleciona uma entrada aleatória do conjunto indicado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, getrandom",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:getRandom('default')\nprint('getRandom:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:getRandomWeighted(setName)",
+    "detail": "Seleciona entrada conforme peso probabilístico configurado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, getrandomweighted",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:getRandomWeighted('default')\nprint('getRandomWeighted:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:getRandomAmount(setName, count)",
+    "detail": "Retorna múltiplas entradas aleatórias. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, getrandomamount",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:getRandomAmount('default', 2)\nprint('getRandomAmount:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:getRandomWeightedAmount(setName, count)",
+    "detail": "Retorna múltiplas entradas ponderadas. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, getrandomweightedamount",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:getRandomWeightedAmount('default', 2)\nprint('getRandomWeightedAmount:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:getSet(setName)",
+    "detail": "Obtém um conjunto registrado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, getset",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:getSet('default')\nprint('getSet:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:getAllSets()",
+    "detail": "Consulta os conjuntos disponíveis. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, getallsets",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:getAllSets()\nprint('getAllSets:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:addSet(setName, items)",
+    "detail": "Registra conjunto com nome e itens. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, addset",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:addSet('default', {{ 2, 'common' }})\nprint('addSet:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:updateSet(setName, newItems)",
+    "detail": "Substitui/atualiza os itens do conjunto. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, updateset",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:updateSet('default', {{ 1, 'new' }})\nprint('updateSet:', result)"
+  },
+  {
+    "module": "collections.selector",
+    "context": "shared",
+    "signature": "pr_lib.collections.selector:removeSet(setName)",
+    "detail": "Remove o conjunto indicado. API de coleção Lua da biblioteca canônica PR, carregada sob demanda; este método atua sobre uma instância criada com :new().",
+    "directory": "bridge/collections/selector.lua",
+    "tags": "collections.selector, shared, collections, estrutura de dados, selector, removeset",
+    "example": "local collection = pr_lib.collections.selector:new({ { 1, 'common' }, { 3, 'rare' } })\nlocal result = collection:removeSet('default')\nprint('removeSet:', result)"
   }
 ];
 export const PR_BRIDGE_MODULES = [
@@ -11362,6 +12090,13 @@ export const PR_BRIDGE_MODULES = [
   "banking",
   "cache",
   "callback",
+  "collections.array",
+  "collections.heap",
+  "collections.lru",
+  "collections.map",
+  "collections.ringbuffer",
+  "collections.selector",
+  "collections.set",
   "core",
   "database",
   "debug",
@@ -11436,6 +12171,6 @@ export const PR_BRIDGE_MODULES = [
   "wrapJsonMutations",
   "zones"
 ];
-export const PR_BRIDGE_API_COUNT = 1261;
+export const PR_BRIDGE_API_COUNT = 1342;
 export const PR_BRIDGE_SOURCE_VERSION = "1.4.8";
 export const PR_BRIDGE_SOURCE_REVISION = "59fbcb60eddeb15aac35b62061c5ef5c330623ae";
