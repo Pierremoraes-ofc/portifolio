@@ -373,6 +373,49 @@ local zoneId = pr_lib.target.addBoxZone({
   }
 ];
 
+const UI_EXAMPLE_EN = {
+  "profile": {
+    "title": "Global visual configuration",
+    "description": "Based on interface/data/config.json. PR Bridge centralizes the visual brand, color palette, and positioning of all interface components."
+  },
+  "context": {
+    "title": "Rich context menu",
+    "description": "registerContext supports metadata, progress, badges, keybindings, checked states, images, submenus, events, and local callbacks."
+  },
+  "list-menu": {
+    "title": "Scrollable list menu and checkboxes",
+    "description": "registerMenu supports side scrolling, checkboxes, selection, and change callbacks."
+  },
+  "input": {
+    "title": "Input dialog",
+    "description": "InputDialog accepts typed rows. The module serializes input, number, select, and checkbox fields with validation and search options."
+  },
+  "alert-notify": {
+    "title": "Alert dialog and notifications",
+    "description": "AlertDialog returns confirm/cancel. Notify accepts title, description, notification type, duration, position, and icon."
+  },
+  "radial": {
+    "title": "Radial menu",
+    "description": "Radial items can call callbacks directly or open a registered nested radial menu."
+  },
+  "target": {
+    "title": "Target: entities and zones",
+    "description": "The native Target supports entities, network IDs, models, global interactions, and zones. Options use groups, items, bones, canInteract, and multiple event dispatch modes."
+  },
+  "interact": {
+    "title": "Interact: world interactions",
+    "description": "Interact maintains persistent world interaction points with mouse-wheel/arrow selection and a configurable activation key."
+  },
+  "target-profile": {
+    "title": "Target appearance settings",
+    "description": "The /pr_ui_admin > Target panel controls placement, eye icon, options list, fonts, colors, markers, effects, and wall detection."
+  },
+  "interact-profile": {
+    "title": "Interact appearance settings",
+    "description": "Interact supports clean, blue_circle, green_square, glitch, circle, crosshair, bullseye, geo-alt-fill, cursor-fill, diamond, and obtaizen_ui visual styles."
+  }
+};
+
 function parseSignature(signature) {
   const open = signature.indexOf('(');
   const close = signature.lastIndexOf(')');
@@ -488,8 +531,8 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
             <article className="bridge-ui-example" key={example.id}>
               <div>
                 <span>{example.id.replaceAll('-', ' ')}</span>
-                <h3>{example.title}</h3>
-                <p>{example.description}</p>
+                <h3>{pt ? example.title : (UI_EXAMPLE_EN[example.id]?.title || example.title)}</h3>
+                <p>{pt ? example.description : (UI_EXAMPLE_EN[example.id]?.description || example.description)}</p>
               </div>
               <pre><code>{example.code}</code></pre>
             </article>
