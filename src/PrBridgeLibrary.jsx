@@ -393,7 +393,7 @@ function isReturnFunction(signature) {
 
 
 function describeParameter(raw, context, pt) {
-  const arg = raw.replace(/\\?$/, '').toLowerCase();
+  const arg = raw.replace(/\?$/, '').toLowerCase();
   const info = {
     source: ['ID do jogador no servidor (source).', 'Server player ID (source).'],
     src: ['ID do jogador no servidor.', 'Server player ID.'],
@@ -411,13 +411,14 @@ function describeParameter(raw, context, pt) {
     data: ['Tabela/dados de entrada; confira o schema do provider.', 'Input data/table; follow the provider schema.'],
     id: ['Identificador do objeto ou registro.', 'Object or record identifier.'],
   };
-  const text = info[arg] || (pt ? 'Consulte a descrição e o código-fonte para o tipo e restrições deste argumento.' : 'See the description and source code for the argument type and constraints.');
-  return (pt ? text[0] || text : text[1] || text) + (raw.endsWith('?') ? (pt ? ' Opcional.' : ' Optional.') : '');
+  const text = info[arg];
+  const description = Array.isArray(text) ? text[pt ? 0 : 1] : (pt ? 'Consulte a descrição e o código-fonte para os tipos e restrições deste argumento.' : 'See the description and source for this argument type and constraints.');
+  return description + (raw.endsWith('?') ? (pt ? ' Opcional.' : ' Optional.') : '');
 }
 
 function returnDescription(entry, pt) {
   const detail = entry.detail || '';
-  const match = detail.match(/(?:^|[.;]\\s*)(Retorna[^.!?]*(?:[.!?]|$))/i);
+  const match = detail.match(/(?:^|[.;]\s*)(Retorna[^.!?]*(?:[.!?]|$))/i);
   if (pt && match) return match[1].trim();
   if (pt && /(nil|false|erro|falha|indisponível)/i.test(detail)) {
     return 'Possui condições de falha/indisponibilidade descritas acima. Não presuma sucesso sem conferir o valor retornado.';
@@ -428,12 +429,12 @@ function returnDescription(entry, pt) {
 }
 
 function sourceLink(entry) {
-  const first = (entry.directory || '').split(';')[0].trim().replace(/^pr_bridge\\//, '');
-  if (!first || /[{}*]/.test(first) || !/^(bridge|imports|shared|interface|docs)\\//.test(first)) return '';
+  const first = (entry.directory || '').split(';')[0].trim().replace(/^pr_bridge\//, '');
+  if (!first || /[{}*]/.test(first) || !/^(bridge|imports|shared|interface|docs)\//.test(first)) return '';
   return 'https://github.com/Pierremoraes-ofc/pr_bridge/blob/main/' + first;
 }
 
-const LUA_TOKENS = /(--[^\\n]*|'(?:\\\\.|[^'\\\\])*'|"(?:\\\\.|[^"\\\\])*"|\\b(?:local|function|if|then|else|elseif|end|return|true|false|nil|not|and|or|for|do|while|repeat|until|in)\\b|\\b\\d+(?:\\.\\d+)?\\b|\\b(?:pr_lib|print|json|RegisterCommand|PlayerPedId)\\b)/g;
+const LUA_TOKENS = /(--[^\n]*|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|\b(?:local|function|if|then|else|elseif|end|return|true|false|nil|not|and|or|for|do|while|repeat|until|in)\b|\b\d+(?:\.\d+)?\b|\b(?:pr_lib|print|json|RegisterCommand|PlayerPedId)\b)/g;
 function LuaExample({ code }) {
   const parts = [];
   let last = 0;
@@ -443,7 +444,7 @@ function LuaExample({ code }) {
     const token = match[0];
     const kind = token.startsWith('--') ? 'comment'
       : token.startsWith("'") || token.startsWith('"') ? 'string'
-      : /^\\d/.test(token) ? 'number'
+      : /^\d/.test(token) ? 'number'
       : /^(pr_lib|print|json|RegisterCommand|PlayerPedId)$/.test(token) ? 'builtin'
       : 'keyword';
     parts.push(<span className={`bridge-lua-${kind}`} key={start}>{token}</span>);
