@@ -1,5 +1,6 @@
-// PR Bridge 1.4.8 — catálogo extraído de documentação e funções publicadas no código.
-// Exemplos são construções de referência; provider e contexto determinam suporte real.
+// PR Bridge 1.4.8 — referência da API publicada no portfólio.
+// Fontes: código da revisão 59fbcb6 e documentação histórica; métodos opcionais dependem do adapter ativo.
+// Assinaturas históricas sem correspondência encontrada em source foram excluídas do catálogo ativo.
 export const PR_BRIDGE_API = [
   {
     "module": "core",
@@ -630,15 +631,6 @@ export const PR_BRIDGE_API = [
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, can, carry, item, server",
     "example": "local source = 1 -- substitua pelo source real recebido no servidor\nlocal result = pr_lib.framework.CanCarryItem(source, 'water', 1, {})\nprint('Resultado:', result)"
-  },
-  {
-    "module": "framework",
-    "context": "server",
-    "signature": "pr_lib.framework.CheckItemValid(source, name, count)",
-    "detail": "Validação interna de segurança de consistência de item de inventário.",
-    "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
-    "tags": "framework, check, item, valid, server",
-    "example": "local source = 1 -- substitua pelo source real recebido no servidor\nlocal result = pr_lib.framework.CheckItemValid(source, 'example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1587,15 +1579,6 @@ export const PR_BRIDGE_API = [
   },
   {
     "module": "inventory",
-    "context": "client",
-    "signature": "pr_lib.inventory.CheckIfInventoryBlocked()",
-    "detail": "Desativa e bloqueia a abertura do inventário pelo jogador (útil em animações de algemas, etc.).",
-    "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
-    "tags": "inventory, check, if, blocked, client",
-    "example": "local result = pr_lib.inventory.CheckIfInventoryBlocked()\nprint('Resultado:', result)"
-  },
-  {
-    "module": "inventory",
     "context": "server",
     "signature": "pr_lib.inventory.CheckItemValid(source, name, count)",
     "detail": "Validação interna de segurança de transação de inventário.",
@@ -1710,15 +1693,6 @@ export const PR_BRIDGE_API = [
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, force, open, server",
     "example": "local source = 1 -- substitua pelo source real recebido no servidor\nlocal result = pr_lib.inventory.forceOpenInventory(source, 'default', {})\nprint('Retorno da operação:', result)"
-  },
-  {
-    "module": "inventory",
-    "context": "client",
-    "signature": "pr_lib.inventory.GetClientPlayerInventory()",
-    "detail": "Retorna a lista bruta de itens que estão atualmente na posse do jogador local.",
-    "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
-    "tags": "inventory, get, client, player",
-    "example": "local result = pr_lib.inventory.GetClientPlayerInventory()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2127,30 +2101,12 @@ export const PR_BRIDGE_API = [
   },
   {
     "module": "inventory",
-    "context": "client",
-    "signature": "pr_lib.inventory.getUserInventory()",
-    "detail": "Resgata arma equipada e inventário bruto local do cliente.",
-    "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
-    "tags": "inventory, get, user, client",
-    "example": "local result = pr_lib.inventory.getUserInventory()\nprint('Resultado:', result)"
-  },
-  {
-    "module": "inventory",
     "context": "server",
     "signature": "pr_lib.inventory.GetWeaponAttachmentItems()",
     "detail": "Retorna a lista de itens válidos que servem como acessórios de armas.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, weapon, attachment, items, server",
     "example": "local result = pr_lib.inventory.GetWeaponAttachmentItems()\nprint('Resultado:', result)"
-  },
-  {
-    "module": "inventory",
-    "context": "client",
-    "signature": "pr_lib.inventory.GetWeaponList()",
-    "detail": "Retorna lista de armas estáticas cadastradas.",
-    "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
-    "tags": "inventory, get, weapon, list, client",
-    "example": "local result = pr_lib.inventory.GetWeaponList()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2187,15 +2143,6 @@ export const PR_BRIDGE_API = [
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, inspect, server",
     "example": "local source = 1 -- substitua pelo source real recebido no servidor\nlocal result = pr_lib.inventory.InspectInventory(source, source)\nprint('Retorno da operação:', result)"
-  },
-  {
-    "module": "inventory",
-    "context": "client",
-    "signature": "pr_lib.inventory.isInventoryOpen()",
-    "detail": "Lógicas de abertura, fechamento e status de exibição da UI do inventário.",
-    "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
-    "tags": "inventory, is, open, client",
-    "example": "local result = pr_lib.inventory.isInventoryOpen()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2367,24 +2314,6 @@ export const PR_BRIDGE_API = [
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, durability, server",
     "example": "local result = pr_lib.inventory.SetDurability(source, 'example', 100)\nprint('Resultado:', result)"
-  },
-  {
-    "module": "inventory",
-    "context": "client",
-    "signature": "pr_lib.inventory.setInClothing(state)",
-    "detail": "Desativa o acesso a itens quando o jogador está em animação de troca de roupa.",
-    "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
-    "tags": "inventory, set, in, clothing, client",
-    "example": "local result = pr_lib.inventory.setInClothing(false)\nprint('Retorno da operação:', result)"
-  },
-  {
-    "module": "inventory",
-    "context": "client",
-    "signature": "pr_lib.inventory.setInventoryDisabled(state)",
-    "detail": "Desativa e bloqueia a abertura do inventário pelo jogador (útil em animações de algemas, etc.).",
-    "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
-    "tags": "inventory, set, disabled, client",
-    "example": "local result = pr_lib.inventory.setInventoryDisabled(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -3132,15 +3061,6 @@ export const PR_BRIDGE_API = [
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, disable, targeting, client, alvo, interação, zona",
     "example": "local result = pr_lib.target.DisableTargeting(false)\nprint('Retorno da operação:', result)"
-  },
-  {
-    "module": "target",
-    "context": "client",
-    "signature": "pr_lib.target.FixOptions(options)",
-    "detail": "Normalização interna de parâmetros de callback de alvos.",
-    "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
-    "tags": "target, fix, options, client, alvo, interação, zona",
-    "example": "local result = pr_lib.target.FixOptions({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -12171,6 +12091,6 @@ export const PR_BRIDGE_MODULES = [
   "wrapJsonMutations",
   "zones"
 ];
-export const PR_BRIDGE_API_COUNT = 1342;
+export const PR_BRIDGE_API_COUNT = 1333;
 export const PR_BRIDGE_SOURCE_VERSION = "1.4.8";
 export const PR_BRIDGE_SOURCE_REVISION = "59fbcb60eddeb15aac35b62061c5ef5c330623ae";
