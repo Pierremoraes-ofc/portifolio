@@ -1,6 +1,6 @@
-// AUTO-GENERATED function catalog snapshot from Pierremoraes-ofc/pr_bridge + docs/functions_datails.md
-// Runtime/release documentation is maintained separately in PrBridgeDocs.jsx and may audit newer commits.
-// Public repository: Pierremoraes-ofc/pr_bridge.
+// Catálogo documentado para PR Bridge 1.4.8; fonte: código atual e docs/functions_datails.md.
+// Chamadas de providers variam por adapter e contexto; exemplos são modelos de integração.
+// Funções de módulos opt-in exigem import explícito. Recursos sem provider podem retornar nil/false.
 export const PR_BRIDGE_API = [
   {
     "module": "core",
@@ -9,7 +9,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se outro recurso dependência está rodando no servidor e se a versão instalada atende à restrição de versão mínima informada.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, check, dependency, shared",
-    "example": "pr_lib.checkDependency(source, 'value', 'value')"
+    "example": "local result = pr_lib.checkDependency('my_resource', nil, 'Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "core",
@@ -18,7 +18,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove fisicamente o arquivo JSON correspondente ao caminho especificado.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, delete, json, shared",
-    "example": "pr_lib.deleteJson('value')"
+    "example": "local result = pr_lib.deleteJson('@my_resource/data/config.json')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "core",
@@ -27,7 +27,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica de forma rápida a existência física de um arquivo no caminho JSON informado.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, json, exists, shared",
-    "example": "pr_lib.jsonExists('value')"
+    "example": "local result = pr_lib.jsonExists('@my_resource/data/config.json')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "core",
@@ -36,7 +36,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega e executa dinamicamente um chunk de código Lua a partir de um arquivo virtual ou real (path). Opcionalmente, permite passar um ambiente global customizado (env) para isolamento do escopo. Se optional for verdadeiro, o interpretador silencia erros de ausência do arquivo.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, load, shared",
-    "example": "local result = pr_lib.load('value', 'value', 'value')"
+    "example": "local result = pr_lib.load('@my_resource/data/config.json', nil, false)\nprint('Resultado:', result)"
   },
   {
     "module": "core",
@@ -45,7 +45,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega um arquivo específico (fileName) de um determinado recurso ativo do servidor (resource) no ambiente customizado (env). Silencia falhas de carregamento se optional for true.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, load, file, shared",
-    "example": "local result = pr_lib.loadFile(source, 'example', 'value', 'value')"
+    "example": "local result = pr_lib.loadFile('my_resource', '@my_resource/data/config.json', nil, false)\nprint('Resultado:', result)"
   },
   {
     "module": "core",
@@ -54,7 +54,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lê, decodifica e retorna uma tabela Lua a partir de um arquivo com formato JSON localizado em path.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, load, json, shared",
-    "example": "local result = pr_lib.loadJson('value', 'value')"
+    "example": "local result = pr_lib.loadJson('@my_resource/data/config.json', false)\nprint('Resultado:', result)"
   },
   {
     "module": "core",
@@ -63,7 +63,7 @@ export const PR_BRIDGE_API = [
     "detail": "Importa dinamicamente submódulos e bibliotecas da estrutura interna da pr_bridge.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, load, module, shared",
-    "example": "local result = pr_lib.loadModule('value', 'value', 'value')"
+    "example": "local result = pr_lib.loadModule('@my_resource/data/config.json', nil, false)\nprint('Resultado:', result)"
   },
   {
     "module": "core",
@@ -72,7 +72,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mescla recursivamente dados novos de uma tabela (changes) em um arquivo JSON existente no disco, preservando as chaves anteriores.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, merge, json, shared",
-    "example": "pr_lib.mergeJson('value', 'value', {})"
+    "example": "local result = pr_lib.mergeJson('@my_resource/data/config.json', {}, {})\nprint('Resultado:', result)"
   },
   {
     "module": "core",
@@ -81,16 +81,16 @@ export const PR_BRIDGE_API = [
     "detail": "Lê, decodifica e retorna uma tabela Lua a partir de um arquivo com formato JSON localizado em path.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, read, json, shared",
-    "example": "local result = pr_lib.readJson('value', 'value')"
+    "example": "local result = pr_lib.readJson('@my_resource/data/config.json', false)\nprint('Resultado:', result)"
   },
   {
     "module": "core",
     "context": "shared",
     "signature": "pr_lib.saveJson(path, value, options)",
-    "detail": "Serializa uma tabela Lua (value) em formato JSON identado e legível, gravando-a no caminho (path).",
+    "detail": "Serializa value com json.encode e grava no recurso/caminho resolvido. Retorna true e detalhes somente para retorno nativo true/1; falhas retornam false e motivo. Não garante indentação nem backup; no servidor, use saveJsonRecovery para proteção adicional.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, save, json, shared",
-    "example": "pr_lib.saveJson('value', 'value', {})"
+    "example": "local result = pr_lib.saveJson('@my_resource/data/config.json', {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "core",
@@ -99,7 +99,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mescla recursivamente dados novos de uma tabela (changes) em um arquivo JSON existente no disco, preservando as chaves anteriores.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, update, json, shared",
-    "example": "pr_lib.updateJson('value', 'value', {})"
+    "example": "local result = pr_lib.updateJson('@my_resource/data/config.json', {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "core",
@@ -108,7 +108,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa uma checagem em background consultando a API do GitHub para verificar se a versão declarada no manifesto do recurso atual é inferior à última release pública (tag) do repositório informado.",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, version, check, shared",
-    "example": "pr_lib.versionCheck('value')"
+    "example": "local result = pr_lib.versionCheck(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "core",
@@ -117,7 +117,7 @@ export const PR_BRIDGE_API = [
     "detail": "Serializa uma tabela Lua (value) em formato JSON identado e legível, gravando-a no caminho (path).",
     "directory": "pr_bridge/bridge/core.lua; pr_bridge/init.lua",
     "tags": "core, write, json, shared",
-    "example": "pr_lib.writeJson('value', 'value', {})"
+    "example": "local result = pr_lib.writeJson('@my_resource/data/config.json', {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "locale",
@@ -126,7 +126,7 @@ export const PR_BRIDGE_API = [
     "detail": "clear() Remove todas as entradas de tradução carregadas.",
     "directory": "pr_bridge/bridge/locale.lua",
     "tags": "locale, lang, clear, shared",
-    "example": "lang:clear()"
+    "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:clear()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "locale",
@@ -135,7 +135,7 @@ export const PR_BRIDGE_API = [
     "detail": "delete(phraseTarget, prefix) Apaga uma entrada específica de tradução.",
     "directory": "pr_bridge/bridge/locale.lua",
     "tags": "locale, lang, delete, shared",
-    "example": "lang:delete('value', 'value')"
+    "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:delete(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "locale",
@@ -144,7 +144,7 @@ export const PR_BRIDGE_API = [
     "detail": "extend(phrases, prefix) Adiciona um conjunto de frases a um catálogo de tradução ativo sob um prefixo identificador de namespace.",
     "directory": "pr_bridge/bridge/locale.lua",
     "tags": "locale, lang, extend, shared",
-    "example": "lang:extend('value', 'value')"
+    "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:extend(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "locale",
@@ -153,7 +153,7 @@ export const PR_BRIDGE_API = [
     "detail": "has(key) Retorna um booleano que indica se a chave de tradução está mapeada na localidade ativa.",
     "directory": "pr_bridge/bridge/locale.lua",
     "tags": "locale, lang, has, shared",
-    "example": "local result = lang:has('value')"
+    "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:has('example_key')\nprint('Resultado:', result)"
   },
   {
     "module": "locale",
@@ -162,7 +162,7 @@ export const PR_BRIDGE_API = [
     "detail": "locale(newLocale) Altera dinamicamente o código de localidade atual do objeto de tradução (ex: para \"pt\", \"en\", \"es\").",
     "directory": "pr_bridge/bridge/locale.lua",
     "tags": "locale, lang, shared",
-    "example": "lang:locale('value')"
+    "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:locale('pt-br')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "locale",
@@ -171,7 +171,7 @@ export const PR_BRIDGE_API = [
     "detail": "replace(phrases) Substitui todas as frases de localização atuais por um novo dicionário.",
     "directory": "pr_bridge/bridge/locale.lua",
     "tags": "locale, lang, replace, shared",
-    "example": "lang:replace('value')"
+    "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:replace(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "locale",
@@ -180,7 +180,7 @@ export const PR_BRIDGE_API = [
     "detail": "t(key, substitutions) Recupera a tradução associada à key. Permite a interpolação dinâmica substituindo variáveis no texto (ex: %{nome}).",
     "directory": "pr_bridge/bridge/locale.lua",
     "tags": "locale, lang, shared",
-    "example": "lang:t('value', 'value')"
+    "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:t('example_key', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "locale",
@@ -189,7 +189,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicia a ponte de internacionalização do recurso que invocou a biblioteca.",
     "directory": "pr_bridge/bridge/locale.lua",
     "tags": "locale, shared",
-    "example": "pr_lib.locale(source)"
+    "example": "local result = pr_lib.locale('my_resource')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -198,7 +198,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o valor associado a uma chave. Caso não exista, executa a função de callback, persiste o seu retorno sob o tempo limite definido em timeout (milissegundos) e então entrega o dado retornado.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache('value', function(...) return true end, 1)"
+    "example": "local result = pr_lib.cache('example_key', function(value) print('Callback:', value) end, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -207,7 +207,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o valor associado a uma chave. Caso não exista, executa a função de callback, persiste o seu retorno sob o tempo limite definido em timeout (milissegundos) e então entrega o dado retornado.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, call, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache.call('value', function(...) return true end, 1)"
+    "example": "local result = pr_lib.cache.call('example_key', function(value) print('Callback:', value) end, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -216,7 +216,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa uma entrada de cache e notifica ouvintes ativos de alteração de estado.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, clear, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache.clear('value')"
+    "example": "local result = pr_lib.cache.clear('example_key')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -225,7 +225,7 @@ export const PR_BRIDGE_API = [
     "detail": "Invalida em lote todas as chaves do cache que começarem com um determinado termo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, clear, prefix, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache.clearPrefix('value')"
+    "example": "local result = pr_lib.cache.clearPrefix(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -234,7 +234,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca um valor anteriormente guardado no cache. Se a chave não existir ou for nula, retorna o valor de fallback.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache.get('value', 'value')"
+    "example": "local result = pr_lib.cache.get('example_key', nil)\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -243,7 +243,7 @@ export const PR_BRIDGE_API = [
     "detail": "Recupera metadados específicos de um jogador a partir do cache temporário de curta duração.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, metadata, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache.GetMetadata(source, {}, 1)"
+    "example": "local result = pr_lib.cache.GetMetadata(source, {}, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -252,7 +252,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o objeto do jogador do framework de forma ultra rápida usando cache em memória para diminuir chamadas repetidas de export.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, player, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache.GetPlayer(source, 1)"
+    "example": "local result = pr_lib.cache.GetPlayer(source, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -261,7 +261,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa todas as instâncias de cache associadas à ID do jogador informada.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, invalidate, player, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache.InvalidatePlayer(source)"
+    "example": "local result = pr_lib.cache.InvalidatePlayer(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -270,7 +270,7 @@ export const PR_BRIDGE_API = [
     "detail": "Assina a alteração de uma chave de cache específica. O callback recebe (newValue, oldValue) quando o dado correspondente mudar.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, on, change, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache.onChange('value', function(...) return true end)"
+    "example": "local result = pr_lib.cache.onChange('example_key', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -279,7 +279,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o valor associado a uma chave. Caso não exista, executa a função de callback, persiste o seu retorno sob o tempo limite definido em timeout (milissegundos) e então entrega o dado retornado.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, remember, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache.remember('value', function(...) return true end, 1)"
+    "example": "local result = pr_lib.cache.remember('example_key', function(value) print('Callback:', value) end, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -288,7 +288,7 @@ export const PR_BRIDGE_API = [
     "detail": "Armazena um dado em memória RAM atrelado a uma chave de identificação de cache.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, set, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache.set('value', 'value')"
+    "example": "local result = pr_lib.cache.set('example_key', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -297,7 +297,7 @@ export const PR_BRIDGE_API = [
     "detail": "Grava uma chave compartilhada no cache central do pr_bridge e sincroniza o novo valor entre os recursos consumidores do mesmo contexto. Somente chaves autorizadas pelo cache central podem ser publicadas.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, set, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache.setShared('value', 'value', 'value')"
+    "example": "local result = pr_lib.cache.setShared('example_key', {}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -306,7 +306,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa os dados ou a operação “clear” e os dados relacionados mantidos pelo módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, clear, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache:clear('value')"
+    "example": "local result = pr_lib.cache:clear('example_key')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -315,7 +315,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa os dados ou a operação “clear prefix” e os dados relacionados mantidos pelo módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, clear, prefix, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache:clearPrefix('value')"
+    "example": "local result = pr_lib.cache:clearPrefix(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -324,7 +324,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache:get('value', 'value')"
+    "example": "local result = pr_lib.cache:get('example_key', nil)\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -333,7 +333,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get entities” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, entities, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache:getEntities('value')"
+    "example": "local result = pr_lib.cache:getEntities(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -342,7 +342,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get entity” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, entity, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache:getEntity(entity)"
+    "example": "local result = pr_lib.cache:getEntity(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -351,7 +351,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get entity state” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, entity, state, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache:getEntityState(entity)"
+    "example": "local result = pr_lib.cache:getEntityState(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -360,7 +360,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get metrics” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, metrics, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache:getMetrics()"
+    "example": "local result = pr_lib.cache:getMetrics()\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -369,7 +369,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se os dados ou a operação “has” está disponível ou atende ao filtro informado.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, has, shared, invalidação, estado, memória",
-    "example": "local result = pr_lib.cache:has('value')"
+    "example": "local result = pr_lib.cache:has('example_key')\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -378,7 +378,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “on change” por meio da API pública do módulo `cache`.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, on, change, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache:onChange('value', function(...) return true end)"
+    "example": "local result = pr_lib.cache:onChange('example_key', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -387,7 +387,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “remember” por meio da API pública do módulo `cache`.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, remember, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache:remember('value', function(...) return true end, 'value')"
+    "example": "local result = pr_lib.cache:remember('example_key', function(value) print('Callback:', value) end, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -396,7 +396,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “scan world” por meio da API pública do módulo `cache`.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, scan, world, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache:scanWorld()"
+    "example": "local result = pr_lib.cache:scanWorld()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -405,7 +405,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define ou atualiza os dados ou a operação “set” usando a autoridade do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, set, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache:set('value', 'value', 'value')"
+    "example": "local result = pr_lib.cache:set('example_key', {}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -414,7 +414,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define ou atualiza os dados ou a operação “set shared” usando a autoridade do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, set, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache:setShared('value', 'value', 'value')"
+    "example": "local result = pr_lib.cache:setShared('example_key', {}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -423,7 +423,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define ou atualiza os dados ou a operação “set world enabled” usando a autoridade do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, set, world, enabled, shared, invalidação, estado, memória",
-    "example": "pr_lib.cache:setWorldEnabled(true)"
+    "example": "local result = pr_lib.cache:setWorldEnabled(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "cache",
@@ -432,7 +432,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get cache metrics” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, get, metrics, client, invalidação, estado, memória",
-    "example": "local result = pr_lib.getCacheMetrics()"
+    "example": "local result = pr_lib.getCacheMetrics()\nprint('Resultado:', result)"
   },
   {
     "module": "cache",
@@ -441,7 +441,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “on cache” por meio da API pública do módulo `cache_central_e_statebag-like`.",
     "directory": "pr_bridge/bridge/cache/shared.lua; pr_bridge/bridge/cache/central.lua",
     "tags": "cache, on, client, invalidação, estado, memória",
-    "example": "pr_lib.onCache('value', function(...) return true end)"
+    "example": "local result = pr_lib.onCache('example_key', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "debug",
@@ -450,7 +450,7 @@ export const PR_BRIDGE_API = [
     "detail": "Imprime dados formatados para console caso o nível de debug do recurso esteja ativado.",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, shared",
-    "example": "pr_lib.debug(args)"
+    "example": "local result = pr_lib.debug()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "debug",
@@ -459,7 +459,7 @@ export const PR_BRIDGE_API = [
     "detail": "Imprime logs de erro formatados em vermelho no console.",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, error, shared",
-    "example": "pr_lib.debug.error(args)"
+    "example": "local result = pr_lib.debug.error()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "debug",
@@ -468,7 +468,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe mensagens formatadas no console usando as cores apropriadas do padrão ANSI (cinza, azul, verde).",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, info, shared",
-    "example": "pr_lib.debug.info(args)"
+    "example": "local result = pr_lib.debug.info()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "debug",
@@ -477,7 +477,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna true se o console do recurso chamador estiver operando em modo verbose (depuração ativa).",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, is, enabled, shared",
-    "example": "local result = pr_lib.debug.isEnabled()"
+    "example": "local result = pr_lib.debug.isEnabled()\nprint('Resultado:', result)"
   },
   {
     "module": "debug",
@@ -486,7 +486,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe mensagens formatadas no console usando as cores apropriadas do padrão ANSI (cinza, azul, verde).",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, log, shared",
-    "example": "pr_lib.debug.log(args)"
+    "example": "local result = pr_lib.debug.log()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "debug",
@@ -495,7 +495,7 @@ export const PR_BRIDGE_API = [
     "detail": "Habilita ou desabilita logs de debug em tempo de execução.",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, set, enabled, shared",
-    "example": "pr_lib.debug.setEnabled(true)"
+    "example": "local result = pr_lib.debug.setEnabled(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "debug",
@@ -504,7 +504,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe mensagens formatadas no console usando as cores apropriadas do padrão ANSI (cinza, azul, verde).",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, success, shared",
-    "example": "pr_lib.debug.success(args)"
+    "example": "local result = pr_lib.debug.success()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "debug",
@@ -513,7 +513,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe logs de alerta em amarelo no console do servidor/cliente.",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, warn, shared",
-    "example": "pr_lib.debug.warn(args)"
+    "example": "local result = pr_lib.debug.warn()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "debug",
@@ -522,7 +522,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe logs de alerta em amarelo no console do servidor/cliente.",
     "directory": "pr_bridge/bridge/debug.lua",
     "tags": "debug, warning, shared",
-    "example": "pr_lib.debug.warning(args)"
+    "example": "local result = pr_lib.debug.warning()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "events",
@@ -531,7 +531,7 @@ export const PR_BRIDGE_API = [
     "detail": "Dispara um evento de cliente para um ou mais jogadores de forma otimizada. Esta função realiza a serialização (msgpack) dos argumentos apenas uma vez, em vez de fazer por alvo, proporcionando ganhos significativos de desempenho ao disparar para múltiplos jogadores. O parâmetro target aceita um ID numérico, ou uma tabela contendo uma lista de IDs.",
     "directory": "pr_bridge/bridge/triggerClientEvent/server.lua",
     "tags": "events, trigger, client, event, server",
-    "example": "pr_lib.triggerClientEvent('example', 'value', args)"
+    "example": "local result = pr_lib.triggerClientEvent('example:action', source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -540,7 +540,7 @@ export const PR_BRIDGE_API = [
     "detail": "Deposita um valor de dinheiro na conta informada do jogador, exigindo opcionalmente um motivo de log.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, account, balance, server",
-    "example": "pr_lib.framework.AddAccountBalance(source, 1, 1, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.AddAccountBalance(source, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -549,7 +549,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona um item ao inventário do jogador, especificando metadados ou o slot preferencial.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, item, server",
-    "example": "pr_lib.framework.AddItem(source, 'example', 1, {}, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.AddItem(source, 'water', 1, {}, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -558,7 +558,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona fundos à conta bancária de uma facção/empresa/sociedade.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, job, account, balance, server",
-    "example": "pr_lib.framework.AddJobAccountBalance(1, 1, 'value')"
+    "example": "local result = pr_lib.framework.AddJobAccountBalance('cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -567,7 +567,7 @@ export const PR_BRIDGE_API = [
     "detail": "Deposita um valor de dinheiro na conta informada do jogador, exigindo opcionalmente um motivo de log.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, money, server",
-    "example": "pr_lib.framework.addMoney(source, 1, 1, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.addMoney(source, 1, 'cash', 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -576,7 +576,7 @@ export const PR_BRIDGE_API = [
     "detail": "Deposita um valor de dinheiro na conta informada do jogador, exigindo opcionalmente um motivo de log.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, player, account, balance, server",
-    "example": "pr_lib.framework.AddPlayerAccountBalance(source, 1, 1, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.AddPlayerAccountBalance(source, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -585,7 +585,7 @@ export const PR_BRIDGE_API = [
     "detail": "Deposita um valor de dinheiro na conta informada do jogador, exigindo opcionalmente um motivo de log.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, player, money, server",
-    "example": "pr_lib.framework.addPlayerMoney(source, 1, 1, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.addPlayerMoney(source, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -594,7 +594,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gerencia gangs do personagem por citizenid, incluindo adicionar, remover e definir gang principal.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, player, to, gang, server",
-    "example": "pr_lib.framework.AddPlayerToGang('example', 'example', 1)"
+    "example": "local result = pr_lib.framework.AddPlayerToGang('license:example', 'police', 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -603,7 +603,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gerencia empregos do personagem por citizenid, incluindo adicionar, remover e definir emprego principal.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, player, to, job, server",
-    "example": "pr_lib.framework.AddPlayerToJob('example', 'example', 1)"
+    "example": "local result = pr_lib.framework.AddPlayerToJob('license:example', 'police', 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -612,7 +612,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona fundos à conta bancária de uma facção/empresa/sociedade.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, society, balance, server",
-    "example": "pr_lib.framework.addSocietyBalance(1, 1, 'value')"
+    "example": "local result = pr_lib.framework.addSocietyBalance('cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -621,7 +621,7 @@ export const PR_BRIDGE_API = [
     "detail": "Funções utilitárias para lidar com armamentos no padrão de frameworks antigos baseados em loadouts de armas físicas.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, add, weapon, server",
-    "example": "pr_lib.framework.AddWeapon(source, {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.AddWeapon(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -630,7 +630,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o inventário do jogador comporta o peso/slots adicionais daquele item específico.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, can, carry, item, server",
-    "example": "local result = pr_lib.framework.CanCarryItem(source, 'example', 1, {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.CanCarryItem(source, 'water', 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -639,7 +639,7 @@ export const PR_BRIDGE_API = [
     "detail": "Validação interna de segurança de consistência de item de inventário.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, check, item, valid, server",
-    "example": "pr_lib.framework.CheckItemValid(source, 'example', 1)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.CheckItemValid(source, 'example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -648,7 +648,7 @@ export const PR_BRIDGE_API = [
     "detail": "Apaga todos os itens do inventário de um jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, clear, player, inventory, server",
-    "example": "pr_lib.framework.ClearPlayerInventory(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.ClearPlayerInventory(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -657,7 +657,7 @@ export const PR_BRIDGE_API = [
     "detail": "Funções utilitárias para lidar com armamentos no padrão de frameworks antigos baseados em loadouts de armas físicas.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, create, weapon, data, server",
-    "example": "local result = pr_lib.framework.CreateWeaponData(source, {}, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.CreateWeaponData(source, {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -666,7 +666,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove a persistência de propriedade de um veículo.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, delete, owned, vehicle, server, veículo, carro",
-    "example": "pr_lib.framework.DeleteOwnedVehicle('value')"
+    "example": "local result = pr_lib.framework.DeleteOwnedVehicle('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -675,7 +675,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o saldo de dinheiro em uma conta específica (ex: \"cash\", \"bank\", \"crypto\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, account, balance, client",
-    "example": "local result = pr_lib.framework.GetAccountBalance(1)"
+    "example": "local result = pr_lib.framework.GetAccountBalance('cash')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -684,7 +684,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o saldo de dinheiro em uma conta específica (ex: \"cash\", \"bank\", \"crypto\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, account, balance, server",
-    "example": "local result = pr_lib.framework.GetAccountBalance(source, 1)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetAccountBalance(source, 'cash')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -693,7 +693,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna uma lista contendo todos os IDs de jogadores conectados no servidor.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, all, players, server",
-    "example": "local result = pr_lib.framework.GetAllPlayers()"
+    "example": "local result = pr_lib.framework.GetAllPlayers()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -702,7 +702,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome RP do personagem local.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, character, name, client",
-    "example": "local result = pr_lib.framework.getCharacterName()"
+    "example": "local result = pr_lib.framework.getCharacterName()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -711,7 +711,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o ID da entidade ped e o ID de rede do jogador mais próximo do personagem local.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, closest, player, client",
-    "example": "local result = pr_lib.framework.GetClosestPlayer()"
+    "example": "local result = pr_lib.framework.GetClosestPlayer()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -720,7 +720,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o ID da entidade do veículo mais próximo.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, closest, vehicle, client, veículo, carro",
-    "example": "local result = pr_lib.framework.GetClosestVehicle()"
+    "example": "local result = pr_lib.framework.GetClosestVehicle()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -729,7 +729,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna um vector3 ou vector4 contendo as coordenadas globais tridimensionais e o ângulo (heading) da entidade do jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, coords, server",
-    "example": "local result = pr_lib.framework.GetCoords(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetCoords(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -738,7 +738,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a lista geral de gangs/facções cadastradas no framework ativo quando o framework oferecer esse conceito.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, gangs, server",
-    "example": "local result = pr_lib.framework.GetFrameworkGangs()"
+    "example": "local result = pr_lib.framework.GetFrameworkGangs()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -747,7 +747,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a lista geral de empregos cadastrados no framework ativo.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, jobs, server",
-    "example": "local result = pr_lib.framework.GetFrameworkJobs()"
+    "example": "local result = pr_lib.framework.GetFrameworkJobs()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -756,7 +756,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o identificador persistente do jogador ativo do framework (CitizenID no QB/QBox, License/CharID no ESX).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, identifier, server",
-    "example": "local result = pr_lib.framework.GetIdentifier(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetIdentifier(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -765,7 +765,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela de dados detalhada de um item pelo seu nome.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, item, by, name, server",
-    "example": "local result = pr_lib.framework.getItemByName('example')"
+    "example": "local result = pr_lib.framework.getItemByName('example:action')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -774,7 +774,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela de dados detalhada de um item pelo seu nome.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, item, by, name, server",
-    "example": "local result = pr_lib.framework.GetItemByName(source, 'example', {}, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetItemByName(source, 'water', {}, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -783,7 +783,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna os dados do item que ocupa o slot numérico informado.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, item, by, slot, server",
-    "example": "local result = pr_lib.framework.GetItemBySlot(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetItemBySlot(source, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -792,7 +792,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a contagem exata daquele item no inventário.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, item, count, client",
-    "example": "local result = pr_lib.framework.GetItemCount('example', {}, 'value')"
+    "example": "local result = pr_lib.framework.GetItemCount('water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -801,7 +801,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a contagem exata daquele item no inventário.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, item, count, server",
-    "example": "local result = pr_lib.framework.GetItemCount(source, 'example', {}, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetItemCount(source, 'water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -810,7 +810,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela de dados detalhada de um item pelo seu nome.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, item, data, server",
-    "example": "local result = pr_lib.framework.GetItemData(source, 'example', {}, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetItemData(source, 'water', {}, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -819,7 +819,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome amigável/rótulo (label) de exibição do item cadastrado no sistema.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, item, label, server",
-    "example": "local result = pr_lib.framework.GetItemLabel('example')"
+    "example": "local result = pr_lib.framework.GetItemLabel('water')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -828,7 +828,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome amigável/rótulo (label) de exibição do item cadastrado no sistema.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, itemlabel, server",
-    "example": "local result = pr_lib.framework.GetItemlabel('example')"
+    "example": "local result = pr_lib.framework.GetItemlabel('water')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -837,7 +837,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o saldo bancário atual da conta corporativa da sociedade/facção.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, job, account, balance, server",
-    "example": "local result = pr_lib.framework.GetJobAccountBalance(1)"
+    "example": "local result = pr_lib.framework.GetJobAccountBalance('cash')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -846,7 +846,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a quantidade de funcionários que estão online e em serviço para o emprego especificado.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, job, count, server",
-    "example": "local result = pr_lib.framework.GetJobCount('example')"
+    "example": "local result = pr_lib.framework.GetJobCount('police')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -855,7 +855,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários locais para resgatar dados do personagem sincronizados com o framework.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, job, info, client",
-    "example": "local result = pr_lib.framework.GetJobInfo()"
+    "example": "local result = pr_lib.framework.GetJobInfo()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -864,7 +864,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o saldo financeiro do personagem local.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, money, client",
-    "example": "local result = pr_lib.framework.GetMoney(1)"
+    "example": "local result = pr_lib.framework.GetMoney('cash')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -873,7 +873,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca no banco de dados a estrutura de persistência associada a um veículo de proprietário baseado na placa.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, owned, vehicle, data, server, veículo, carro",
-    "example": "local result = pr_lib.framework.GetOwnedVehicleData('value')"
+    "example": "local result = pr_lib.framework.GetOwnedVehicleData('ABC1234')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -882,7 +882,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o identificador único (CitizenID/License) do dono do veículo.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, owned, vehicle, owner, server, veículo, carro",
-    "example": "local result = pr_lib.framework.GetOwnedVehicleOwner('value')"
+    "example": "local result = pr_lib.framework.GetOwnedVehicleOwner('ABC1234')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -891,7 +891,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a tabela abstrata que representa o jogador ativo do framework para a ID (source) indicada.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, client",
-    "example": "local result = pr_lib.framework.GetPlayer()"
+    "example": "local result = pr_lib.framework.GetPlayer()\nprint('GetPlayer:', result)"
   },
   {
     "module": "framework",
@@ -900,7 +900,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a tabela abstrata que representa o jogador ativo do framework para a ID (source) indicada.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, server",
-    "example": "local result = pr_lib.framework.GetPlayer(source)"
+    "example": "local source = source -- ID do jogador\nlocal result = pr_lib.framework.GetPlayer(source)\nprint('GetPlayer:', result)"
   },
   {
     "module": "framework",
@@ -909,7 +909,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o saldo de dinheiro em uma conta específica (ex: \"cash\", \"bank\", \"crypto\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, account, balance, server",
-    "example": "local result = pr_lib.framework.GetPlayerAccountBalance(source, 1)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerAccountBalance(source, 'cash')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -918,7 +918,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados puros de persistência do personagem do jogador (como nome, metadados, dinheiro, etc.).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, data, client",
-    "example": "local result = pr_lib.framework.GetPlayerData()"
+    "example": "local result = pr_lib.framework.GetPlayerData()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -927,7 +927,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados puros de persistência do personagem do jogador (como nome, metadados, dinheiro, etc.).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, data, server",
-    "example": "local result = pr_lib.framework.GetPlayerData(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerData(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -936,7 +936,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a data de nascimento registrada do personagem.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, dob, client",
-    "example": "local result = pr_lib.framework.GetPlayerDob()"
+    "example": "local result = pr_lib.framework.GetPlayerDob()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -945,7 +945,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a data de nascimento registrada do personagem.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, dob, server",
-    "example": "local result = pr_lib.framework.GetPlayerDob(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerDob(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -954,7 +954,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a data de nascimento registrada do personagem.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, dob, server",
-    "example": "local result = pr_lib.framework.getPlayerDOB(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerDOB(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -963,7 +963,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a tabela abstrata que representa o jogador ativo do framework para a ID (source) indicada.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, from, id, server",
-    "example": "local result = pr_lib.framework.getPlayerFromId(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerFromId(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -972,7 +972,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a tabela abstrata que representa o jogador ativo do framework para a ID (source) indicada.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, from, id, server",
-    "example": "local result = pr_lib.framework.GetPlayerFromId(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerFromId(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -981,7 +981,7 @@ export const PR_BRIDGE_API = [
     "detail": "Recupera um jogador logado a partir de sua licença primária ou ID única de cidadão (CitizenID/Identifier).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, from, identifier, server",
-    "example": "local result = pr_lib.framework.GetPlayerFromIdentifier('example')"
+    "example": "local result = pr_lib.framework.GetPlayerFromIdentifier('license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -990,7 +990,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o gênero do personagem (retorna \"m\", \"f\" ou representação equivalente).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, gender, client",
-    "example": "local result = pr_lib.framework.GetPlayerGender()"
+    "example": "local result = pr_lib.framework.GetPlayerGender()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -999,7 +999,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o gênero do personagem (retorna \"m\", \"f\" ou representação equivalente).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, gender, server",
-    "example": "local result = pr_lib.framework.GetPlayerGender(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerGender(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1008,7 +1008,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o grupo de permissão de administração do jogador (ex: \"user\", \"admin\", \"god\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, group, client",
-    "example": "local result = pr_lib.framework.GetPlayerGroup()"
+    "example": "local result = pr_lib.framework.GetPlayerGroup()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1017,7 +1017,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o grupo de permissão de administração do jogador (ex: \"user\", \"admin\", \"god\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, group, server",
-    "example": "local result = pr_lib.framework.GetPlayerGroup(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerGroup(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1026,7 +1026,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o grupo de permissão de administração do jogador (ex: \"user\", \"admin\", \"god\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, group, server",
-    "example": "local result = pr_lib.framework.getPlayerGroup(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerGroup(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1035,7 +1035,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a altura registrada do personagem no framework (normalmente usado em ESX).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, height, server",
-    "example": "local result = pr_lib.framework.getPlayerHeight(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerHeight(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1044,7 +1044,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o identificador persistente do jogador ativo do framework (CitizenID no QB/QBox, License/CharID no ESX).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, identifier, client",
-    "example": "local result = pr_lib.framework.GetPlayerIdentifier()"
+    "example": "local result = pr_lib.framework.GetPlayerIdentifier()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1053,7 +1053,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o identificador persistente do jogador ativo do framework (CitizenID no QB/QBox, License/CharID no ESX).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, identifier, server",
-    "example": "local result = pr_lib.framework.GetPlayerIdentifier(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerIdentifier(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1062,7 +1062,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o inventário bruto de itens carregados do jogador da forma normalizada pelo framework ativo.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, inventory, client",
-    "example": "local result = pr_lib.framework.GetPlayerInventory()"
+    "example": "local result = pr_lib.framework.GetPlayerInventory()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1071,7 +1071,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o inventário bruto de itens carregados do jogador da forma normalizada pelo framework ativo.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, inventory, server",
-    "example": "local result = pr_lib.framework.GetPlayerInventory(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerInventory(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1080,7 +1080,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a tabela ou string contendo o emprego (job), cargo (grade) e permissões do jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, job, client",
-    "example": "local result = pr_lib.framework.GetPlayerJob()"
+    "example": "local result = pr_lib.framework.GetPlayerJob()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1089,7 +1089,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a tabela ou string contendo o emprego (job), cargo (grade) e permissões do jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, job, server",
-    "example": "local result = pr_lib.framework.GetPlayerJob(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerJob(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1098,7 +1098,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a tabela ou string contendo o emprego (job), cargo (grade) e permissões do jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, job, server",
-    "example": "local result = pr_lib.framework.getPlayerJob(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerJob(source, 'default')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1107,7 +1107,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém um valor guardado dentro dos metadados persistentes do personagem.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, metadata, client",
-    "example": "local result = pr_lib.framework.GetPlayerMetadata('value')"
+    "example": "local result = pr_lib.framework.GetPlayerMetadata('example_key')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1116,7 +1116,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém um valor guardado dentro dos metadados persistentes do personagem.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, metadata, client",
-    "example": "local result = pr_lib.framework.getPlayerMetadata('value')"
+    "example": "local result = pr_lib.framework.getPlayerMetadata('example_key')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1125,7 +1125,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém um valor guardado dentro dos metadados persistentes do personagem.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, metadata, server",
-    "example": "local result = pr_lib.framework.GetPlayerMetadata(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerMetadata(source, 'example_key')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1134,7 +1134,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém um valor guardado dentro dos metadados persistentes do personagem.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, metadata, server",
-    "example": "local result = pr_lib.framework.getPlayerMetadata(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerMetadata(source, 'example_key')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1143,7 +1143,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o saldo de dinheiro em uma conta específica (ex: \"cash\", \"bank\", \"crypto\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, money, server",
-    "example": "local result = pr_lib.framework.getPlayerMoney(source, 1)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerMoney(source, 'cash')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1152,7 +1152,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o nome em jogo (RP) do personagem do jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, player, name, client",
-    "example": "local result = pr_lib.framework.GetPlayerName()"
+    "example": "local result = pr_lib.framework.GetPlayerName()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1161,7 +1161,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o nome em jogo (RP) do personagem do jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, name, server",
-    "example": "local result = pr_lib.framework.GetPlayerName(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetPlayerName(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1170,7 +1170,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o nome em jogo (RP) do personagem do jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, name, server",
-    "example": "local result = pr_lib.framework.getPlayerName(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerName(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1179,7 +1179,7 @@ export const PR_BRIDGE_API = [
     "detail": "Recupera o nome do personagem do jogador offline ou online pelo seu identificador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, name, by, identifier, server",
-    "example": "local result = pr_lib.framework.GetPlayerNameByIdentifier('example')"
+    "example": "local result = pr_lib.framework.GetPlayerNameByIdentifier('license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1188,7 +1188,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o gênero do personagem (retorna \"m\", \"f\" ou representação equivalente).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, sex, server",
-    "example": "local result = pr_lib.framework.getPlayerSex(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.getPlayerSex(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1197,7 +1197,7 @@ export const PR_BRIDGE_API = [
     "detail": "Extrai a ID (source) do servidor a partir do objeto abstrato do jogador entregue pelo framework.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, player, source, from, server",
-    "example": "local result = pr_lib.framework.getPlayerSourceFromPlayer('value')"
+    "example": "local result = pr_lib.framework.getPlayerSourceFromPlayer(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1206,7 +1206,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome do recurso de framework ativo no servidor (ex: \"qbx_core\", \"qb-core\", \"es_extended\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, get, resource, name, client",
-    "example": "local result = pr_lib.framework.GetResourceName()"
+    "example": "local result = pr_lib.framework.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1215,7 +1215,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome do recurso de framework ativo no servidor (ex: \"qbx_core\", \"qb-core\", \"es_extended\").",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, resource, name, server",
-    "example": "local result = pr_lib.framework.GetResourceName()"
+    "example": "local result = pr_lib.framework.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1224,7 +1224,7 @@ export const PR_BRIDGE_API = [
     "detail": "Funções utilitárias para lidar com armamentos no padrão de frameworks antigos baseados em loadouts de armas físicas.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, get, weapon, server",
-    "example": "local result = pr_lib.framework.GetWeapon(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.GetWeapon(source, 'example:action')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1233,7 +1233,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador possui o item com a quantidade especificada.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, has, item, client",
-    "example": "local result = pr_lib.framework.HasItem('example', 1, {}, 'value')"
+    "example": "local result = pr_lib.framework.HasItem('water', 1, {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1242,7 +1242,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador possui o item com a quantidade especificada.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, has, item, server",
-    "example": "local result = pr_lib.framework.HasItem(source, 'example', 1, {}, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.HasItem(source, 'water', 1, {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1251,7 +1251,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe e oculta painéis TextUI flutuantes.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, hide, text, ui, client",
-    "example": "pr_lib.framework.HideTextUI()"
+    "example": "local result = pr_lib.framework.HideTextUI()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1260,7 +1260,7 @@ export const PR_BRIDGE_API = [
     "detail": "Grava um veículo na tabela de propriedade de veículos persistentes.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, insert, owned, vehicle, server, veículo, carro",
-    "example": "pr_lib.framework.InsertOwnedVehicle('value', 'value', entity)"
+    "example": "local result = pr_lib.framework.InsertOwnedVehicle('ABC1234', nil, 0)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1269,7 +1269,7 @@ export const PR_BRIDGE_API = [
     "detail": "API utilitária para gerenciamento em lote de estados do inventário.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, inventory, management, server",
-    "example": "pr_lib.framework.InventoryManagement(source, {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.InventoryManagement(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1278,7 +1278,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se o jogador local está em estado de morte/nocaute.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, is, player, dead, client",
-    "example": "local result = pr_lib.framework.IsPlayerDead()"
+    "example": "local result = pr_lib.framework.IsPlayerDead()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1287,7 +1287,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se o personagem local terminou de carregar completamente e já está ativo e spawnado no mapa.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, is, player, loaded, client",
-    "example": "local result = pr_lib.framework.IsPlayerLoaded()"
+    "example": "local result = pr_lib.framework.IsPlayerLoaded()\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1296,7 +1296,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome amigável/rótulo (label) de exibição do item cadastrado no sistema.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, items, server",
-    "example": "pr_lib.framework.Items('example')"
+    "example": "local result = pr_lib.framework.Items('water')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1305,7 +1305,7 @@ export const PR_BRIDGE_API = [
     "detail": "Dispara uma notificação nativa simplificada baseada no framework carregado.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, notify, client",
-    "example": "pr_lib.framework.Notify('value', 'value', 'value')"
+    "example": "local result = pr_lib.framework.Notify('Exemplo do PR Bridge', nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1314,7 +1314,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador pertence a um determinado grupo de emprego, com verificação opcional do nível do cargo (grade).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, player, has, job, client",
-    "example": "pr_lib.framework.PlayerHasJob('example', 1)"
+    "example": "local result = pr_lib.framework.PlayerHasJob('police', 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1323,7 +1323,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador pertence a um determinado grupo de emprego, com verificação opcional do nível do cargo (grade).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, player, has, job, server",
-    "example": "pr_lib.framework.PlayerHasJob(source, 'example', 1)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.PlayerHasJob(source, 'police', 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1332,7 +1332,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra um server-callback que pode ser requisitado e retornado síncrona ou assincronamente pelo cliente.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, register, callback, server, request, resposta, timeout",
-    "example": "local result = pr_lib.framework.RegisterCallback('example', function(...) return true end)"
+    "example": "local result = pr_lib.framework.RegisterCallback('example:action', function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1341,7 +1341,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa uma função executada quando o jogador consome ou usa o item a partir do inventário.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, register, usable, item, server",
-    "example": "local result = pr_lib.framework.RegisterUsableItem('example', function(...) return true end)"
+    "example": "local result = pr_lib.framework.RegisterUsableItem('water', function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -1350,7 +1350,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retira dinheiro da conta do jogador (ex: para compras). Retorna se a operação foi bem-sucedida.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, account, balance, server",
-    "example": "pr_lib.framework.RemoveAccountBalance(source, 1, 1, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.RemoveAccountBalance(source, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1359,7 +1359,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove um item do inventário do jogador.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, item, server",
-    "example": "pr_lib.framework.RemoveItem(source, 'example', 1, {}, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.RemoveItem(source, 'water', 1, {}, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1368,7 +1368,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove fundos da conta corporativa/sociedade de um emprego específico.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, job, account, balance, server",
-    "example": "pr_lib.framework.RemoveJobAccountBalance(1, 1, 'value')"
+    "example": "local result = pr_lib.framework.RemoveJobAccountBalance('cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1377,7 +1377,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retira dinheiro da conta do jogador (ex: para compras). Retorna se a operação foi bem-sucedida.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, player, account, balance, server",
-    "example": "pr_lib.framework.RemovePlayerAccountBalance(source, 1, 1, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.RemovePlayerAccountBalance(source, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1386,7 +1386,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gerencia gangs do personagem por citizenid, incluindo adicionar, remover e definir gang principal.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, player, from, gang, server",
-    "example": "pr_lib.framework.RemovePlayerFromGang('example', 'example')"
+    "example": "local result = pr_lib.framework.RemovePlayerFromGang('license:example', 'police')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1395,7 +1395,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gerencia empregos do personagem por citizenid, incluindo adicionar, remover e definir emprego principal.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, player, from, job, server",
-    "example": "pr_lib.framework.RemovePlayerFromJob('example', 'example')"
+    "example": "local result = pr_lib.framework.RemovePlayerFromJob('license:example', 'police')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1404,7 +1404,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retira dinheiro da conta do jogador (ex: para compras). Retorna se a operação foi bem-sucedida.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, player, money, server",
-    "example": "pr_lib.framework.removePlayerMoney(source, 1, 1, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.removePlayerMoney(source, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1413,7 +1413,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove fundos da conta corporativa/sociedade de um emprego específico.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, society, balance, server",
-    "example": "pr_lib.framework.removeSocietyBalance(1, 1, 'value')"
+    "example": "local result = pr_lib.framework.removeSocietyBalance('cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1422,7 +1422,7 @@ export const PR_BRIDGE_API = [
     "detail": "Funções utilitárias para lidar com armamentos no padrão de frameworks antigos baseados em loadouts de armas físicas.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, remove, weapon, server",
-    "example": "pr_lib.framework.RemoveWeapon(source, {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.RemoveWeapon(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1431,7 +1431,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define dados e atributos internos customizados para um item em um slot específico.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, set, metadata, server",
-    "example": "pr_lib.framework.SetMetadata(source, 'value', {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.SetMetadata(source, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1440,7 +1440,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera o estado de servico do emprego ativo do jogador (true para entrar em servico, false para sair).",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, set, player, duty, server",
-    "example": "pr_lib.framework.SetPlayerDuty(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.SetPlayerDuty(source, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1449,7 +1449,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera o emprego e cargo do jogador remotamente.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, set, player, job, server",
-    "example": "pr_lib.framework.SetPlayerJob(source, 'example', 1)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.SetPlayerJob(source, 'police', 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1458,7 +1458,7 @@ export const PR_BRIDGE_API = [
     "detail": "Grava um valor nos metadados do jogador e sincroniza a alteração com o banco de dados e cliente.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, set, player, metadata, server",
-    "example": "pr_lib.framework.SetPlayerMetadata(source, 'value', 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.SetPlayerMetadata(source, 'example_key', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1467,7 +1467,7 @@ export const PR_BRIDGE_API = [
     "detail": "Grava um valor nos metadados do jogador e sincroniza a alteração com o banco de dados e cliente.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, set, player, metadata, server",
-    "example": "pr_lib.framework.setPlayerMetadata(source, 'value', 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.setPlayerMetadata(source, 'example_key', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1476,7 +1476,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gerencia gangs do personagem por citizenid, incluindo adicionar, remover e definir gang principal.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, set, player, primary, gang, server",
-    "example": "pr_lib.framework.SetPlayerPrimaryGang('example', 'example')"
+    "example": "local result = pr_lib.framework.SetPlayerPrimaryGang('license:example', 'police')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1485,7 +1485,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gerencia empregos do personagem por citizenid, incluindo adicionar, remover e definir emprego principal.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, set, player, primary, job, server",
-    "example": "pr_lib.framework.SetPlayerPrimaryJob('example', 'example')"
+    "example": "local result = pr_lib.framework.SetPlayerPrimaryJob('license:example', 'police')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1494,7 +1494,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe e oculta painéis TextUI flutuantes.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, show, text, ui, client",
-    "example": "pr_lib.framework.ShowTextUI('value')"
+    "example": "local result = pr_lib.framework.ShowTextUI('Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1503,7 +1503,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retira dinheiro da conta do jogador (ex: para compras). Retorna se a operação foi bem-sucedida.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/server.lua",
     "tags": "framework, take, money, server",
-    "example": "pr_lib.framework.takeMoney(source, 1, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.framework.takeMoney(source, 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -1512,7 +1512,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aplica ou remove partes de roupas integradas a sistemas de vestiários de frameworks.",
     "directory": "pr_bridge/bridge/framework_normalizer.lua; pr_bridge/bridge/frameworks/*/client.lua",
     "tags": "framework, toggle, outfit, client",
-    "example": "pr_lib.framework.toggleOutfit('value', 'value')"
+    "example": "local result = pr_lib.framework.toggleOutfit(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1521,7 +1521,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona um item a um inventário qualquer (inv pode ser o ID do jogador ou o ID de um baú/stash).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, add, item, server",
-    "example": "pr_lib.inventory.AddItem('value', 'value', 1, {}, 'value', function(...) return true end)"
+    "example": "local result = pr_lib.inventory.AddItem(nil, 'water', 1, {}, 1, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1530,7 +1530,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de gerenciamento remoto de itens persistidos dentro de baús registrados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, add, item, into, stash, server",
-    "example": "pr_lib.inventory.AddItemIntoStash('example', 'value', 1, 'value', {}, 'value', 'value')"
+    "example": "local result = pr_lib.inventory.AddItemIntoStash(nil, 'water', 1, 1, {}, 1, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1539,7 +1539,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de gerenciamento remoto de itens persistidos dentro de baús registrados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, add, stash, items, server",
-    "example": "pr_lib.inventory.AddStashItems('example', 'value')"
+    "example": "local result = pr_lib.inventory.AddStashItems(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1548,7 +1548,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona itens ao porta-malas de um veículo persistente.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, add, trunk, items, server",
-    "example": "pr_lib.inventory.AddTrunkItems('example', 'value')"
+    "example": "local result = pr_lib.inventory.AddTrunkItems('license:example', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1557,7 +1557,7 @@ export const PR_BRIDGE_API = [
     "detail": "Validam limites físicos (peso total, volume ou slots livres) de um inventário para determinar se novos itens podem ser adicionados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, can, carry, amount, server",
-    "example": "local result = pr_lib.inventory.CanCarryAmount('value', 'value')"
+    "example": "local result = pr_lib.inventory.CanCarryAmount(nil, 'water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1566,7 +1566,7 @@ export const PR_BRIDGE_API = [
     "detail": "Validam limites físicos (peso total, volume ou slots livres) de um inventário para determinar se novos itens podem ser adicionados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, can, carry, item, server",
-    "example": "local result = pr_lib.inventory.CanCarryItem('value', 'value', 1, {})"
+    "example": "local result = pr_lib.inventory.CanCarryItem(nil, 'water', 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1575,7 +1575,7 @@ export const PR_BRIDGE_API = [
     "detail": "Validam limites físicos (peso total, volume ou slots livres) de um inventário para determinar se novos itens podem ser adicionados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, can, carry, weight, server",
-    "example": "local result = pr_lib.inventory.CanCarryWeight('value', 'value')"
+    "example": "local result = pr_lib.inventory.CanCarryWeight(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1584,7 +1584,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se o inventário suporta a troca física de um item por outro em termos de peso e capacidade restante.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, can, swap, item, server",
-    "example": "local result = pr_lib.inventory.CanSwapItem('value', 'value', 1, 'value', 1)"
+    "example": "local result = pr_lib.inventory.CanSwapItem(nil, 'water', 'water', 'water', 'water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1593,7 +1593,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desativa e bloqueia a abertura do inventário pelo jogador (útil em animações de algemas, etc.).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, check, if, blocked, client",
-    "example": "pr_lib.inventory.CheckIfInventoryBlocked()"
+    "example": "local result = pr_lib.inventory.CheckIfInventoryBlocked()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1602,7 +1602,7 @@ export const PR_BRIDGE_API = [
     "detail": "Validação interna de segurança de transação de inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, check, item, valid, server",
-    "example": "pr_lib.inventory.CheckItemValid(source, 'example', 1)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.CheckItemValid(source, 'example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1611,7 +1611,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa todos os itens de um inventário, permitindo opcionalmente ignorar (preservar) itens informados na tabela keep.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, clear, server",
-    "example": "pr_lib.inventory.ClearInventory('value', 'value')"
+    "example": "local result = pr_lib.inventory.ClearInventory(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1620,7 +1620,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa inventários secundários de baús.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, clear, other, server",
-    "example": "pr_lib.inventory.ClearOtherInventory('value', 'example')"
+    "example": "local result = pr_lib.inventory.ClearOtherInventory('default', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1629,7 +1629,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa todos os itens de um inventário, permitindo opcionalmente ignorar (preservar) itens informados na tabela keep.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, clear, player, server",
-    "example": "pr_lib.inventory.ClearPlayerInventory('value', 'value')"
+    "example": "local result = pr_lib.inventory.ClearPlayerInventory(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1638,7 +1638,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de gerenciamento remoto de itens persistidos dentro de baús registrados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, clear, stash, server",
-    "example": "pr_lib.inventory.ClearStash('example')"
+    "example": "local result = pr_lib.inventory.ClearStash(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1647,7 +1647,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de abertura, fechamento e status de exibição da UI do inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, close, client",
-    "example": "pr_lib.inventory.closeInventory()"
+    "example": "local result = pr_lib.inventory.closeInventory()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1656,7 +1656,7 @@ export const PR_BRIDGE_API = [
     "detail": "Usado para apreender o inventário do jogador temporariamente e depois restaurá-lo (útil para sistemas de prisão).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, confiscate, server",
-    "example": "pr_lib.inventory.ConfiscateInventory(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.ConfiscateInventory(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1665,7 +1665,7 @@ export const PR_BRIDGE_API = [
     "detail": "Dropa todos os itens do inventário de um jogador no chão em um contêiner físico.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, create, drop, from, player, server",
-    "example": "local result = pr_lib.inventory.CreateDropFromPlayer(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.CreateDropFromPlayer(source)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1674,7 +1674,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria um baú em memória que é descartado após o encerramento do recurso ou limpeza.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, create, temporary, stash, server",
-    "example": "local result = pr_lib.inventory.CreateTemporaryStash('value')"
+    "example": "local result = pr_lib.inventory.CreateTemporaryStash(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1683,7 +1683,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra lógica de ativação de itens consumíveis.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, create, usable, item, server",
-    "example": "local result = pr_lib.inventory.CreateUsableItem('value', function(...) return true end)"
+    "example": "local result = pr_lib.inventory.CreateUsableItem('water', function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1692,7 +1692,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria um container de drop customizado no chão no mundo 3D.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, custom, drop, server",
-    "example": "pr_lib.inventory.CustomDrop('value', 'value', vec3(0.0, 0.0, 0.0), 'value', 'value', 'value', 'prop_tool_bench02')"
+    "example": "local result = pr_lib.inventory.CustomDrop(nil, {}, vector3(0.0, 0.0, 0.0), 1, 1, nil, 'prop_ld_flow_bottle')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1701,7 +1701,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra formatação de exibição de metadados customizados na interface do inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, display, metadata, client",
-    "example": "pr_lib.inventory.displayMetadata({}, 'value')"
+    "example": "local result = pr_lib.inventory.displayMetadata({}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1710,7 +1710,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe na tela da ID especificada a UI do inventário aberta em um baú, jogador ou loja.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, force, open, server",
-    "example": "pr_lib.inventory.forceOpenInventory(source, 'value', {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.forceOpenInventory(source, 'default', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -1719,7 +1719,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista bruta de itens que estão atualmente na posse do jogador local.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, client, player",
-    "example": "local result = pr_lib.inventory.GetClientPlayerInventory()"
+    "example": "local result = pr_lib.inventory.GetClientPlayerInventory()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1728,7 +1728,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna dados de sub-recipientes/mochilas carregados no slot de inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, container, from, slot, server",
-    "example": "local result = pr_lib.inventory.GetContainerFromSlot('value', 'example')"
+    "example": "local result = pr_lib.inventory.GetContainerFromSlot(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1737,7 +1737,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata arma equipada e inventário bruto local do cliente.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, current, weapon, client",
-    "example": "local result = pr_lib.inventory.getCurrentWeapon()"
+    "example": "local result = pr_lib.inventory.getCurrentWeapon()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1746,7 +1746,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna os dados da arma equipada ativa de um inventário de jogador.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, current, weapon, server",
-    "example": "local result = pr_lib.inventory.GetCurrentWeapon('value')"
+    "example": "local result = pr_lib.inventory.GetCurrentWeapon(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1755,7 +1755,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, empty, slot, server",
-    "example": "local result = pr_lib.inventory.GetEmptySlot('value')"
+    "example": "local result = pr_lib.inventory.GetEmptySlot(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1764,7 +1764,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o caminho da imagem de exibição do item para uso em interfaces NUI.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, image, path, client",
-    "example": "local result = pr_lib.inventory.GetImagePath('value')"
+    "example": "local result = pr_lib.inventory.GetImagePath('water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1773,7 +1773,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o caminho da imagem de exibição do item para uso em interfaces NUI.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, image, path, server",
-    "example": "local result = pr_lib.inventory.GetImagePath('value')"
+    "example": "local result = pr_lib.inventory.GetImagePath('water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1782,7 +1782,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela geral contendo todos os dados e itens de um inventário específico.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, server",
-    "example": "local result = pr_lib.inventory.GetInventory('value', 'value')"
+    "example": "local result = pr_lib.inventory.GetInventory(nil, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1791,7 +1791,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o caminho da imagem de exibição do item para uso em interfaces NUI.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, img, client",
-    "example": "local result = pr_lib.inventory.getInventoryImg('value')"
+    "example": "local result = pr_lib.inventory.getInventoryImg(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1800,7 +1800,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o caminho da imagem de exibição do item para uso em interfaces NUI.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, img, client",
-    "example": "local result = pr_lib.inventory.GetInventoryImg('value')"
+    "example": "local result = pr_lib.inventory.GetInventoryImg(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1809,7 +1809,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o caminho da imagem de exibição do item para uso em interfaces NUI.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, img, server",
-    "example": "local result = pr_lib.inventory.getInventoryImg('value')"
+    "example": "local result = pr_lib.inventory.getInventoryImg(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1818,7 +1818,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o caminho da imagem de exibição do item para uso em interfaces NUI.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, img, server",
-    "example": "local result = pr_lib.inventory.GetInventoryImg('value')"
+    "example": "local result = pr_lib.inventory.GetInventoryImg(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1827,7 +1827,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela geral contendo todos os dados e itens de um inventário específico.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, items, server",
-    "example": "local result = pr_lib.inventory.GetInventoryItems('value', 'value')"
+    "example": "local result = pr_lib.inventory.GetInventoryItems(nil, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1836,7 +1836,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca os dados detalhados e integridade de um item pelo seu nome ou chave.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, item, server",
-    "example": "local result = pr_lib.inventory.GetItem('value', 'value', {}, 1)"
+    "example": "local result = pr_lib.inventory.GetItem(nil, 'water', {}, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1845,7 +1845,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca os dados detalhados e integridade de um item pelo seu nome ou chave.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, item, by, name, server",
-    "example": "local result = pr_lib.inventory.GetItemByName('value', 'value', {}, 1)"
+    "example": "local result = pr_lib.inventory.GetItemByName(nil, 'water', {}, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1854,7 +1854,7 @@ export const PR_BRIDGE_API = [
     "detail": "Recupera dados do slot do inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, item, by, slot, server",
-    "example": "local result = pr_lib.inventory.GetItemBySlot('value', 'value')"
+    "example": "local result = pr_lib.inventory.GetItemBySlot(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1863,7 +1863,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verificações de estoque de itens.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, item, count, client",
-    "example": "local result = pr_lib.inventory.GetItemCount('example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetItemCount('water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1872,7 +1872,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verificações de estoque de itens.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, item, count, server",
-    "example": "local result = pr_lib.inventory.GetItemCount('value', 'example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetItemCount(nil, 'water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1881,7 +1881,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam metadados estáticos do item a partir da tabela de configuração de itens registrada no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, item, info, client",
-    "example": "local result = pr_lib.inventory.GetItemInfo('value')"
+    "example": "local result = pr_lib.inventory.GetItemInfo('water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1890,7 +1890,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam metadados estáticos do item a partir da tabela de configuração de itens registrada no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, item, info, client",
-    "example": "local result = pr_lib.inventory.getItemInfo('value')"
+    "example": "local result = pr_lib.inventory.getItemInfo('water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1899,7 +1899,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam metadados estáticos do item a partir da tabela de configuração de itens registrada no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, item, info, server",
-    "example": "local result = pr_lib.inventory.GetItemInfo('value')"
+    "example": "local result = pr_lib.inventory.GetItemInfo('water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1908,7 +1908,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam metadados estáticos do item a partir da tabela de configuração de itens registrada no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, item, info, server",
-    "example": "local result = pr_lib.inventory.getItemInfo('value')"
+    "example": "local result = pr_lib.inventory.getItemInfo('water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1917,7 +1917,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam metadados estáticos do item a partir da tabela de configuração de itens registrada no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, item, label, client",
-    "example": "local result = pr_lib.inventory.GetItemLabel('value')"
+    "example": "local result = pr_lib.inventory.GetItemLabel('water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1926,7 +1926,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam metadados estáticos do item a partir da tabela de configuração de itens registrada no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, item, label, server",
-    "example": "local result = pr_lib.inventory.GetItemLabel('value')"
+    "example": "local result = pr_lib.inventory.GetItemLabel('water')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1935,7 +1935,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca propriedades registradas locais dos itens.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, item, list, client",
-    "example": "local result = pr_lib.inventory.GetItemList()"
+    "example": "local result = pr_lib.inventory.GetItemList()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1944,7 +1944,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna uma lista de números de slots que contêm o item pesquisado.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, item, slots, server",
-    "example": "local result = pr_lib.inventory.GetItemSlots('value', 'value', {})"
+    "example": "local result = pr_lib.inventory.GetItemSlots(nil, 'water', {})\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1953,7 +1953,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela geral contendo todos os dados e itens de um inventário específico.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, player, client",
-    "example": "local result = pr_lib.inventory.GetPlayerInventory()"
+    "example": "local result = pr_lib.inventory.GetPlayerInventory()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1962,7 +1962,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela geral contendo todos os dados e itens de um inventário específico.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, player, server",
-    "example": "local result = pr_lib.inventory.GetPlayerInventory(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.GetPlayerInventory(source)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1971,7 +1971,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista bruta de itens que estão atualmente na posse do jogador local.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, player, items, client",
-    "example": "local result = pr_lib.inventory.GetPlayerItems()"
+    "example": "local result = pr_lib.inventory.GetPlayerItems()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1980,7 +1980,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata propriedades de peso do jogador local.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, player, max, weight, client",
-    "example": "local result = pr_lib.inventory.GetPlayerMaxWeight()"
+    "example": "local result = pr_lib.inventory.GetPlayerMaxWeight()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1989,7 +1989,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata propriedades de peso do jogador local.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, player, weight, client",
-    "example": "local result = pr_lib.inventory.GetPlayerWeight()"
+    "example": "local result = pr_lib.inventory.GetPlayerWeight()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -1998,7 +1998,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome do script de inventário ativo no servidor.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, resource, name, client",
-    "example": "local result = pr_lib.inventory.GetResourceName()"
+    "example": "local result = pr_lib.inventory.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2007,7 +2007,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome do script de inventário ativo no servidor.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, resource, name, server",
-    "example": "local result = pr_lib.inventory.GetResourceName()"
+    "example": "local result = pr_lib.inventory.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2016,7 +2016,7 @@ export const PR_BRIDGE_API = [
     "detail": "Recupera dados do slot do inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, slot, server",
-    "example": "local result = pr_lib.inventory.GetSlot('value', 'value')"
+    "example": "local result = pr_lib.inventory.GetSlot(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2025,7 +2025,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, slot, for, item, server",
-    "example": "local result = pr_lib.inventory.GetSlotForItem('value', 'example', {})"
+    "example": "local result = pr_lib.inventory.GetSlotForItem(nil, 'water', {})\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2034,7 +2034,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, slot, ids, with, item, client",
-    "example": "local result = pr_lib.inventory.GetSlotIdsWithItem('example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetSlotIdsWithItem('water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2043,7 +2043,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, slot, ids, with, item, server",
-    "example": "local result = pr_lib.inventory.GetSlotIdsWithItem('value', 'example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetSlotIdsWithItem(nil, 'water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2052,7 +2052,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, slot, id, with, item, client",
-    "example": "local result = pr_lib.inventory.GetSlotIdWithItem('example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetSlotIdWithItem('water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2061,7 +2061,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, slot, id, with, item, server",
-    "example": "local result = pr_lib.inventory.GetSlotIdWithItem('value', 'example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetSlotIdWithItem(nil, 'water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2070,7 +2070,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, slots, with, item, client",
-    "example": "local result = pr_lib.inventory.GetSlotsWithItem('example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetSlotsWithItem('water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2079,7 +2079,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, slots, with, item, server",
-    "example": "local result = pr_lib.inventory.GetSlotsWithItem('value', 'example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetSlotsWithItem(nil, 'water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2088,7 +2088,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, slot, with, item, client",
-    "example": "local result = pr_lib.inventory.GetSlotWithItem('example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetSlotWithItem('water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2097,7 +2097,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de slots por critério de itens correspondentes ou vazios.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, slot, with, item, server",
-    "example": "local result = pr_lib.inventory.GetSlotWithItem('value', 'example', {}, 'value')"
+    "example": "local result = pr_lib.inventory.GetSlotWithItem(nil, 'water', {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2106,7 +2106,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de gerenciamento remoto de itens persistidos dentro de baús registrados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, stash, items, server",
-    "example": "local result = pr_lib.inventory.GetStashItems('example')"
+    "example": "local result = pr_lib.inventory.GetStashItems(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2115,7 +2115,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o número de slots ocupados no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, total, used, slots, server",
-    "example": "local result = pr_lib.inventory.GetTotalUsedSlots(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.GetTotalUsedSlots(source)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2124,7 +2124,7 @@ export const PR_BRIDGE_API = [
     "detail": "Calcula o peso total acumulado a partir de uma lista de itens.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, total, weight, server",
-    "example": "local result = pr_lib.inventory.GetTotalWeight('value')"
+    "example": "local result = pr_lib.inventory.GetTotalWeight({})\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2133,7 +2133,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata arma equipada e inventário bruto local do cliente.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, user, client",
-    "example": "local result = pr_lib.inventory.getUserInventory()"
+    "example": "local result = pr_lib.inventory.getUserInventory()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2142,7 +2142,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista de itens válidos que servem como acessórios de armas.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, get, weapon, attachment, items, server",
-    "example": "local result = pr_lib.inventory.GetWeaponAttachmentItems()"
+    "example": "local result = pr_lib.inventory.GetWeaponAttachmentItems()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2151,7 +2151,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna lista de armas estáticas cadastradas.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, get, weapon, list, client",
-    "example": "local result = pr_lib.inventory.GetWeaponList()"
+    "example": "local result = pr_lib.inventory.GetWeaponList()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2160,7 +2160,7 @@ export const PR_BRIDGE_API = [
     "detail": "Transfere um item do inventário local diretamente para o jogador próximo (serverId).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, give, item, to, target, client, alvo, interação, zona",
-    "example": "pr_lib.inventory.giveItemToTarget('example', 'example', 1)"
+    "example": "local result = pr_lib.inventory.giveItemToTarget(nil, 1, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2169,7 +2169,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verificações de estoque de itens.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, has, item, client",
-    "example": "local result = pr_lib.inventory.HasItem('value', 1, {}, 'value')"
+    "example": "local result = pr_lib.inventory.HasItem('water', 1, {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2178,7 +2178,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verificações de estoque de itens.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, has, item, server",
-    "example": "local result = pr_lib.inventory.HasItem('value', 'value', 1, {}, 'value')"
+    "example": "local result = pr_lib.inventory.HasItem(nil, 'water', 1, {}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2187,7 +2187,7 @@ export const PR_BRIDGE_API = [
     "detail": "Permite que o jogador source visualize e inspecione em tempo real o inventário do jogador target.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, inspect, server",
-    "example": "local result = pr_lib.inventory.InspectInventory('value', source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.InspectInventory(source, source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2196,7 +2196,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de abertura, fechamento e status de exibição da UI do inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, is, open, client",
-    "example": "local result = pr_lib.inventory.isInventoryOpen()"
+    "example": "local result = pr_lib.inventory.isInventoryOpen()\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2205,7 +2205,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam metadados estáticos do item a partir da tabela de configuração de itens registrada no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, items, client",
-    "example": "pr_lib.inventory.Items('example')"
+    "example": "local result = pr_lib.inventory.Items('water')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2214,7 +2214,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam metadados estáticos do item a partir da tabela de configuração de itens registrada no inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, items, server",
-    "example": "pr_lib.inventory.Items('example')"
+    "example": "local result = pr_lib.inventory.Items('water')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2223,7 +2223,7 @@ export const PR_BRIDGE_API = [
     "detail": "Força salvamento ou carregamento direto de estados de inventários no banco de dados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, load, server",
-    "example": "local result = pr_lib.inventory.LoadInventory(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.LoadInventory(source, 'license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2232,7 +2232,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de abertura, fechamento e status de exibição da UI do inventário.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, open, client",
-    "example": "pr_lib.inventory.openInventory('value', {})"
+    "example": "local result = pr_lib.inventory.openInventory('default', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2241,7 +2241,7 @@ export const PR_BRIDGE_API = [
     "detail": "Abre o contêiner de drop/chão mais próximo.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, open, nearby, client",
-    "example": "pr_lib.inventory.openNearbyInventory()"
+    "example": "local result = pr_lib.inventory.openNearbyInventory()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2250,7 +2250,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe na tela da ID especificada a UI do inventário aberta em um baú, jogador ou loja.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, open, player, server",
-    "example": "pr_lib.inventory.OpenPlayerInventory(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.OpenPlayerInventory(source, source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2259,7 +2259,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe na tela da ID especificada a UI do inventário aberta em um baú, jogador ou loja.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, open, shop, server",
-    "example": "pr_lib.inventory.OpenShop(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.OpenShop(source, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2268,7 +2268,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe na tela da ID especificada a UI do inventário aberta em um baú, jogador ou loja.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, open, stash, server",
-    "example": "pr_lib.inventory.OpenStash(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.OpenStash(source, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2277,7 +2277,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma loja dinâmica acessível por alvo ou coordenadas.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, register, shop, server",
-    "example": "local result = pr_lib.inventory.RegisterShop('value', 'value', vec3(0.0, 0.0, 0.0), 'value')"
+    "example": "local result = pr_lib.inventory.RegisterShop('Exemplo do PR Bridge', nil, vector3(0.0, 0.0, 0.0), nil)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2286,7 +2286,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra dinamicamente um novo baú (stash) no inventário com regras de permissão.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, register, stash, client",
-    "example": "local result = pr_lib.inventory.RegisterStash('example', 'value', 'value')"
+    "example": "local result = pr_lib.inventory.RegisterStash(nil, 1, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2295,7 +2295,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra dinamicamente um novo baú (stash) no inventário com regras de permissão.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, register, stash, server",
-    "example": "local result = pr_lib.inventory.RegisterStash('example', 'value', 'value', 'value', 'value', 'value', vec3(0.0, 0.0, 0.0))"
+    "example": "local result = pr_lib.inventory.RegisterStash(nil, 'Exemplo do PR Bridge', 1, 1, nil, nil, vector3(0.0, 0.0, 0.0))\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2304,7 +2304,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra lógica de ativação de itens consumíveis.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, register, usable, item, server",
-    "example": "local result = pr_lib.inventory.RegisterUsableItem('value', function(...) return true end, {})"
+    "example": "local result = pr_lib.inventory.RegisterUsableItem('water', function(value) print('Callback:', value) end, {})\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2313,7 +2313,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove um item do inventário do jogador ou de um baú.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, remove, item, server",
-    "example": "pr_lib.inventory.RemoveItem('value', 'value', 1, {}, 'value')"
+    "example": "local result = pr_lib.inventory.RemoveItem(nil, 'water', 1, {}, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2322,7 +2322,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de gerenciamento remoto de itens persistidos dentro de baús registrados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, remove, item, into, stash, server",
-    "example": "pr_lib.inventory.RemoveItemIntoStash('example', 'value', 1, 'value', 'value', 'value')"
+    "example": "local result = pr_lib.inventory.RemoveItemIntoStash(nil, 'water', 1, 1, 1, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2331,7 +2331,7 @@ export const PR_BRIDGE_API = [
     "detail": "Usado para apreender o inventário do jogador temporariamente e depois restaurá-lo (útil para sistemas de prisão).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, return, server",
-    "example": "pr_lib.inventory.ReturnInventory(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.ReturnInventory(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2340,7 +2340,7 @@ export const PR_BRIDGE_API = [
     "detail": "Força salvamento ou carregamento direto de estados de inventários no banco de dados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, save, server",
-    "example": "pr_lib.inventory.SaveInventory(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.SaveInventory(source, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2349,7 +2349,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa buscas avançadas utilizando seletores complexos (comportamento nativo do ox_inventory).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, search, client",
-    "example": "pr_lib.inventory.Search('value', 'value', {})"
+    "example": "local result = pr_lib.inventory.Search(nil, 'water', {})\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2358,7 +2358,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa buscas avançadas utilizando seletores complexos (comportamento nativo do ox_inventory).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, search, server",
-    "example": "pr_lib.inventory.Search('value', 'value', 'value', {})"
+    "example": "local result = pr_lib.inventory.Search(nil, nil, 'water', {})\nprint('Resultado:', result)"
   },
   {
     "module": "inventory",
@@ -2367,7 +2367,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define a durabilidade (vida útil de 0 a 100) do item de um determinado slot.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, durability, server",
-    "example": "pr_lib.inventory.SetDurability('value', 'value', 'value')"
+    "example": "local result = pr_lib.inventory.SetDurability(nil, 1, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2376,7 +2376,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desativa o acesso a itens quando o jogador está em animação de troca de roupa.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, set, in, clothing, client",
-    "example": "pr_lib.inventory.setInClothing(true)"
+    "example": "local result = pr_lib.inventory.setInClothing(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2385,7 +2385,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desativa e bloqueia a abertura do inventário pelo jogador (útil em animações de algemas, etc.).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, set, disabled, client",
-    "example": "pr_lib.inventory.setInventoryDisabled(true)"
+    "example": "local result = pr_lib.inventory.setInventoryDisabled(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2394,7 +2394,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para forçar estados de itens diretamente em slots.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, items, server",
-    "example": "pr_lib.inventory.SetInventoryItems(source, 'value', 1)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.SetInventoryItems(source, 'water', 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2403,7 +2403,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para forçar estados de itens diretamente em slots.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, item, by, slot, server",
-    "example": "pr_lib.inventory.SetItemBySlot(source, 'value', 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.inventory.SetItemBySlot(source, 1, 'water')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2412,7 +2412,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atualiza metadados específicos de um item que ocupa determinado slot (ex: definir durabilidade, número de série).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, item, metadata, server",
-    "example": "pr_lib.inventory.SetItemMetadata('value', 'value', {})"
+    "example": "local result = pr_lib.inventory.SetItemMetadata(nil, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2421,7 +2421,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atualiza metadados específicos de um item que ocupa determinado slot (ex: definir durabilidade, número de série).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, item, metadata, server",
-    "example": "pr_lib.inventory.setItemMetadata('value', 'value', {})"
+    "example": "local result = pr_lib.inventory.setItemMetadata(nil, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2430,7 +2430,7 @@ export const PR_BRIDGE_API = [
     "detail": "Redefine propriedades de limite de peso e contagem de slots de um baú/stash ou jogador.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, max, weight, server",
-    "example": "pr_lib.inventory.SetMaxWeight('value', 'value')"
+    "example": "local result = pr_lib.inventory.SetMaxWeight(nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2439,7 +2439,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atualiza metadados específicos de um item que ocupa determinado slot (ex: definir durabilidade, número de série).",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, metadata, server",
-    "example": "pr_lib.inventory.SetMetadata('value', 'value', {})"
+    "example": "local result = pr_lib.inventory.SetMetadata(nil, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2448,7 +2448,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para forçar estados de itens diretamente em slots.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, player, server",
-    "example": "pr_lib.inventory.setPlayerInventory('value', {})"
+    "example": "local result = pr_lib.inventory.setPlayerInventory(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2457,7 +2457,7 @@ export const PR_BRIDGE_API = [
     "detail": "Redefine propriedades de limite de peso e contagem de slots de um baú/stash ou jogador.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, set, slot, count, server",
-    "example": "pr_lib.inventory.SetSlotCount('value', 'value')"
+    "example": "local result = pr_lib.inventory.SetSlotCount(nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2466,7 +2466,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra ou define o proprietário temporário de baús.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, set, stash, target, client, alvo, interação, zona",
-    "example": "pr_lib.inventory.setStashTarget('example', 'value')"
+    "example": "local result = pr_lib.inventory.setStashTarget(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2475,7 +2475,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lógicas de gerenciamento remoto de itens persistidos dentro de baús registrados.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, update, stash, server",
-    "example": "pr_lib.inventory.UpdateStash('example', 'value')"
+    "example": "local result = pr_lib.inventory.UpdateStash(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2484,7 +2484,7 @@ export const PR_BRIDGE_API = [
     "detail": "Transfere itens e baús de porta-malas/porta-luvas quando a placa de um veículo for alterada.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/server.lua",
     "tags": "inventory, update, vehicle, server, veículo, carro",
-    "example": "pr_lib.inventory.UpdateVehicle('value', 'value')"
+    "example": "local result = pr_lib.inventory.UpdateVehicle('ABC1234', 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2493,7 +2493,7 @@ export const PR_BRIDGE_API = [
     "detail": "Usa localmente um item ou aciona a tecla de atalho de um slot de arma/item.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, use, item, client",
-    "example": "pr_lib.inventory.useItem({}, function(...) return true end)"
+    "example": "local result = pr_lib.inventory.useItem({}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2502,7 +2502,7 @@ export const PR_BRIDGE_API = [
     "detail": "Usa localmente um item ou aciona a tecla de atalho de um slot de arma/item.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, use, slot, client",
-    "example": "pr_lib.inventory.useSlot('value')"
+    "example": "local result = pr_lib.inventory.useSlot(1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "inventory",
@@ -2511,7 +2511,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ativa ou desativa o menu circular nativo de armas do GTA V.",
     "directory": "pr_bridge/bridge/inventory_normalizer.lua; pr_bridge/bridge/inventories/*/client.lua",
     "tags": "inventory, weapon, wheel, client",
-    "example": "pr_lib.inventory.weaponWheel(true)"
+    "example": "local result = pr_lib.inventory.weaponWheel(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2520,7 +2520,7 @@ export const PR_BRIDGE_API = [
     "detail": "Fecha um balão privado ou global criado pelo cliente. No modo global, somente o jogador que criou aquela ID pode solicitar sua remoção.",
     "directory": "pr_bridge/bridge/notifications/*/{client,server}.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, hide, notify, bubble, client/server",
-    "example": "pr_lib.hideNotifyBubble('example')"
+    "example": "local result = pr_lib.hideNotifyBubble(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2529,7 +2529,7 @@ export const PR_BRIDGE_API = [
     "detail": "Fecha um balão privado ou global criado pelo cliente. No modo global, somente o jogador que criou aquela ID pode solicitar sua remoção.",
     "directory": "pr_bridge/bridge/notifications/*/{client,server}.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, hide, notify, bubble, client/server",
-    "example": "pr_lib.HideNotifyBubble('example')"
+    "example": "local result = pr_lib.HideNotifyBubble(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2538,7 +2538,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos da raiz para os módulos nativos de notificação e TextUI do pr_bridge, sem sobrescrever o adaptador legado pr_lib.notify.",
     "directory": "pr_bridge/bridge/notifications/*/client.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, client",
-    "example": "pr_lib.Notify({})"
+    "example": "local result = pr_lib.Notify({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2547,7 +2547,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia uma notificação flutuante na tela. O parâmetro data pode ser uma string contendo a mensagem ou uma tabela com propriedades como title, description, type, icon, etc. kind e duration servem de fallback de tipo de notificação e tempo de duração (em ms).",
     "directory": "pr_bridge/bridge/notifications/*/{client,server}.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, client/server",
-    "example": "pr_lib.notify(source, {}, 'value', 'value')"
+    "example": "local result = pr_lib.notify(GetPlayerServerId(PlayerId()), {}, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2556,7 +2556,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o script de notificação ativo (ex: \"ox_lib\", \"okokNotify\", \"bulletin\", etc.).",
     "directory": "pr_bridge/bridge/notifications/*/client.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, get, resource, name, client",
-    "example": "local result = pr_lib.notify.GetResourceName()"
+    "example": "local result = pr_lib.notify.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "notification",
@@ -2565,7 +2565,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o script de notificação ativo (ex: \"ox_lib\", \"okokNotify\", \"bulletin\", etc.).",
     "directory": "pr_bridge/bridge/notifications/*/server.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, get, resource, name, server",
-    "example": "local result = pr_lib.notify.GetResourceName()"
+    "example": "local result = pr_lib.notify.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "notification",
@@ -2574,7 +2574,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia uma notificação flutuante na tela. O parâmetro data pode ser uma string contendo a mensagem ou uma tabela com propriedades como title, description, type, icon, etc. kind e duration servem de fallback de tipo de notificação e tempo de duração (em ms).",
     "directory": "pr_bridge/bridge/notifications/*/client.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, client",
-    "example": "pr_lib.notify.Notify({}, 'value', 'value')"
+    "example": "local result = pr_lib.notify.Notify({}, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2583,7 +2583,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia uma notificação flutuante na tela. O parâmetro data pode ser uma string contendo a mensagem ou uma tabela com propriedades como title, description, type, icon, etc. kind e duration servem de fallback de tipo de notificação e tempo de duração (em ms).",
     "directory": "pr_bridge/bridge/notifications/*/server.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, server",
-    "example": "pr_lib.notify.Notify(source, {}, 'value', 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.notify.Notify(source, {}, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2592,7 +2592,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mostra um balão de fala responsivo ancorado acima de um ped. Por padrão visibility = \"self\", então somente o jogador local recebe e vê o balão. Com visibility = \"all\", a solicitação passa pelo servidor e todos os jogadores veem o mesmo balão ancorado no ped de quem o acionou. Retorna a ID do balão.",
     "directory": "pr_bridge/bridge/notifications/*/{client,server}.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, bubble, client/server",
-    "example": "pr_lib.notifyBubble({}, 'value', 'value')"
+    "example": "local result = pr_lib.notifyBubble({}, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2601,7 +2601,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mostra um balão de fala responsivo ancorado acima de um ped. Por padrão visibility = \"self\", então somente o jogador local recebe e vê o balão. Com visibility = \"all\", a solicitação passa pelo servidor e todos os jogadores veem o mesmo balão ancorado no ped de quem o acionou. Retorna a ID do balão.",
     "directory": "pr_bridge/bridge/notifications/*/{client,server}.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, bubble, client/server",
-    "example": "pr_lib.NotifyBubble({}, 'value', 'value')"
+    "example": "local result = pr_lib.NotifyBubble({}, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "notification",
@@ -2610,7 +2610,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia o balão a todos os clientes e o ancora no ped de actorSource. Exige a origem do personagem para impedir que cada cliente mostre o balão sobre si mesmo.",
     "directory": "pr_bridge/bridge/notifications/*/{client,server}.lua; pr_bridge/interface/client/modules/notify.lua",
     "tags": "notification, notify, bubble, all, client/server",
-    "example": "pr_lib.NotifyBubbleAll(source, {})"
+    "example": "local result = pr_lib.NotifyBubbleAll(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "alert",
@@ -2619,7 +2619,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos da raiz para os diálogos nativos da interface do pr_bridge. Linhas numéricas aceitam step e precision; quando nenhum passo é informado, o campo aceita livremente valores decimais em vez de restringir a inteiros.",
     "directory": "pr_bridge/interface/client/modules/alert.lua",
     "tags": "alert, dialog, client",
-    "example": "pr_lib.alertDialog({}, 1)"
+    "example": "local result = pr_lib.alertDialog({}, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2628,7 +2628,7 @@ export const PR_BRIDGE_API = [
     "detail": "API nativa de contexto do pr_bridge, com estrutura 1:1 ao ox_lib.registerContext, mas renderizada pela NUI interna do bridge. Aceita campos como id, title, position, menu, canClose, searchPlaceholder, searchEmpty, options, onExit e onBack; cada opção pode usar title, description, icon, iconColor, iconAnimation, disabled, readOnly, metadata, progress, colorScheme, image, arrow, event, serverEvent, command, args, menu e onSelect. Funções onSelect ficam guardadas no runtime Lua e nunca são enviadas para a NUI. A lupa do cabeçalho filtra a lista atual por título, descrição, badge, tecla e metadata sem alterar os índices dos callbacks. O campo icon usa Bootstrap Icons e aceita nomes como person-fill, car-front-fill ou bi-geo-alt-fill; aliases comuns do formato anterior continuam convertidos para preservar compatibilidade.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, get, open, context, client, contexto, nui, interface",
-    "example": "local result = pr_lib.getOpenContextMenu()"
+    "example": "local result = pr_lib.getOpenContextMenu()\nprint('Resultado:', result)"
   },
   {
     "module": "menu",
@@ -2637,7 +2637,7 @@ export const PR_BRIDGE_API = [
     "detail": "API nativa de contexto do pr_bridge, com estrutura 1:1 ao ox_lib.registerContext, mas renderizada pela NUI interna do bridge. Aceita campos como id, title, position, menu, canClose, searchPlaceholder, searchEmpty, options, onExit e onBack; cada opção pode usar title, description, icon, iconColor, iconAnimation, disabled, readOnly, metadata, progress, colorScheme, image, arrow, event, serverEvent, command, args, menu e onSelect. Funções onSelect ficam guardadas no runtime Lua e nunca são enviadas para a NUI. A lupa do cabeçalho filtra a lista atual por título, descrição, badge, tecla e metadata sem alterar os índices dos callbacks. O campo icon usa Bootstrap Icons e aceita nomes como person-fill, car-front-fill ou bi-geo-alt-fill; aliases comuns do formato anterior continuam convertidos para preservar compatibilidade.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, hide, context, client, contexto, nui, interface",
-    "example": "pr_lib.hideContext('value')"
+    "example": "local result = pr_lib.hideContext(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2646,7 +2646,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos diretos para o adaptador de menu. Quando data.position não for informado, registerMenu usa o lado definido no painel visual global.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, hide, client, contexto, nui, interface",
-    "example": "pr_lib.hideMenu('value')"
+    "example": "local result = pr_lib.hideMenu(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2655,7 +2655,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe um modal pop-up de confirmação de tela cheia (ex: Sim/Não), aguardando e retornando a decisão do jogador.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, alert, dialog, client, contexto, nui, interface",
-    "example": "pr_lib.menus.AlertDialog({}, 1)"
+    "example": "local result = pr_lib.menus.AlertDialog({}, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2664,7 +2664,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “alert dialog” por meio da API pública do módulo `menu`.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, alert, dialog, client, contexto, nui, interface",
-    "example": "pr_lib.menus.alertDialog({}, 1)"
+    "example": "local result = pr_lib.menus.alertDialog({}, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2673,7 +2673,7 @@ export const PR_BRIDGE_API = [
     "detail": "Criação, manipulação e status de exibição de menus contextuais modernos e listagens interativas.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, get, open, context, client, contexto, nui, interface",
-    "example": "local result = pr_lib.menus.GetOpenContextMenu()"
+    "example": "local result = pr_lib.menus.GetOpenContextMenu()\nprint('Resultado:', result)"
   },
   {
     "module": "menu",
@@ -2682,7 +2682,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get open context menu” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, get, open, context, client, contexto, nui, interface",
-    "example": "local result = pr_lib.menus.getOpenContextMenu()"
+    "example": "local result = pr_lib.menus.getOpenContextMenu()\nprint('Resultado:', result)"
   },
   {
     "module": "menu",
@@ -2691,7 +2691,7 @@ export const PR_BRIDGE_API = [
     "detail": "Criação, manipulação e status de exibição de menus contextuais modernos e listagens interativas.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, hide, context, client, contexto, nui, interface",
-    "example": "pr_lib.menus.HideContext('value')"
+    "example": "local result = pr_lib.menus.HideContext(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2700,7 +2700,7 @@ export const PR_BRIDGE_API = [
     "detail": "Oculta os dados ou a operação “hide context” e restaura o estado visual relacionado.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, hide, context, client, contexto, nui, interface",
-    "example": "pr_lib.menus.hideContext('value')"
+    "example": "local result = pr_lib.menus.hideContext(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2709,7 +2709,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe ou esconde o menu registrado sob a ID correspondente.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, hide, client, contexto, nui, interface",
-    "example": "pr_lib.menus.HideMenu('value')"
+    "example": "local result = pr_lib.menus.HideMenu(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2718,7 +2718,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe uma caixa de diálogo na tela contendo formulários de entrada de dados (inputs, selects, etc.), retornando as respostas do usuário após o envio.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, input, dialog, client, contexto, nui, interface",
-    "example": "pr_lib.menus.InputDialog('value', 'value', {})"
+    "example": "local result = pr_lib.menus.InputDialog(nil, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2727,7 +2727,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “input dialog” por meio da API pública do módulo `menu`.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, input, dialog, client, contexto, nui, interface",
-    "example": "pr_lib.menus.inputDialog('value', 'value', {})"
+    "example": "local result = pr_lib.menus.inputDialog(nil, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2736,7 +2736,7 @@ export const PR_BRIDGE_API = [
     "detail": "Criação, manipulação e status de exibição de menus contextuais modernos e listagens interativas.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, register, context, client, contexto, nui, interface",
-    "example": "local result = pr_lib.menus.RegisterContext('value')"
+    "example": "local result = pr_lib.menus.RegisterContext('Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "menu",
@@ -2745,7 +2745,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra os dados ou a operação “register context” no módulo ativo.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, register, context, client, contexto, nui, interface",
-    "example": "local result = pr_lib.menus.registerContext('value')"
+    "example": "local result = pr_lib.menus.registerContext('Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "menu",
@@ -2754,7 +2754,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra um menu contextual ou lista (baseado em ox_lib ou qb-menu). data descreve as opções e cb é acionado quando o menu é fechado ou atualizado.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, register, client, contexto, nui, interface",
-    "example": "local result = pr_lib.menus.RegisterMenu({}, function(...) return true end)"
+    "example": "local result = pr_lib.menus.RegisterMenu({}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "menu",
@@ -2763,7 +2763,7 @@ export const PR_BRIDGE_API = [
     "detail": "Criação, manipulação e status de exibição de menus contextuais modernos e listagens interativas.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, show, context, client, contexto, nui, interface",
-    "example": "pr_lib.menus.ShowContext('example')"
+    "example": "local result = pr_lib.menus.ShowContext(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2772,7 +2772,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe os dados ou a operação “show context” ao jogador.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, show, context, client, contexto, nui, interface",
-    "example": "pr_lib.menus.showContext('example')"
+    "example": "local result = pr_lib.menus.showContext(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2781,7 +2781,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe ou esconde o menu registrado sob a ID correspondente.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, menus, show, client, contexto, nui, interface",
-    "example": "pr_lib.menus.ShowMenu('example', 'value')"
+    "example": "local result = pr_lib.menus.ShowMenu(nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2790,7 +2790,7 @@ export const PR_BRIDGE_API = [
     "detail": "API nativa de contexto do pr_bridge, com estrutura 1:1 ao ox_lib.registerContext, mas renderizada pela NUI interna do bridge. Aceita campos como id, title, position, menu, canClose, searchPlaceholder, searchEmpty, options, onExit e onBack; cada opção pode usar title, description, icon, iconColor, iconAnimation, disabled, readOnly, metadata, progress, colorScheme, image, arrow, event, serverEvent, command, args, menu e onSelect. Funções onSelect ficam guardadas no runtime Lua e nunca são enviadas para a NUI. A lupa do cabeçalho filtra a lista atual por título, descrição, badge, tecla e metadata sem alterar os índices dos callbacks. O campo icon usa Bootstrap Icons e aceita nomes como person-fill, car-front-fill ou bi-geo-alt-fill; aliases comuns do formato anterior continuam convertidos para preservar compatibilidade.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, register, context, client, contexto, nui, interface",
-    "example": "local result = pr_lib.registerContext('value')"
+    "example": "local result = pr_lib.registerContext('Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "menu",
@@ -2799,7 +2799,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos diretos para o adaptador de menu. Quando data.position não for informado, registerMenu usa o lado definido no painel visual global.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, register, client, contexto, nui, interface",
-    "example": "local result = pr_lib.registerMenu({}, function(...) return true end)"
+    "example": "local result = pr_lib.registerMenu({}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "menu",
@@ -2808,7 +2808,7 @@ export const PR_BRIDGE_API = [
     "detail": "API nativa de contexto do pr_bridge, com estrutura 1:1 ao ox_lib.registerContext, mas renderizada pela NUI interna do bridge. Aceita campos como id, title, position, menu, canClose, searchPlaceholder, searchEmpty, options, onExit e onBack; cada opção pode usar title, description, icon, iconColor, iconAnimation, disabled, readOnly, metadata, progress, colorScheme, image, arrow, event, serverEvent, command, args, menu e onSelect. Funções onSelect ficam guardadas no runtime Lua e nunca são enviadas para a NUI. A lupa do cabeçalho filtra a lista atual por título, descrição, badge, tecla e metadata sem alterar os índices dos callbacks. O campo icon usa Bootstrap Icons e aceita nomes como person-fill, car-front-fill ou bi-geo-alt-fill; aliases comuns do formato anterior continuam convertidos para preservar compatibilidade.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, show, context, client, contexto, nui, interface",
-    "example": "pr_lib.showContext('example')"
+    "example": "local result = pr_lib.showContext(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "menu",
@@ -2817,7 +2817,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos diretos para o adaptador de menu. Quando data.position não for informado, registerMenu usa o lado definido no painel visual global.",
     "directory": "pr_bridge/bridge/menus/*/client.lua; pr_bridge/interface/client/modules/context.lua",
     "tags": "menu, show, client, contexto, nui, interface",
-    "example": "pr_lib.showMenu('example', 'value')"
+    "example": "local result = pr_lib.showMenu(nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interface",
@@ -2826,7 +2826,7 @@ export const PR_BRIDGE_API = [
     "detail": "Abre o painel administrativo global da interface e consulta sua configuração atual. A paleta, a opacidade e as posições de registerContext, metadata, alertDialog, inputDialog, registerMenu, notify, progress e TextUI ficam persistidas em interface/data/config.json e sincronizadas por state bag global. O comando /pr_ui_admin abre o mesmo painel; parentMenu pode apontar para um contexto pai e manter o botão de voltar.",
     "directory": "pr_bridge/interface/client/ui.lua; pr_bridge/interface/client/host.lua; pr_bridge/interface/server/config.lua",
     "tags": "interface, get, visual, config, client",
-    "example": "local result = pr_lib.getVisualConfig()"
+    "example": "local result = pr_lib.getVisualConfig()\nprint('Resultado:', result)"
   },
   {
     "module": "interface",
@@ -2835,7 +2835,7 @@ export const PR_BRIDGE_API = [
     "detail": "Abre o painel administrativo global da interface e consulta sua configuração atual. A paleta, a opacidade e as posições de registerContext, metadata, alertDialog, inputDialog, registerMenu, notify, progress e TextUI ficam persistidas em interface/data/config.json e sincronizadas por state bag global. O comando /pr_ui_admin abre o mesmo painel; parentMenu pode apontar para um contexto pai e manter o botão de voltar.",
     "directory": "pr_bridge/interface/client/ui.lua; pr_bridge/interface/client/host.lua; pr_bridge/interface/server/config.lua",
     "tags": "interface, open, visual, admin, menu, client, contexto, nui",
-    "example": "pr_lib.openVisualAdminMenu('value')"
+    "example": "local result = pr_lib.openVisualAdminMenu(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "textui_adapter",
@@ -2844,7 +2844,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos da raiz para os módulos nativos de notificação e TextUI do pr_bridge, sem sobrescrever o adaptador legado pr_lib.notify.",
     "directory": "pr_bridge/bridge/textui/*/client.lua; pr_bridge/interface/client/modules/textui.lua",
     "tags": "textui, adapter, hide, text, ui, client",
-    "example": "pr_lib.hideTextUI()"
+    "example": "local result = pr_lib.hideTextUI()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "textui_adapter",
@@ -2853,7 +2853,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos da raiz para os módulos nativos de notificação e TextUI do pr_bridge, sem sobrescrever o adaptador legado pr_lib.notify.",
     "directory": "pr_bridge/bridge/textui/*/client.lua; pr_bridge/interface/client/modules/textui.lua",
     "tags": "textui, adapter, is, text, uiopen, client",
-    "example": "local result = pr_lib.isTextUIOpen()"
+    "example": "local result = pr_lib.isTextUIOpen()\nprint('Resultado:', result)"
   },
   {
     "module": "textui_adapter",
@@ -2862,7 +2862,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos da raiz para os módulos nativos de notificação e TextUI do pr_bridge, sem sobrescrever o adaptador legado pr_lib.notify.",
     "directory": "pr_bridge/bridge/textui/*/client.lua; pr_bridge/interface/client/modules/textui.lua",
     "tags": "textui, adapter, show, text, ui, client",
-    "example": "pr_lib.showTextUI('value', {})"
+    "example": "local result = pr_lib.showTextUI('Exemplo do PR Bridge', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "textui_adapter",
@@ -2871,7 +2871,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o recurso ativo de TextUI.",
     "directory": "pr_bridge/bridge/textui/*/client.lua; pr_bridge/interface/client/modules/textui.lua",
     "tags": "textui, adapter, bridge, get, resource, name, client",
-    "example": "local result = pr_lib.textuiBridge.GetResourceName()"
+    "example": "local result = pr_lib.textuiBridge.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "textui_adapter",
@@ -2880,7 +2880,7 @@ export const PR_BRIDGE_API = [
     "detail": "Esconde o painel TextUI ativo.",
     "directory": "pr_bridge/bridge/textui/*/client.lua; pr_bridge/interface/client/modules/textui.lua",
     "tags": "textui, adapter, bridge, hide, client",
-    "example": "pr_lib.textuiBridge.Hide()"
+    "example": "local result = pr_lib.textuiBridge.Hide()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "textui_adapter",
@@ -2889,7 +2889,7 @@ export const PR_BRIDGE_API = [
     "detail": "Esconde o painel TextUI ativo.",
     "directory": "pr_bridge/bridge/textui/*/client.lua; pr_bridge/interface/client/modules/textui.lua",
     "tags": "textui, adapter, bridge, hide, client",
-    "example": "pr_lib.textuiBridge.hide()"
+    "example": "local result = pr_lib.textuiBridge.hide()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "textui_adapter",
@@ -2898,7 +2898,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mostra um painel flutuante de texto na tela (geralmente no canto superior esquerdo ou centralizado).",
     "directory": "pr_bridge/bridge/textui/*/client.lua; pr_bridge/interface/client/modules/textui.lua",
     "tags": "textui, adapter, bridge, show, client",
-    "example": "pr_lib.textuiBridge.Show('value')"
+    "example": "local result = pr_lib.textuiBridge.Show('Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "textui_adapter",
@@ -2907,7 +2907,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mostra um painel flutuante de texto na tela (geralmente no canto superior esquerdo ou centralizado).",
     "directory": "pr_bridge/bridge/textui/*/client.lua; pr_bridge/interface/client/modules/textui.lua",
     "tags": "textui, adapter, bridge, show, client",
-    "example": "pr_lib.textuiBridge.show('value')"
+    "example": "local result = pr_lib.textuiBridge.show('Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "input",
@@ -2916,7 +2916,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalhos da raiz para os diálogos nativos da interface do pr_bridge. Linhas numéricas aceitam step e precision; quando nenhum passo é informado, o campo aceita livremente valores decimais em vez de restringir a inteiros.",
     "directory": "pr_bridge/interface/client/modules/input.lua",
     "tags": "input, dialog, client",
-    "example": "pr_lib.inputDialog('value', 'value', {})"
+    "example": "local result = pr_lib.inputDialog(nil, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2925,7 +2925,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zona de interação retangular tridimensional invisível (ou com renderização em debug) no mapa.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, box, zone, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddBoxZone('example', vec3(0.0, 0.0, 0.0), 'value', 'value', {}, 'value')"
+    "example": "local result = pr_lib.target.AddBoxZone('example:action', vector3(0.0, 0.0, 0.0), nil, nil, {}, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2934,7 +2934,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zona de interação retangular tridimensional invisível (ou com renderização em debug) no mapa.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, box, zone, client, alvo, interação, zona",
-    "example": "pr_lib.target.addBoxZone('value')"
+    "example": "local result = pr_lib.target.addBoxZone({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2943,7 +2943,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções de interação via menu de alvo (olho/olhar) para uma entidade de rede (veículo, ped, objeto) baseada em sua ID de rede.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, entity, client, alvo, interação, zona",
-    "example": "pr_lib.target.addEntity(NetworkGetNetworkIdFromEntity(entity), {})"
+    "example": "local result = pr_lib.target.addEntity(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2952,7 +2952,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções de interação via menu de alvo (olho/olhar) para uma entidade de rede (veículo, ped, objeto) baseada em sua ID de rede.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, entity, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddEntity(NetworkGetNetworkIdFromEntity(entity), {})"
+    "example": "local result = pr_lib.target.AddEntity(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2961,7 +2961,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona ou remove opções de interações aplicadas globalmente em todos os objetos físicos do GTA.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, object, client, alvo, interação, zona",
-    "example": "pr_lib.target.addGlobalObject({})"
+    "example": "local result = pr_lib.target.addGlobalObject({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2970,7 +2970,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona ou remove opções de interações aplicadas globalmente em todos os objetos físicos do GTA.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, object, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddGlobalObject({})"
+    "example": "local result = pr_lib.target.AddGlobalObject({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2979,7 +2979,7 @@ export const PR_BRIDGE_API = [
     "detail": "Opções universais que se aplicam a qualquer elemento do mundo 3D focado pelo target.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, option, client, alvo, interação, zona",
-    "example": "pr_lib.target.addGlobalOption({})"
+    "example": "local result = pr_lib.target.addGlobalOption({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2988,7 +2988,7 @@ export const PR_BRIDGE_API = [
     "detail": "registra opções universais.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, option, shared, alvo, interação, zona",
-    "example": "pr_lib.target.AddGlobalOption({})"
+    "example": "local result = pr_lib.target.AddGlobalOption({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -2997,7 +2997,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções aplicadas a todos os peds (NPCs) do jogo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, ped, client, alvo, interação, zona",
-    "example": "pr_lib.target.addGlobalPed({})"
+    "example": "local result = pr_lib.target.addGlobalPed({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3006,7 +3006,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções aplicadas a todos os peds (NPCs) do jogo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, ped, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddGlobalPed({})"
+    "example": "local result = pr_lib.target.AddGlobalPed({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3015,7 +3015,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona opções que aparecerão ao focar a mira do alvo em outros jogadores online (ex: revistar, algemar).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, player, client, alvo, interação, zona",
-    "example": "pr_lib.target.addGlobalPlayer({})"
+    "example": "local result = pr_lib.target.addGlobalPlayer({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3024,7 +3024,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona opções que aparecerão ao focar a mira do alvo em outros jogadores online (ex: revistar, algemar).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, player, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddGlobalPlayer({})"
+    "example": "local result = pr_lib.target.AddGlobalPlayer({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3033,7 +3033,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções em todos os veículos do mundo 3D (ex: trancar/destrancar).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, vehicle, client, alvo, interação, zona, veículo, carro",
-    "example": "pr_lib.target.addGlobalVehicle({})"
+    "example": "local result = pr_lib.target.addGlobalVehicle({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3042,7 +3042,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções em todos os veículos do mundo 3D (ex: trancar/destrancar).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, global, vehicle, client, alvo, interação, zona, veículo, carro",
-    "example": "pr_lib.target.AddGlobalVehicle({})"
+    "example": "local result = pr_lib.target.AddGlobalVehicle({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3051,7 +3051,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria interações de alvo para entidades locais criadas unicamente no cliente.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, local, entity, client, alvo, interação, zona",
-    "example": "pr_lib.target.addLocalEntity('value', {})"
+    "example": "local result = pr_lib.target.addLocalEntity(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3060,7 +3060,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria interações de alvo para entidades locais criadas unicamente no cliente.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, local, entity, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddLocalEntity('value', {})"
+    "example": "local result = pr_lib.target.AddLocalEntity(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3069,7 +3069,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra interações que estarão ativas globalmente para todos os objetos, peds ou veículos criados que utilizem o modelo 3D (hash/name) especificado (ex: lixeiras, hidrantes).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, model, client, alvo, interação, zona",
-    "example": "pr_lib.target.addModel('prop_tool_bench02', {})"
+    "example": "local result = pr_lib.target.addModel('prop_ld_flow_bottle', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3078,7 +3078,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra interações que estarão ativas globalmente para todos os objetos, peds ou veículos criados que utilizem o modelo 3D (hash/name) especificado (ex: lixeiras, hidrantes).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, model, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddModel('prop_tool_bench02', {})"
+    "example": "local result = pr_lib.target.AddModel('prop_ld_flow_bottle', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3087,7 +3087,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zona de interação poligonal complexa contornando uma área.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, poly, zone, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddPolyZone('example', 'value', 'value', {}, 'value')"
+    "example": "local result = pr_lib.target.AddPolyZone('example:action', nil, nil, {}, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3096,7 +3096,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zona de interação poligonal complexa contornando uma área.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, poly, zone, client, alvo, interação, zona",
-    "example": "pr_lib.target.addPolyZone('value')"
+    "example": "local result = pr_lib.target.addPolyZone({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3105,7 +3105,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zona de interação esférica em coordenadas 3D.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, sphere, zone, client, alvo, interação, zona",
-    "example": "pr_lib.target.AddSphereZone('example', vec3(0.0, 0.0, 0.0), 1, {}, 'value')"
+    "example": "local result = pr_lib.target.AddSphereZone('example:action', vector3(0.0, 0.0, 0.0), 1, {}, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3114,7 +3114,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zona de interação esférica em coordenadas 3D.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, add, sphere, zone, client, alvo, interação, zona",
-    "example": "pr_lib.target.addSphereZone('value')"
+    "example": "local result = pr_lib.target.addSphereZone({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3123,7 +3123,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ativa ou desativa temporariamente a possibilidade do jogador usar a tecla do target.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, disable, targeting, client, alvo, interação, zona",
-    "example": "pr_lib.target.disableTargeting(true)"
+    "example": "local result = pr_lib.target.disableTargeting(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3132,7 +3132,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ativa ou desativa temporariamente a possibilidade do jogador usar a tecla do target.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, disable, targeting, client, alvo, interação, zona",
-    "example": "pr_lib.target.DisableTargeting(true)"
+    "example": "local result = pr_lib.target.DisableTargeting(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3141,7 +3141,7 @@ export const PR_BRIDGE_API = [
     "detail": "Normalização interna de parâmetros de callback de alvos.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, fix, options, client, alvo, interação, zona",
-    "example": "pr_lib.target.FixOptions({})"
+    "example": "local result = pr_lib.target.FixOptions({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3150,7 +3150,7 @@ export const PR_BRIDGE_API = [
     "detail": "Nome do recurso de target ativo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, get, resource, name, client, alvo, interação, zona",
-    "example": "local result = pr_lib.target.GetResourceName()"
+    "example": "local result = pr_lib.target.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "target",
@@ -3159,7 +3159,7 @@ export const PR_BRIDGE_API = [
     "detail": "retorna as coleções aplicáveis ao alvo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, get, options, shared, alvo, interação, zona",
-    "example": "local result = pr_lib.target.GetTargetOptions(args)"
+    "example": "local result = pr_lib.target.GetTargetOptions()\nprint('Resultado:', result)"
   },
   {
     "module": "target",
@@ -3168,7 +3168,7 @@ export const PR_BRIDGE_API = [
     "detail": "retorna as coleções aplicáveis ao alvo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, get, options, shared, alvo, interação, zona",
-    "example": "local result = pr_lib.target.getTargetOptions(entity, entity, 'prop_tool_bench02')"
+    "example": "local result = pr_lib.target.getTargetOptions(PlayerPedId(), PlayerPedId(), 'prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "target",
@@ -3177,7 +3177,7 @@ export const PR_BRIDGE_API = [
     "detail": "informa se o target está ativo no cliente.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, is, active, shared, alvo, interação, zona",
-    "example": "local result = pr_lib.target.isActive()"
+    "example": "local result = pr_lib.target.isActive()\nprint('Resultado:', result)"
   },
   {
     "module": "target",
@@ -3186,7 +3186,7 @@ export const PR_BRIDGE_API = [
     "detail": "informa se o target está ativo no cliente.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, is, active, shared, alvo, interação, zona",
-    "example": "local result = pr_lib.target.IsActive()"
+    "example": "local result = pr_lib.target.IsActive()\nprint('Resultado:', result)"
   },
   {
     "module": "target",
@@ -3195,7 +3195,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove opções específicas registradas na entidade de rede.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, entity, client, alvo, interação, zona",
-    "example": "pr_lib.target.removeEntity(NetworkGetNetworkIdFromEntity(entity), 'example')"
+    "example": "local result = pr_lib.target.removeEntity(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3204,7 +3204,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove opções específicas registradas na entidade de rede.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, entity, client, alvo, interação, zona",
-    "example": "pr_lib.target.RemoveEntity(NetworkGetNetworkIdFromEntity(entity), 'example')"
+    "example": "local result = pr_lib.target.RemoveEntity(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3213,7 +3213,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona ou remove opções de interações aplicadas globalmente em todos os objetos físicos do GTA.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, object, client, alvo, interação, zona",
-    "example": "pr_lib.target.removeGlobalObject('example')"
+    "example": "local result = pr_lib.target.removeGlobalObject(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3222,7 +3222,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona ou remove opções de interações aplicadas globalmente em todos os objetos físicos do GTA.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, object, client, alvo, interação, zona",
-    "example": "pr_lib.target.RemoveGlobalObject('example')"
+    "example": "local result = pr_lib.target.RemoveGlobalObject(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3231,7 +3231,7 @@ export const PR_BRIDGE_API = [
     "detail": "Opções universais que se aplicam a qualquer elemento do mundo 3D focado pelo target.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, option, client, alvo, interação, zona",
-    "example": "pr_lib.target.removeGlobalOption('example')"
+    "example": "local result = pr_lib.target.removeGlobalOption(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3240,7 +3240,7 @@ export const PR_BRIDGE_API = [
     "detail": "remove opções universais do recurso chamador. As opções aceitam filtros groups, items, bones, offset, canInteract, menus menuName/openMenu e ações onSelect/export/event/serverEvent/command. O detalhamento arquitetural, configuração visual e compatibilidade qtarget estão em docs/TARGET_NATIVE.md.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, option, shared, alvo, interação, zona",
-    "example": "pr_lib.target.RemoveGlobalOption('example')"
+    "example": "local result = pr_lib.target.RemoveGlobalOption(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3249,7 +3249,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções aplicadas a todos os peds (NPCs) do jogo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, ped, client, alvo, interação, zona",
-    "example": "pr_lib.target.removeGlobalPed('example')"
+    "example": "local result = pr_lib.target.removeGlobalPed(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3258,7 +3258,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções aplicadas a todos os peds (NPCs) do jogo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, ped, client, alvo, interação, zona",
-    "example": "pr_lib.target.RemoveGlobalPed('example')"
+    "example": "local result = pr_lib.target.RemoveGlobalPed(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3267,7 +3267,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona opções que aparecerão ao focar a mira do alvo em outros jogadores online (ex: revistar, algemar).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, player, client, alvo, interação, zona",
-    "example": "pr_lib.target.removeGlobalPlayer('example')"
+    "example": "local result = pr_lib.target.removeGlobalPlayer(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3276,7 +3276,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona opções que aparecerão ao focar a mira do alvo em outros jogadores online (ex: revistar, algemar).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, player, client, alvo, interação, zona",
-    "example": "pr_lib.target.RemoveGlobalPlayer('example')"
+    "example": "local result = pr_lib.target.RemoveGlobalPlayer(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3285,7 +3285,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções em todos os veículos do mundo 3D (ex: trancar/destrancar).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, vehicle, client, alvo, interação, zona, veículo, carro",
-    "example": "pr_lib.target.removeGlobalVehicle('example')"
+    "example": "local result = pr_lib.target.removeGlobalVehicle(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3294,7 +3294,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções em todos os veículos do mundo 3D (ex: trancar/destrancar).",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, global, vehicle, client, alvo, interação, zona, veículo, carro",
-    "example": "pr_lib.target.RemoveGlobalVehicle('example')"
+    "example": "local result = pr_lib.target.RemoveGlobalVehicle(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3303,7 +3303,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove interações da entidade local.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, local, entity, client, alvo, interação, zona",
-    "example": "pr_lib.target.removeLocalEntity('value', 'example')"
+    "example": "local result = pr_lib.target.removeLocalEntity(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3312,7 +3312,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove interações da entidade local.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, local, entity, client, alvo, interação, zona",
-    "example": "pr_lib.target.RemoveLocalEntity('value', 'example')"
+    "example": "local result = pr_lib.target.RemoveLocalEntity(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3321,7 +3321,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove opções do modelo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, model, client, alvo, interação, zona",
-    "example": "pr_lib.target.removeModel('prop_tool_bench02', 'example')"
+    "example": "local result = pr_lib.target.removeModel('prop_ld_flow_bottle', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3330,7 +3330,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove opções do modelo.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, model, client, alvo, interação, zona",
-    "example": "pr_lib.target.RemoveModel('prop_tool_bench02', 'example')"
+    "example": "local result = pr_lib.target.RemoveModel('prop_ld_flow_bottle', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3339,7 +3339,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove do sistema de alvos a zona de interação correspondente à ID informada.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, zone, client, alvo, interação, zona",
-    "example": "pr_lib.target.removeZone('example')"
+    "example": "local result = pr_lib.target.removeZone(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3348,7 +3348,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove do sistema de alvos a zona de interação correspondente à ID informada.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, remove, zone, client, alvo, interação, zona",
-    "example": "pr_lib.target.RemoveZone('example')"
+    "example": "local result = pr_lib.target.RemoveZone(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3357,7 +3357,7 @@ export const PR_BRIDGE_API = [
     "detail": "verifica uma zona por ID ou nome.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, zone, exists, shared, alvo, interação, zona",
-    "example": "local result = pr_lib.target.zoneExists('example')"
+    "example": "local result = pr_lib.target.zoneExists(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -3366,7 +3366,7 @@ export const PR_BRIDGE_API = [
     "detail": "verifica uma zona por ID ou nome.",
     "directory": "pr_bridge/bridge/targets/; pr_bridge/bridge/targets/native/api.lua",
     "tags": "target, zone, exists, shared, alvo, interação, zona",
-    "example": "local result = pr_lib.target.ZoneExists('example')"
+    "example": "local result = pr_lib.target.ZoneExists(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3375,7 +3375,7 @@ export const PR_BRIDGE_API = [
     "detail": "Força o fechamento imediato do celular.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, close, client",
-    "example": "pr_lib.phone.ClosePhone()"
+    "example": "local result = pr_lib.phone.ClosePhone()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3384,7 +3384,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicia a interface de discagem/ligação local no telefone.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, create, call, client",
-    "example": "local result = pr_lib.phone.CreateCall('example', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.phone.CreateCall('example:action', nil, nil, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3393,7 +3393,7 @@ export const PR_BRIDGE_API = [
     "detail": "Encerra a chamada ativa localmente.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, end, call, client",
-    "example": "pr_lib.phone.EndCall()"
+    "example": "local result = pr_lib.phone.EndCall()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3402,7 +3402,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas de status de ligações ativas.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, get, call, client",
-    "example": "local result = pr_lib.phone.GetCall()"
+    "example": "local result = pr_lib.phone.GetCall()\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3411,7 +3411,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém metadados de mídia, contatos ou fotos salvos no celular do jogador.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, get, meta, from, source, server",
-    "example": "local result = pr_lib.phone.GetMetaFromSource(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.GetMetaFromSource(source)\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3420,7 +3420,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lista de telefones cadastrados.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, get, names, server",
-    "example": "local result = pr_lib.phone.GetPhoneNames()"
+    "example": "local result = pr_lib.phone.GetPhoneNames()\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3429,7 +3429,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o número de telefone do jogador com base no seu identificador.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, get, number, from, identifier, server",
-    "example": "local result = pr_lib.phone.GetPhoneNumberFromIdentifier(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.GetPhoneNumberFromIdentifier(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3438,7 +3438,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador local criou ou possui uma conta ativa de e-mail no aplicativo.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, has, email, account, server",
-    "example": "local result = pr_lib.phone.HasEmailAccount(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.HasEmailAccount(source)\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3447,7 +3447,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna true se o jogador local estiver ativamente com a interface gráfica do celular aberta.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, in, client",
-    "example": "pr_lib.phone.InPhone()"
+    "example": "local result = pr_lib.phone.InPhone()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3456,7 +3456,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas de status de ligações ativas.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, is, in, call, client",
-    "example": "local result = pr_lib.phone.IsInCall()"
+    "example": "local result = pr_lib.phone.IsInCall()\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3465,7 +3465,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se o jogador está utilizando o aplicativo de foto/câmera do celular.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, is, in, camera, client",
-    "example": "local result = pr_lib.phone.IsInCamera()"
+    "example": "local result = pr_lib.phone.IsInCamera()\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3474,7 +3474,7 @@ export const PR_BRIDGE_API = [
     "detail": "Modifica e consulta o status de trabalho em serviço de serviços de emergência nos aplicativos de dispatch/chamados do celular.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, is, in, job, duty, server",
-    "example": "local result = pr_lib.phone.IsInJobDuty(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.IsInJobDuty(source)\nprint('Resultado:', result)"
   },
   {
     "module": "phone",
@@ -3483,7 +3483,7 @@ export const PR_BRIDGE_API = [
     "detail": "Modifica e consulta o status de trabalho em serviço de serviços de emergência nos aplicativos de dispatch/chamados do celular.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, remove, from, job, duty, server",
-    "example": "pr_lib.phone.RemoveFromJobDuty(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.RemoveFromJobDuty(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3492,7 +3492,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia uma notificação/mensagem de texto simulada de um aplicativo (ex: WhatsApp, Bank) para o celular de destino.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, send, new, message, from, app, server",
-    "example": "pr_lib.phone.SendNewMessageFromApp('value', 'value', 'value', 'example')"
+    "example": "local result = pr_lib.phone.SendNewMessageFromApp(source, nil, 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3501,7 +3501,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia uma notificação de chamado de emergência GPS para os celulares das facções militares/médicas em serviço.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, send, sosmessage, server",
-    "example": "pr_lib.phone.SendSOSMessage(source, 'value', vec3(0.0, 0.0, 0.0), 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.SendSOSMessage(source, nil, vector3(0.0, 0.0, 0.0), 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3510,7 +3510,7 @@ export const PR_BRIDGE_API = [
     "detail": "Bloqueia ou libera a capacidade do jogador de abrir a interface do telefone.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, set, can, open, client",
-    "example": "pr_lib.phone.SetCanOpenPhone('value')"
+    "example": "local result = pr_lib.phone.SetCanOpenPhone(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3519,7 +3519,7 @@ export const PR_BRIDGE_API = [
     "detail": "Modifica e consulta o status de trabalho em serviço de serviços de emergência nos aplicativos de dispatch/chamados do celular.",
     "directory": "pr_bridge/bridge/phones/*/server.lua",
     "tags": "phone, set, in, job, duty, server",
-    "example": "pr_lib.phone.SetInJobDuty(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.SetInJobDuty(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "phone",
@@ -3528,7 +3528,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ativa ou desativa alertas persistentes de GPS SOS locais.",
     "directory": "pr_bridge/bridge/phones/*/client.lua",
     "tags": "phone, set, sos, client",
-    "example": "pr_lib.phone.SetSOS('value')"
+    "example": "local result = pr_lib.phone.SetSOS(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "progressbar",
@@ -3537,7 +3537,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mostra uma barra de carregamento de progresso linear na tela com tempo especificado em duration (ms) executando opcionalmente uma animação no personagem (anim).",
     "directory": "pr_bridge/bridge/progressbar/*/client.lua",
     "tags": "progressbar, progress, do, client",
-    "example": "pr_lib.progress.doProgressbar('value', 'value', 'value')"
+    "example": "local result = pr_lib.progress.doProgressbar(1, 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "progressbar",
@@ -3546,7 +3546,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe um progresso circular real na NUI Svelte e preserva animação, props, bloqueios e cancelamento. As APIs pr_lib.progressCircle(data) e pr_lib.progress.progressCircle(data) aceitam o contrato do ox_lib, incluindo duration, label, position, canCancel, disable, anim, prop e color. O campo position aceita top/top-center, middle/center e bottom/bottom-center; quando informado na chamada ele prevalece sobre a posição global, e quando omitido o runtime Lua resolve e envia explicitamente a configuração administrativa persistida. Use /pr_progress_circle_test e /pr_progress_bar_test para homologar ambos usando a posição global configurada no painel; chamadas reais continuam podendo sobrescrever essa posição com position. A barra linear usa contorno branco nos segmentos e no indicador percentual.",
     "directory": "pr_bridge/bridge/progressbar/*/client.lua",
     "tags": "progressbar, progress, do, circle, client",
-    "example": "pr_lib.progress.doProgressCircle('value', 'value', 'value')"
+    "example": "local result = pr_lib.progress.doProgressCircle(1, 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "progressbar",
@@ -3555,7 +3555,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “progress circle” por meio da API pública do módulo `progressbar`.",
     "directory": "pr_bridge/bridge/progressbar/*/client.lua",
     "tags": "progressbar, progress, circle, client",
-    "example": "pr_lib.progress.progressCircle({})"
+    "example": "local result = pr_lib.progress.progressCircle({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "progressbar",
@@ -3564,7 +3564,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “progress circle” por meio da API pública do módulo `outros_adaptadores_(pr_lib.banking,_pr_lib.callback,_pr_lib.ace,_pr_lib.progress,_pr_lib.weather)`.",
     "directory": "pr_bridge/bridge/progressbar/*/client.lua",
     "tags": "progressbar, progress, circle, client",
-    "example": "pr_lib.progressCircle({})"
+    "example": "local result = pr_lib.progressCircle({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "minigame",
@@ -3573,7 +3573,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cancela o skill check ativo, fecha a NUI, libera o foco do teclado e faz a chamada em espera retornar false. A tecla ESC também cancela.",
     "directory": "pr_bridge/bridge/minigames/*/client.lua",
     "tags": "minigame, cancel, skill, check, client",
-    "example": "local result = pr_lib.cancelSkillCheck()"
+    "example": "local result = pr_lib.cancelSkillCheck()\nprint('Resultado:', result)"
   },
   {
     "module": "minigame",
@@ -3582,7 +3582,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cancela o skill check ativo, fecha a NUI, libera o foco do teclado e faz a chamada em espera retornar false. A tecla ESC também cancela.",
     "directory": "pr_bridge/bridge/minigames/*/client.lua",
     "tags": "minigame, cancel, skill, check, client",
-    "example": "local result = pr_lib.minigame.CancelSkillCheck()"
+    "example": "local result = pr_lib.minigame.CancelSkillCheck()\nprint('Resultado:', result)"
   },
   {
     "module": "minigame",
@@ -3591,7 +3591,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa o skill check nativo do pr_bridge. difficulties aceita nomes easy, medium e hard ou tabelas com areaSize e speedMultiplier; keys define as teclas válidas; options aceita label, timeout e position. A posição aceita top/top-center ou bottom/bottom-center, prevalece sobre a configuração global quando fornecida e usa a configuração administrativa quando omitida. Retorna um booleano após todas as etapas. Use /pr_skillcheck_top_test e /pr_skillcheck_bottom_test para homologar as duas posições.",
     "directory": "pr_bridge/bridge/minigames/*/client.lua",
     "tags": "minigame, skill, check, client",
-    "example": "pr_lib.minigame.SkillCheck(args)"
+    "example": "local result = pr_lib.minigame.SkillCheck()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "minigame",
@@ -3600,7 +3600,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa o minigame ativo detectado pelo pr_bridge e retorna true em sucesso ou false em falha/cancelamento. O parametro config deve conter a configuracao do minigame, incluindo game e, quando aplicavel, dificultMinigame.vehiParked e dificultMinigame.vehiCarjack. O parametro mode seleciona qual dificuldade usar, por exemplo \"parked\" para veiculo estacionado ou \"carjack\" para roubo/abordagem. Adaptadores atuais: glitch-minigames, glitch-minigame, mhacking, ox_lib e fallback default.",
     "directory": "pr_bridge/bridge/minigames/*/client.lua",
     "tags": "minigame, start, client",
-    "example": "pr_lib.minigame.Start('value', 'value')"
+    "example": "local result = pr_lib.minigame.Start(nil, 'default')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "minigame",
@@ -3609,7 +3609,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa o minigame ativo detectado pelo pr_bridge e retorna true em sucesso ou false em falha/cancelamento. O parametro config deve conter a configuracao do minigame, incluindo game e, quando aplicavel, dificultMinigame.vehiParked e dificultMinigame.vehiCarjack. O parametro mode seleciona qual dificuldade usar, por exemplo \"parked\" para veiculo estacionado ou \"carjack\" para roubo/abordagem. Adaptadores atuais: glitch-minigames, glitch-minigame, mhacking, ox_lib e fallback default.",
     "directory": "pr_bridge/bridge/minigames/*/client.lua",
     "tags": "minigame, minigames, start, client",
-    "example": "pr_lib.minigames.Start('value', 'value')"
+    "example": "local result = pr_lib.minigames.Start(nil, 'default')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "minigame",
@@ -3618,7 +3618,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa o skill check nativo do pr_bridge. difficulties aceita nomes easy, medium e hard ou tabelas com areaSize e speedMultiplier; keys define as teclas válidas; options aceita label, timeout e position. A posição aceita top/top-center ou bottom/bottom-center, prevalece sobre a configuração global quando fornecida e usa a configuração administrativa quando omitida. Retorna um booleano após todas as etapas. Use /pr_skillcheck_top_test e /pr_skillcheck_bottom_test para homologar as duas posições.",
     "directory": "pr_bridge/bridge/minigames/*/client.lua",
     "tags": "minigame, skill, check, client",
-    "example": "pr_lib.skillCheck('value', 'value', {})"
+    "example": "local result = pr_lib.skillCheck(nil, 'example_key', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -3627,7 +3627,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o recurso gerenciador de clima ativo (ex: \"vSync\", \"cd_easytime\").",
     "directory": "pr_bridge/bridge/weather/*/client.lua",
     "tags": "weather, get, resource, name, client",
-    "example": "local result = pr_lib.weather.GetResourceName()"
+    "example": "local result = pr_lib.weather.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -3636,7 +3636,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ativa ou congela a sincronização global de clima e hora locais para o jogador.",
     "directory": "pr_bridge/bridge/weather/*/client.lua",
     "tags": "weather, toggle, sync, client",
-    "example": "pr_lib.weather.ToggleSync('value')"
+    "example": "local result = pr_lib.weather.ToggleSync(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3645,7 +3645,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa instruções DDL ou DML (como INSERT, UPDATE, DELETE) que alteram dados, retornando a quantidade de linhas afetadas ou informações da transação.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, auto, server",
-    "example": "pr_lib.database.auto('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.auto('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3654,7 +3654,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exporta tabelas e dados em formato de arquivo .sql gravado no disco do servidor de forma otimizada e nativa através de consultas. O parâmetro options permite configurar as tabelas a serem salvas, o local e se deve exportar estrutura (schema), dados (inserts) ou ambos.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, backup, create, server",
-    "example": "local result = pr_lib.database.backup.create({})"
+    "example": "local result = pr_lib.database.backup.create({})\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3663,7 +3663,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exporta tabelas e dados em formato de arquivo .sql gravado no disco do servidor de forma otimizada e nativa através de consultas. O parâmetro options permite configurar as tabelas a serem salvas, o local e se deve exportar estrutura (schema), dados (inserts) ou ambos.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, backup, export, server",
-    "example": "pr_lib.database.backup.export({})"
+    "example": "local result = pr_lib.database.backup.export({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3672,7 +3672,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exporta tabelas e dados em formato de arquivo .sql gravado no disco do servidor de forma otimizada e nativa através de consultas. O parâmetro options permite configurar as tabelas a serem salvas, o local e se deve exportar estrutura (schema), dados (inserts) ou ambos.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, backup, run, server",
-    "example": "pr_lib.database.backup.run({})"
+    "example": "local result = pr_lib.database.backup.run({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3681,7 +3681,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exporta tabelas e dados em formato de arquivo .sql gravado no disco do servidor de forma otimizada e nativa através de consultas. O parâmetro options permite configurar as tabelas a serem salvas, o local e se deve exportar estrutura (schema), dados (inserts) ou ambos.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, create, backup, server",
-    "example": "local result = pr_lib.database.createBackup({})"
+    "example": "local result = pr_lib.database.createBackup({})\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3690,7 +3690,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa instruções DDL ou DML (como INSERT, UPDATE, DELETE) que alteram dados, retornando a quantidade de linhas afetadas ou informações da transação.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, execute, client",
-    "example": "pr_lib.database.execute('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.execute('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3699,7 +3699,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa instruções DDL ou DML (como INSERT, UPDATE, DELETE) que alteram dados, retornando a quantidade de linhas afetadas ou informações da transação.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, execute, server",
-    "example": "pr_lib.database.execute('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.execute('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3708,7 +3708,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa instruções DDL ou DML (como INSERT, UPDATE, DELETE) que alteram dados, retornando a quantidade de linhas afetadas ou informações da transação.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, execute, server",
-    "example": "pr_lib.database.Execute('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.Execute('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3717,7 +3717,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aliases compatíveis de leitura e gravação legadas para scripts antigos que dependiam de mysql-async ou ghmattimysql.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, fetch, client",
-    "example": "pr_lib.database.fetch('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.fetch('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3726,7 +3726,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aliases compatíveis de leitura e gravação legadas para scripts antigos que dependiam de mysql-async ou ghmattimysql.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, fetch, server",
-    "example": "pr_lib.database.fetch('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.fetch('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3735,7 +3735,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aliases compatíveis de leitura e gravação legadas para scripts antigos que dependiam de mysql-async ou ghmattimysql.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, fetch, all, client",
-    "example": "pr_lib.database.fetchAll('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.fetchAll('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3744,7 +3744,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aliases compatíveis de leitura e gravação legadas para scripts antigos que dependiam de mysql-async ou ghmattimysql.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, fetch, all, server",
-    "example": "pr_lib.database.fetchAll('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.fetchAll('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3753,7 +3753,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o recurso SQL de banco de dados ativo (ex: \"oxmysql\").",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, get, resource, name, client",
-    "example": "local result = pr_lib.database.GetResourceName()"
+    "example": "local result = pr_lib.database.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3762,7 +3762,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o recurso SQL de banco de dados ativo (ex: \"oxmysql\").",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, get, resource, name, server",
-    "example": "local result = pr_lib.database.GetResourceName()"
+    "example": "local result = pr_lib.database.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3771,7 +3771,7 @@ export const PR_BRIDGE_API = [
     "detail": "Insere registros no banco de dados e retorna a ID numérica autoincremento (insertId) do registro inserido.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, insert, client",
-    "example": "pr_lib.database.insert('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.insert('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3780,7 +3780,7 @@ export const PR_BRIDGE_API = [
     "detail": "Insere registros no banco de dados e retorna a ID numérica autoincremento (insertId) do registro inserido.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, insert, server",
-    "example": "pr_lib.database.insert('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.insert('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3789,7 +3789,7 @@ export const PR_BRIDGE_API = [
     "detail": "Insere registros no banco de dados e retorna a ID numérica autoincremento (insertId) do registro inserido.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, insert, server",
-    "example": "pr_lib.database.Insert('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.Insert('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3798,7 +3798,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se a conexão inicial e o pool de conexões com o MySQL estão prontos para receber queries.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, is, ready, client",
-    "example": "local result = pr_lib.database.isReady()"
+    "example": "local result = pr_lib.database.isReady()\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3807,7 +3807,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se a conexão inicial e o pool de conexões com o MySQL estão prontos para receber queries.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, is, ready, server",
-    "example": "local result = pr_lib.database.isReady()"
+    "example": "local result = pr_lib.database.isReady()\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3816,7 +3816,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa consultas preparadas e aceita um conjunto de parâmetros ou uma lista de conjuntos. No mysql-async e ghmattimysql, o pr_bridge preserva esse contrato por emulação segura sobre as APIs nativas.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, prepare, server",
-    "example": "pr_lib.database.Prepare(args)"
+    "example": "local result = pr_lib.database.Prepare()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3825,7 +3825,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa consultas preparadas e aceita um conjunto de parâmetros ou uma lista de conjuntos. No mysql-async e ghmattimysql, o pr_bridge preserva esse contrato por emulação segura sobre as APIs nativas.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, prepare, server",
-    "example": "pr_lib.database.prepare('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.prepare('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3834,7 +3834,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa uma query no banco de dados e retorna uma lista completa de tabelas de registros (linhas) correspondentes.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, query, client",
-    "example": "pr_lib.database.query('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.query('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3843,7 +3843,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa uma query no banco de dados e retorna uma lista completa de tabelas de registros (linhas) correspondentes.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, query, server",
-    "example": "pr_lib.database.query('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.query('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3852,7 +3852,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa escrita crua individual ou em lote e preserva o formato com affectedRows usado por consumidores compatíveis com oxmysql.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, raw, execute, server",
-    "example": "pr_lib.database.RawExecute(args)"
+    "example": "local result = pr_lib.database.RawExecute()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3861,7 +3861,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa escrita crua individual ou em lote e preserva o formato com affectedRows usado por consumidores compatíveis com oxmysql.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, raw, execute, server",
-    "example": "pr_lib.database.rawExecute('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.rawExecute('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3870,7 +3870,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aliases compatíveis de leitura e gravação legadas para scripts antigos que dependiam de mysql-async ou ghmattimysql.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, read, client",
-    "example": "local result = pr_lib.database.read('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.read('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3879,7 +3879,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aliases compatíveis de leitura e gravação legadas para scripts antigos que dependiam de mysql-async ou ghmattimysql.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, read, server",
-    "example": "local result = pr_lib.database.read('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.read('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3888,7 +3888,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa o callback assim que o adaptador selecionado estiver pronto; sem callback, retorna o estado atual.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, ready, server",
-    "example": "local result = pr_lib.database.ready(function(...) return true end)"
+    "example": "local result = pr_lib.database.ready(function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3897,7 +3897,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa instruções DDL ou DML (como INSERT, UPDATE, DELETE) que alteram dados, retornando a quantidade de linhas afetadas ou informações da transação.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, run, client",
-    "example": "pr_lib.database.run('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.run('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3906,7 +3906,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa instruções DDL ou DML (como INSERT, UPDATE, DELETE) que alteram dados, retornando a quantidade de linhas afetadas ou informações da transação.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, run, server",
-    "example": "pr_lib.database.run('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.run('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3915,7 +3915,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a query e extrai a primeira coluna do primeiro registro retornado (útil para buscar contagens COUNT(*) ou valores de colunas únicas).",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, scalar, client",
-    "example": "pr_lib.database.scalar('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.scalar('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3924,7 +3924,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a query e extrai a primeira coluna do primeiro registro retornado (útil para buscar contagens COUNT(*) ou valores de colunas únicas).",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, scalar, server",
-    "example": "pr_lib.database.scalar('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.scalar('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3933,7 +3933,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a query e extrai a primeira coluna do primeiro registro retornado (útil para buscar contagens COUNT(*) ou valores de colunas únicas).",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, scalar, server",
-    "example": "pr_lib.database.Scalar('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.Scalar('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3942,7 +3942,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa uma query no banco de dados e retorna uma lista completa de tabelas de registros (linhas) correspondentes.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, select, server",
-    "example": "pr_lib.database.Select('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.Select('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3951,7 +3951,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a query e retorna uma tabela simples contendo as chaves da primeira linha encontrada (útil para buscar um único usuário).",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, single, client",
-    "example": "pr_lib.database.single('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.single('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3960,7 +3960,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a query e retorna uma tabela simples contendo as chaves da primeira linha encontrada (útil para buscar um único usuário).",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, single, server",
-    "example": "pr_lib.database.single('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.single('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "database",
@@ -3969,7 +3969,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa um lote de queries SQL como uma transação atômica. Se qualquer uma falhar, executa um Rollback geral no banco de dados.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, transaction, client",
-    "example": "pr_lib.database.transaction('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.transaction({}, {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3978,7 +3978,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa um lote de queries SQL como uma transação atômica. Se qualquer uma falhar, executa um Rollback geral no banco de dados.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, transaction, server",
-    "example": "pr_lib.database.transaction('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.transaction({}, {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3987,7 +3987,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa um lote de queries SQL como uma transação atômica. Se qualquer uma falhar, executa um Rollback geral no banco de dados.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, transaction, server",
-    "example": "pr_lib.database.Transaction('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.Transaction({}, {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -3996,7 +3996,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa comandos SQL de alteração de dados, retornando a contagem de linhas afetadas.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, update, client",
-    "example": "pr_lib.database.update('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.update('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -4005,7 +4005,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa comandos SQL de alteração de dados, retornando a contagem de linhas afetadas.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, update, server",
-    "example": "pr_lib.database.update('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.update('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -4014,7 +4014,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa comandos SQL de alteração de dados, retornando a contagem de linhas afetadas.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, update, server",
-    "example": "pr_lib.database.Update('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.Update('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -4023,7 +4023,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aliases compatíveis de leitura e gravação legadas para scripts antigos que dependiam de mysql-async ou ghmattimysql.",
     "directory": "pr_bridge/bridge/database/*/client.lua",
     "tags": "database, write, client",
-    "example": "pr_lib.database.write('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.write('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -4032,7 +4032,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aliases compatíveis de leitura e gravação legadas para scripts antigos que dependiam de mysql-async ou ghmattimysql.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, write, server",
-    "example": "pr_lib.database.write('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.database.write('SELECT 1', {}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "database",
@@ -4041,7 +4041,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exporta tabelas e dados em formato de arquivo .sql gravado no disco do servidor de forma otimizada e nativa através de consultas. O parâmetro options permite configurar as tabelas a serem salvas, o local e se deve exportar estrutura (schema), dados (inserts) ou ambos.",
     "directory": "pr_bridge/bridge/database/*/server.lua",
     "tags": "database, sql, backup, create, server",
-    "example": "local result = pr_lib.sqlBackup.create({})"
+    "example": "local result = pr_lib.sqlBackup.create({})\nprint('Resultado:', result)"
   },
   {
     "module": "fuel",
@@ -4050,7 +4050,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a porcentagem ou volume de combustível atual de um veículo (de 0.0 a 100.0).",
     "directory": "pr_bridge/bridge/fuel/*/client.lua",
     "tags": "fuel, get, client",
-    "example": "local result = pr_lib.fuel.GetFuel(entity)"
+    "example": "local result = pr_lib.fuel.GetFuel(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fuel",
@@ -4059,7 +4059,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o script de combustível ativo (ex: \"ox_fuel\", \"legacyfuel\").",
     "directory": "pr_bridge/bridge/fuel/*/client.lua",
     "tags": "fuel, get, resource, name, client",
-    "example": "local result = pr_lib.fuel.GetResourceName()"
+    "example": "local result = pr_lib.fuel.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "fuel",
@@ -4068,7 +4068,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define a quantidade e tipo de combustível no veículo informado.",
     "directory": "pr_bridge/bridge/fuel/*/client.lua",
     "tags": "fuel, set, client",
-    "example": "pr_lib.fuel.SetFuel(entity, 1, 'value')"
+    "example": "local result = pr_lib.fuel.SetFuel(PlayerPedId(), 1, 'default')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4077,7 +4077,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista completa de placas de veículos das quais o jogador tem chaves guardadas.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, get, all, keys, client, veículo, carro",
-    "example": "local result = pr_lib.vehicle_key.GetAllKeys('value')"
+    "example": "local result = pr_lib.vehicle_key.GetAllKeys(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4086,7 +4086,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista completa de placas de veículos das quais o jogador tem chaves guardadas.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, get, all, keys, server, veículo, carro",
-    "example": "local result = pr_lib.vehicle_key.GetAllKeys(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.GetAllKeys(source)\nprint('Resultado:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4095,7 +4095,7 @@ export const PR_BRIDGE_API = [
     "detail": "Script de chaves ativo localmente.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, get, resource, name, client, veículo, carro",
-    "example": "local result = pr_lib.vehicle_key.GetResourceName()"
+    "example": "local result = pr_lib.vehicle_key.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4104,7 +4104,7 @@ export const PR_BRIDGE_API = [
     "detail": "Concede chaves permanentes ou temporárias de um veículo para o jogador.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, give, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.GiveKey('value')"
+    "example": "local result = pr_lib.vehicle_key.GiveKey('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4113,7 +4113,7 @@ export const PR_BRIDGE_API = [
     "detail": "Concede chaves permanentes ou temporárias de um veículo para o jogador.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, give, server, veículo, carro",
-    "example": "pr_lib.vehicle_key.GiveKey(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.GiveKey(source, 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4122,7 +4122,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a posse da chave de um veículo específico a um item físico físico do inventário do jogador.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, give, item, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.GiveKeyItem('value', entity)"
+    "example": "local result = pr_lib.vehicle_key.GiveKeyItem('ABC1234', PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4131,7 +4131,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a posse da chave de um veículo específico a um item físico físico do inventário do jogador.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, give, item, server, veículo, carro",
-    "example": "pr_lib.vehicle_key.GiveKeyItem(source, 'value', NetworkGetNetworkIdFromEntity(entity))"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.GiveKeyItem(source, 'ABC1234', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4140,7 +4140,7 @@ export const PR_BRIDGE_API = [
     "detail": "Abre o menu para emprestar ou entregar a chave do veículo correspondente à placa para o jogador mais próximo.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, give, menu, client, veículo, carro, contexto, nui, interface",
-    "example": "pr_lib.vehicle_key.GiveKeyMenu('value')"
+    "example": "local result = pr_lib.vehicle_key.GiveKeyMenu('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4149,7 +4149,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra a chave localmente no chaveiro do veículo.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, give, keys, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.GiveKeys(entity, 'value')"
+    "example": "local result = pr_lib.vehicle_key.GiveKeys(PlayerPedId(), 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4158,7 +4158,7 @@ export const PR_BRIDGE_API = [
     "detail": "Concede chaves permanentes ou temporárias de um veículo para o jogador.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, give, temp, keys, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.GiveTempKeys('value')"
+    "example": "local result = pr_lib.vehicle_key.GiveTempKeys('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4167,7 +4167,7 @@ export const PR_BRIDGE_API = [
     "detail": "Concede chaves permanentes ou temporárias de um veículo para o jogador.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, give, temp, keys, server, veículo, carro",
-    "example": "pr_lib.vehicle_key.GiveTempKeys(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.GiveTempKeys(source, 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4176,7 +4176,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consulta se o jogador de ID source possui as chaves físicas de um veículo com a placa especificada.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, has, client, veículo, carro",
-    "example": "local result = pr_lib.vehicle_key.HasKey('value')"
+    "example": "local result = pr_lib.vehicle_key.HasKey('ABC1234')\nprint('Resultado:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4185,7 +4185,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consulta se o jogador de ID source possui as chaves físicas de um veículo com a placa especificada.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, has, server, veículo, carro",
-    "example": "local result = pr_lib.vehicle_key.HasKey(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.HasKey(source, 'ABC1234')\nprint('Resultado:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4194,7 +4194,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consulta se o jogador de ID source possui as chaves físicas de um veículo com a placa especificada.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, have, permanent, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.HavePermanentKey('value')"
+    "example": "local result = pr_lib.vehicle_key.HavePermanentKey('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4203,7 +4203,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consulta se o jogador de ID source possui as chaves físicas de um veículo com a placa especificada.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, have, permanent, server, veículo, carro",
-    "example": "pr_lib.vehicle_key.HavePermanentKey(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.HavePermanentKey(source, 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4212,7 +4212,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se o jogador tem uma chave temporária/alugada.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, have, temporary, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.HaveTemporaryKey('value')"
+    "example": "local result = pr_lib.vehicle_key.HaveTemporaryKey('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4221,7 +4221,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se o jogador tem uma chave temporária/alugada.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, have, temporary, server, veículo, carro",
-    "example": "pr_lib.vehicle_key.HaveTemporaryKey(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.HaveTemporaryKey(source, 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4230,7 +4230,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe o menu de chaveiro contendo todas as chaves do jogador para controle e exclusões.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, manage, keys, menu, client, veículo, carro, contexto, nui, interface",
-    "example": "pr_lib.vehicle_key.ManageKeysMenu()"
+    "example": "local result = pr_lib.vehicle_key.ManageKeysMenu()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4239,7 +4239,7 @@ export const PR_BRIDGE_API = [
     "detail": "Revoga e retira a posse de chaves.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, remove, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.RemoveKey('value')"
+    "example": "local result = pr_lib.vehicle_key.RemoveKey('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4248,7 +4248,7 @@ export const PR_BRIDGE_API = [
     "detail": "Revoga e retira a posse de chaves.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, remove, server, veículo, carro",
-    "example": "pr_lib.vehicle_key.RemoveKey(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.RemoveKey(source, 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4257,7 +4257,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a posse da chave de um veículo específico a um item físico físico do inventário do jogador.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, remove, item, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.RemoveKeyItem('value')"
+    "example": "local result = pr_lib.vehicle_key.RemoveKeyItem('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4266,7 +4266,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a posse da chave de um veículo específico a um item físico físico do inventário do jogador.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, remove, item, server, veículo, carro",
-    "example": "pr_lib.vehicle_key.RemoveKeyItem(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.RemoveKeyItem(source, 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4275,7 +4275,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove as chaves locais do veículo.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, remove, keys, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.RemoveKeys(entity, 'value')"
+    "example": "local result = pr_lib.vehicle_key.RemoveKeys(PlayerPedId(), 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4284,7 +4284,7 @@ export const PR_BRIDGE_API = [
     "detail": "Revoga e retira a posse de chaves.",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, remove, temp, keys, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.RemoveTempKeys('value')"
+    "example": "local result = pr_lib.vehicle_key.RemoveTempKeys('ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4293,7 +4293,7 @@ export const PR_BRIDGE_API = [
     "detail": "Revoga e retira a posse de chaves.",
     "directory": "pr_bridge/bridge/vehicle_key/*/server.lua",
     "tags": "vehicle, key, remove, temp, keys, server, veículo, carro",
-    "example": "pr_lib.vehicle_key.RemoveTempKeys(source, 'value')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.vehicle_key.RemoveTempKeys(source, 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "vehicle_key",
@@ -4302,7 +4302,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a ação local de chaveamento física do veículo (trancar/destrancar porta, tocar alarme e piscar setas).",
     "directory": "pr_bridge/bridge/vehicle_key/*/client.lua",
     "tags": "vehicle, key, toggle, lock, client, veículo, carro",
-    "example": "pr_lib.vehicle_key.ToggleLock()"
+    "example": "local result = pr_lib.vehicle_key.ToggleLock()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "banking",
@@ -4311,7 +4311,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona fundos à conta bancária de um jogador.",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, add, account, balance, shared",
-    "example": "pr_lib.banking.AddAccountBalance('value', 1, 1, 'value')"
+    "example": "local result = pr_lib.banking.AddAccountBalance(nil, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "banking",
@@ -4320,7 +4320,7 @@ export const PR_BRIDGE_API = [
     "detail": "Visualiza e altera o saldo de contas bancárias corporativas/sociedades de empregos.",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, add, job, account, balance, shared",
-    "example": "pr_lib.banking.AddJobAccountBalance(1, 1, 'value')"
+    "example": "local result = pr_lib.banking.AddJobAccountBalance('cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "banking",
@@ -4329,7 +4329,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona fundos à conta bancária de um jogador.",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, add, player, account, balance, shared",
-    "example": "pr_lib.banking.AddPlayerAccountBalance('value', 1, 1, 'value')"
+    "example": "local result = pr_lib.banking.AddPlayerAccountBalance(nil, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "banking",
@@ -4338,7 +4338,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o saldo de uma conta bancária de um jogador (ex: \"personal\", \"savings\").",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, get, account, balance, shared",
-    "example": "local result = pr_lib.banking.GetAccountBalance('value', 1)"
+    "example": "local result = pr_lib.banking.GetAccountBalance(nil, 'cash')\nprint('Resultado:', result)"
   },
   {
     "module": "banking",
@@ -4347,7 +4347,7 @@ export const PR_BRIDGE_API = [
     "detail": "Visualiza e altera o saldo de contas bancárias corporativas/sociedades de empregos.",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, get, job, account, balance, shared",
-    "example": "local result = pr_lib.banking.GetJobAccountBalance(1)"
+    "example": "local result = pr_lib.banking.GetJobAccountBalance('cash')\nprint('Resultado:', result)"
   },
   {
     "module": "banking",
@@ -4356,7 +4356,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o saldo de uma conta bancária de um jogador (ex: \"personal\", \"savings\").",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, get, player, account, balance, shared",
-    "example": "local result = pr_lib.banking.GetPlayerAccountBalance('value', 1)"
+    "example": "local result = pr_lib.banking.GetPlayerAccountBalance(nil, 'cash')\nprint('Resultado:', result)"
   },
   {
     "module": "banking",
@@ -4365,7 +4365,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o recurso bancário ativo (ex: \"okokBanking\", \"renewed_banking\", etc.).",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, get, resource, name, shared",
-    "example": "local result = pr_lib.banking.GetResourceName()"
+    "example": "local result = pr_lib.banking.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "banking",
@@ -4374,7 +4374,7 @@ export const PR_BRIDGE_API = [
     "detail": "Deduz dinheiro da conta bancária de um jogador.",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, remove, account, balance, shared",
-    "example": "pr_lib.banking.RemoveAccountBalance('value', 1, 1, 'value')"
+    "example": "local result = pr_lib.banking.RemoveAccountBalance(nil, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "banking",
@@ -4383,7 +4383,7 @@ export const PR_BRIDGE_API = [
     "detail": "Visualiza e altera o saldo de contas bancárias corporativas/sociedades de empregos.",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, remove, job, account, balance, shared",
-    "example": "pr_lib.banking.RemoveJobAccountBalance(1, 1, 'value')"
+    "example": "local result = pr_lib.banking.RemoveJobAccountBalance('cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "banking",
@@ -4392,7 +4392,7 @@ export const PR_BRIDGE_API = [
     "detail": "Deduz dinheiro da conta bancária de um jogador.",
     "directory": "pr_bridge/bridge/banking/*/{client,server}.lua",
     "tags": "banking, remove, player, account, balance, shared",
-    "example": "pr_lib.banking.RemovePlayerAccountBalance('value', 1, 1, 'value')"
+    "example": "local result = pr_lib.banking.RemovePlayerAccountBalance(nil, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "callback",
@@ -4401,7 +4401,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “callback” por meio da API pública do módulo `callbacks_reforçados_(opt-in)`.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, client, request, resposta, timeout",
-    "example": "pr_lib.callback(args)"
+    "example": "local result = pr_lib.callback()\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4410,7 +4410,7 @@ export const PR_BRIDGE_API = [
     "detail": "Chama o callback remoto bloqueando a execução da thread atual (síncrona) até que a resposta chegue, ou ocorra um estouro de tempo limite (timeout em ms). Retorna os dados diretamente.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, await, client, request, resposta, timeout",
-    "example": "pr_lib.callback.await('example', 1, args)"
+    "example": "local result = pr_lib.callback.await('example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4419,7 +4419,7 @@ export const PR_BRIDGE_API = [
     "detail": "Chama o callback remoto bloqueando a execução da thread atual (síncrona) até que a resposta chegue, ou ocorra um estouro de tempo limite (timeout em ms). Retorna os dados diretamente.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, await, server, request, resposta, timeout",
-    "example": "pr_lib.callback.await('value', 'example', 1, args)"
+    "example": "local result = pr_lib.callback.await(source, 'example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4428,7 +4428,7 @@ export const PR_BRIDGE_API = [
     "detail": "Chama o callback remoto bloqueando a execução da thread atual (síncrona) até que a resposta chegue, ou ocorra um estouro de tempo limite (timeout em ms). Retorna os dados diretamente.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, await, client, server, request, resposta, timeout",
-    "example": "pr_lib.callback.awaitClient('value', 'example', 1, args)"
+    "example": "local result = pr_lib.callback.awaitClient(source, 'example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4437,7 +4437,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cancela uma requisição pendente ativa.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, cancel, client, request, resposta, timeout",
-    "example": "local result = pr_lib.callback.cancel('example', 'value')"
+    "example": "local result = pr_lib.callback.cancel(nil, 'Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4446,7 +4446,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cancela uma requisição pendente ativa.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, cancel, server, request, resposta, timeout",
-    "example": "local result = pr_lib.callback.cancel('example', 'value')"
+    "example": "local result = pr_lib.callback.cancel(nil, 'Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4455,7 +4455,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista de requisições de callback aguardando resposta.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, get, pending, client, request, resposta, timeout",
-    "example": "local result = pr_lib.callback.getPending()"
+    "example": "local result = pr_lib.callback.getPending()\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4464,7 +4464,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista de requisições de callback aguardando resposta.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, get, pending, server, request, resposta, timeout",
-    "example": "local result = pr_lib.callback.getPending()"
+    "example": "local result = pr_lib.callback.getPending()\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4473,7 +4473,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna pendências, limites, timeouts, rejeições, respostas forjadas, cancelamentos e erros protegidos.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, get, stats, client, request, resposta, timeout",
-    "example": "local result = pr_lib.callback.getStats()"
+    "example": "local result = pr_lib.callback.getStats()\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4482,7 +4482,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna pendências, limites, timeouts, rejeições, respostas forjadas, cancelamentos e erros protegidos.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, get, stats, server, request, resposta, timeout",
-    "example": "local result = pr_lib.callback.getStats()"
+    "example": "local result = pr_lib.callback.getStats()\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4491,7 +4491,7 @@ export const PR_BRIDGE_API = [
     "detail": "Disponibiliza as ordens do ox_lib; no cliente também aplica o delay por evento.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, ox, client, request, resposta, timeout",
-    "example": "pr_lib.callback.ox('example', 'value', function(...) return true end, args)"
+    "example": "local result = pr_lib.callback.ox('example:action', 1, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "callback",
@@ -4500,7 +4500,7 @@ export const PR_BRIDGE_API = [
     "detail": "Disponibiliza as ordens do ox_lib; no cliente também aplica o delay por evento.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, ox, server, request, resposta, timeout",
-    "example": "pr_lib.callback.ox(args)"
+    "example": "local result = pr_lib.callback.ox()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "callback",
@@ -4509,7 +4509,7 @@ export const PR_BRIDGE_API = [
     "detail": "Disponibiliza as ordens do ox_lib; no cliente também aplica o delay por evento.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, ox, await, client, request, resposta, timeout",
-    "example": "pr_lib.callback.ox.await('example', 'value', args)"
+    "example": "local result = pr_lib.callback.ox.await('example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -4518,7 +4518,7 @@ export const PR_BRIDGE_API = [
     "detail": "Dispara uma chamada assíncrona que executa um bloco de código no ambiente oposto (Server para Client, ou vice-versa) e executa a função cb entregando o resultado assim que a resposta for enviada.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, trigger, client, request, resposta, timeout",
-    "example": "pr_lib.callback.trigger('example', function(...) return true end, args)"
+    "example": "local result = pr_lib.callback.trigger('example:action', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "callback",
@@ -4527,7 +4527,7 @@ export const PR_BRIDGE_API = [
     "detail": "Dispara uma chamada assíncrona que executa um bloco de código no ambiente oposto (Server para Client, ou vice-versa) e executa a função cb entregando o resultado assim que a resposta for enviada.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, trigger, server, request, resposta, timeout",
-    "example": "pr_lib.callback.trigger('value', 'example', function(...) return true end, args)"
+    "example": "local result = pr_lib.callback.trigger(source, 'example:action', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "callback",
@@ -4536,7 +4536,7 @@ export const PR_BRIDGE_API = [
     "detail": "Dispara um callback direcionado ao cliente do jogador target.",
     "directory": "pr_bridge/bridge/callback/{client,server,secure_client,secure_server}.lua",
     "tags": "callback, trigger, client, server, request, resposta, timeout",
-    "example": "pr_lib.callback.triggerClient('value', 'example', function(...) return true end, args)"
+    "example": "local result = pr_lib.callback.triggerClient(source, 'example:action', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4545,7 +4545,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona ou garante a existência de regras ACE dinamicamente (ex: conceder comandos administrativos).",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, add, server",
-    "example": "pr_lib.ace.addAce('value', 'example', 'value')"
+    "example": "local result = pr_lib.ace.addAce(nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4554,7 +4554,7 @@ export const PR_BRIDGE_API = [
     "detail": "Vincula ou remove herança e hierarquia de principais do ACE (ex: herdar permissões de admin de um cargo superior).",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, add, principal, server",
-    "example": "pr_lib.ace.addPrincipal('value', 'value')"
+    "example": "local result = pr_lib.ace.addPrincipal(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4563,7 +4563,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verificação híbrida de permissão que analisa grupos de frameworks, empregos e permissões ACE configuradas no objeto options.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, can, access, server",
-    "example": "local result = pr_lib.ace.canAccess(source, {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.canAccess(source, {})\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4572,7 +4572,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias de compatibilidade para de getPermissionCatalog..",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, discover, permissions, server",
-    "example": "pr_lib.ace.discoverPermissions({})"
+    "example": "local result = pr_lib.ace.discoverPermissions({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4581,7 +4581,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona ou garante a existência de regras ACE dinamicamente (ex: conceder comandos administrativos).",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, ensure, server",
-    "example": "pr_lib.ace.ensureAce('value', 'example')"
+    "example": "local result = pr_lib.ace.ensureAce(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4590,7 +4590,7 @@ export const PR_BRIDGE_API = [
     "detail": "Garante permissão ACE de execução de comando.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, ensure, command, server",
-    "example": "pr_lib.ace.ensureCommandAce('value', 'example')"
+    "example": "local result = pr_lib.ace.ensureCommandAce(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4599,7 +4599,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna todos os identificadores conhecidos de rede do jogador (license, discord, ip, steam, etc.).",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, get, identifiers, server",
-    "example": "local result = pr_lib.ace.getIdentifiers(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.getIdentifiers(source)\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4608,7 +4608,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get permission catalog” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, get, permission, catalog, server",
-    "example": "local result = pr_lib.ace.getPermissionCatalog({})"
+    "example": "local result = pr_lib.ace.getPermissionCatalog({})\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4617,7 +4617,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consulta nativa se o jogador possui permissões no arquivo de configurações server.cfg baseada em ACE principal (ex: IsPlayerAceAllowed).",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, has, server",
-    "example": "local result = pr_lib.ace.hasAce(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.hasAce(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4626,7 +4626,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se o jogador tem permissão de execução de um comando do console nativo do FiveM.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, has, command, server",
-    "example": "local result = pr_lib.ace.hasCommandAce(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.hasCommandAce(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4635,7 +4635,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verificação híbrida de permissão que analisa grupos de frameworks, empregos e permissões ACE configuradas no objeto options.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, has, framework, access, server",
-    "example": "local result = pr_lib.ace.hasFrameworkAccess(source, {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.hasFrameworkAccess(source, {})\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4644,7 +4644,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se um jogador possui um identificador específico.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, has, identifier, server",
-    "example": "local result = pr_lib.ace.hasIdentifier(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.hasIdentifier(source, 'license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4653,7 +4653,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o identificador específico do jogador está explicitamente autorizado no ACE.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, has, identifier, server",
-    "example": "local result = pr_lib.ace.hasIdentifierAce(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.hasIdentifierAce(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4662,7 +4662,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador está em uma whitelist do ACE correspondente ao nome da licença.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, in, whitelist, server",
-    "example": "pr_lib.ace.inWhitelist(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.inWhitelist(source, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4671,7 +4671,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se o jogador tem permissão de execução de um comando do console nativo do FiveM.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, is, command, allowed, server",
-    "example": "local result = pr_lib.ace.isCommandAllowed(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.isCommandAllowed(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4680,7 +4680,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o identificador específico do jogador está explicitamente autorizado no ACE.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, is, identifier, allowed, server",
-    "example": "local result = pr_lib.ace.isIdentifierAceAllowed(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.isIdentifierAceAllowed(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4689,7 +4689,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consulta nativa se o jogador possui permissões no arquivo de configurações server.cfg baseada em ACE principal (ex: IsPlayerAceAllowed).",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, is, player, allowed, server",
-    "example": "local result = pr_lib.ace.isPlayerAceAllowed(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.isPlayerAceAllowed(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4698,7 +4698,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador está em uma whitelist do ACE correspondente ao nome da licença.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, is, whitelisted, server",
-    "example": "local result = pr_lib.ace.isWhitelisted(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.ace.isWhitelisted(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4707,7 +4707,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias de compatibilidade para de getPermissionCatalog..",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, list, permissions, server",
-    "example": "pr_lib.ace.listPermissions({})"
+    "example": "local result = pr_lib.ace.listPermissions({})\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4716,7 +4716,7 @@ export const PR_BRIDGE_API = [
     "detail": "Parser interno de strings de convars.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, parse, convar, list, server",
-    "example": "pr_lib.ace.parseConvarList('value')"
+    "example": "local result = pr_lib.ace.parseConvarList(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4725,7 +4725,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra os dados ou a operação “register permission” no módulo ativo.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, register, permission, server",
-    "example": "local result = pr_lib.ace.registerPermission('example', {})"
+    "example": "local result = pr_lib.ace.registerPermission('example:action', {})\nprint('Resultado:', result)"
   },
   {
     "module": "ace",
@@ -4734,7 +4734,7 @@ export const PR_BRIDGE_API = [
     "detail": "Apaga ou altera regras ACE de permissão.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, remove, server",
-    "example": "pr_lib.ace.removeAce('value', 'example', 'value')"
+    "example": "local result = pr_lib.ace.removeAce(nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4743,7 +4743,7 @@ export const PR_BRIDGE_API = [
     "detail": "Vincula ou remove herança e hierarquia de principais do ACE (ex: herdar permissões de admin de um cargo superior).",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, remove, principal, server",
-    "example": "pr_lib.ace.removePrincipal('value', 'value')"
+    "example": "local result = pr_lib.ace.removePrincipal(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ace",
@@ -4752,7 +4752,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “unregister permission” por meio da API pública do módulo `ace`.",
     "directory": "pr_bridge/bridge/ace/server.lua",
     "tags": "ace, unregister, permission, server",
-    "example": "pr_lib.ace.unregisterPermission('example')"
+    "example": "local result = pr_lib.ace.unregisterPermission('example:action')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addcommand",
@@ -4761,7 +4761,7 @@ export const PR_BRIDGE_API = [
     "detail": "API robusta para registro de comandos de console/chat. Suporta filtragem nativa de permissões (empregos, cargos, ACE e whitelists), sugestões de chat automáticas com parâmetros tipados e conversão automática de argumentos de entrada (ex: converter string para número, boleano ou ID do jogador \"me\").",
     "directory": "pr_bridge/bridge/addCommand/client.lua",
     "tags": "addcommand, add, command, client",
-    "example": "pr_lib.addCommand('example', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.addCommand(nil, nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addcommand",
@@ -4770,7 +4770,7 @@ export const PR_BRIDGE_API = [
     "detail": "API robusta para registro de comandos de console/chat. Suporta filtragem nativa de permissões (empregos, cargos, ACE e whitelists), sugestões de chat automáticas com parâmetros tipados e conversão automática de argumentos de entrada (ex: converter string para número, boleano ou ID do jogador \"me\").",
     "directory": "pr_bridge/bridge/addCommand/server.lua",
     "tags": "addcommand, add, command, server",
-    "example": "pr_lib.addCommand('example', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.addCommand(nil, nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addcommand",
@@ -4779,7 +4779,7 @@ export const PR_BRIDGE_API = [
     "detail": "API robusta para registro de comandos de console/chat. Suporta filtragem nativa de permissões (empregos, cargos, ACE e whitelists), sugestões de chat automáticas com parâmetros tipados e conversão automática de argumentos de entrada (ex: converter string para número, boleano ou ID do jogador \"me\").",
     "directory": "pr_bridge/bridge/addCommand/client.lua",
     "tags": "addcommand, add, command, client",
-    "example": "pr_lib.addCommand.add('example', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.addCommand.add(nil, nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addcommand",
@@ -4788,7 +4788,7 @@ export const PR_BRIDGE_API = [
     "detail": "API robusta para registro de comandos de console/chat. Suporta filtragem nativa de permissões (empregos, cargos, ACE e whitelists), sugestões de chat automáticas com parâmetros tipados e conversão automática de argumentos de entrada (ex: converter string para número, boleano ou ID do jogador \"me\").",
     "directory": "pr_bridge/bridge/addCommand/server.lua",
     "tags": "addcommand, add, command, server",
-    "example": "pr_lib.addCommand.add('example', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.addCommand.add(nil, nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addcommand",
@@ -4797,7 +4797,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias de compatibilidade para add.",
     "directory": "pr_bridge/bridge/addCommand/client.lua",
     "tags": "addcommand, add, command, client",
-    "example": "pr_lib.addCommand.addCommand('example', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.addCommand.addCommand(nil, nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addcommand",
@@ -4806,7 +4806,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias de compatibilidade para add.",
     "directory": "pr_bridge/bridge/addCommand/server.lua",
     "tags": "addcommand, add, command, server",
-    "example": "pr_lib.addCommand.addCommand('example', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.addCommand.addCommand(nil, nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addcommand",
@@ -4815,7 +4815,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get suggestions” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/addCommand/client.lua",
     "tags": "addcommand, add, command, get, suggestions, client",
-    "example": "local result = pr_lib.addCommand.getSuggestions()"
+    "example": "local result = pr_lib.addCommand.getSuggestions()\nprint('Resultado:', result)"
   },
   {
     "module": "addcommand",
@@ -4824,7 +4824,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get suggestions” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/addCommand/server.lua",
     "tags": "addcommand, add, command, get, suggestions, server",
-    "example": "local result = pr_lib.addCommand.getSuggestions()"
+    "example": "local result = pr_lib.addCommand.getSuggestions()\nprint('Resultado:', result)"
   },
   {
     "module": "addcommand",
@@ -4833,7 +4833,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se os dados ou a operação “has suggestion” está disponível ou atende ao filtro informado.",
     "directory": "pr_bridge/bridge/addCommand/client.lua",
     "tags": "addcommand, add, command, has, suggestion, client",
-    "example": "local result = pr_lib.addCommand.hasSuggestion('example')"
+    "example": "local result = pr_lib.addCommand.hasSuggestion(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "addcommand",
@@ -4842,7 +4842,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se os dados ou a operação “has suggestion” está disponível ou atende ao filtro informado.",
     "directory": "pr_bridge/bridge/addCommand/server.lua",
     "tags": "addcommand, add, command, has, suggestion, server",
-    "example": "local result = pr_lib.addCommand.hasSuggestion('example')"
+    "example": "local result = pr_lib.addCommand.hasSuggestion(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "addcommand",
@@ -4851,7 +4851,7 @@ export const PR_BRIDGE_API = [
     "detail": "API robusta para registro de comandos de console/chat. Suporta filtragem nativa de permissões (empregos, cargos, ACE e whitelists), sugestões de chat automáticas com parâmetros tipados e conversão automática de argumentos de entrada (ex: converter string para número, boleano ou ID do jogador \"me\").",
     "directory": "pr_bridge/bridge/addCommand/client.lua",
     "tags": "addcommand, add, command, register, client",
-    "example": "local result = pr_lib.addCommand.register('example', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.addCommand.register(nil, nil, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "addcommand",
@@ -4860,7 +4860,7 @@ export const PR_BRIDGE_API = [
     "detail": "API robusta para registro de comandos de console/chat. Suporta filtragem nativa de permissões (empregos, cargos, ACE e whitelists), sugestões de chat automáticas com parâmetros tipados e conversão automática de argumentos de entrada (ex: converter string para número, boleano ou ID do jogador \"me\").",
     "directory": "pr_bridge/bridge/addCommand/server.lua",
     "tags": "addcommand, add, command, register, server",
-    "example": "local result = pr_lib.addCommand.register('example', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.addCommand.register(nil, nil, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "addcommand",
@@ -4869,7 +4869,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “send suggestions” por meio da API pública do módulo `addcommand`.",
     "directory": "pr_bridge/bridge/addCommand/client.lua",
     "tags": "addcommand, add, command, send, suggestions, client",
-    "example": "pr_lib.addCommand.sendSuggestions('value')"
+    "example": "local result = pr_lib.addCommand.sendSuggestions(GetPlayerServerId(PlayerId()))\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addcommand",
@@ -4878,7 +4878,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “send suggestions” por meio da API pública do módulo `addcommand`.",
     "directory": "pr_bridge/bridge/addCommand/server.lua",
     "tags": "addcommand, add, command, send, suggestions, server",
-    "example": "pr_lib.addCommand.sendSuggestions('value')"
+    "example": "local result = pr_lib.addCommand.sendSuggestions(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addkeybind",
@@ -4887,7 +4887,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra mapeamentos de teclas nativas do GTA V listados em Configurações > Teclas > FiveM. O objeto data define nome, descrição, tecla padrão (defaultKey ou keys), combinações e callbacks onPressed/onReleased. Teclas simples preservam o name como comando, seguindo o contrato nativo do FiveM e do ox_lib; combinações usam comandos internos compactos.",
     "directory": "pr_bridge/bridge/addKeybind/client.lua",
     "tags": "addkeybind, add, keybind, client",
-    "example": "pr_lib.addKeybind({})"
+    "example": "local result = pr_lib.addKeybind({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "addkeybind",
@@ -4896,7 +4896,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o objeto mapeador de tecla registrado.",
     "directory": "pr_bridge/bridge/addKeybind/client.lua",
     "tags": "addkeybind, add, keybind, get, client",
-    "example": "local result = pr_lib.addKeybind.get('example')"
+    "example": "local result = pr_lib.addKeybind.get('example:action')\nprint('Resultado:', result)"
   },
   {
     "module": "addkeybind",
@@ -4905,7 +4905,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove e desativa permanentemente o mapeamento de teclas associado.",
     "directory": "pr_bridge/bridge/addKeybind/client.lua",
     "tags": "addkeybind, add, keybind, remove, client",
-    "example": "pr_lib.addKeybind.remove('example')"
+    "example": "local result = pr_lib.addKeybind.remove('example:action')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "translator",
@@ -4914,7 +4914,7 @@ export const PR_BRIDGE_API = [
     "detail": "Traduz e exibe imediatamente um alerta de notificação com título e descrição localizados.",
     "directory": "pr_bridge/bridge/translator/client.lua",
     "tags": "translator, show, translated, notify, client",
-    "example": "pr_lib.translator.showTranslatedNotify('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.translator.showTranslatedNotify('Exemplo do PR Bridge', 'Exemplo do PR Bridge', 'default', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "translator",
@@ -4923,7 +4923,7 @@ export const PR_BRIDGE_API = [
     "detail": "Traduz um texto individual (text) para o idioma informado (targetLang) de forma assíncrona, retornando o resultado no callback cb e em uma Promise.",
     "directory": "pr_bridge/bridge/translator/client.lua",
     "tags": "translator, translate, client",
-    "example": "pr_lib.translator.translate('value', 'value')"
+    "example": "local result = pr_lib.translator.translate('Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "translator",
@@ -4932,7 +4932,7 @@ export const PR_BRIDGE_API = [
     "detail": "Traduz um texto individual (text) para o idioma informado (targetLang) de forma assíncrona, retornando o resultado no callback cb e em uma Promise.",
     "directory": "pr_bridge/bridge/translator/server.lua",
     "tags": "translator, translate, server",
-    "example": "pr_lib.translator.translate('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.translator.translate('Exemplo do PR Bridge', nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "translator",
@@ -4941,7 +4941,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a tradução em lote de uma lista de strings de forma otimizada paralelamente para minimizar latência.",
     "directory": "pr_bridge/bridge/translator/client.lua",
     "tags": "translator, translate, batch, client",
-    "example": "pr_lib.translator.translateBatch('value', 'value')"
+    "example": "local result = pr_lib.translator.translateBatch(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "translator",
@@ -4950,7 +4950,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a tradução em lote de uma lista de strings de forma otimizada paralelamente para minimizar latência.",
     "directory": "pr_bridge/bridge/translator/server.lua",
     "tags": "translator, translate, batch, server",
-    "example": "pr_lib.translator.translateBatch('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.translator.translateBatch(nil, nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "translator",
@@ -4959,7 +4959,7 @@ export const PR_BRIDGE_API = [
     "detail": "Varre e traduz automaticamente todas as propriedades de título, descrição e opções de um objeto de menu (compatível com a estrutura de ox_lib menus) de forma dinâmica para a localidade do jogador antes de sua renderização.",
     "directory": "pr_bridge/bridge/translator/client.lua",
     "tags": "translator, translate, menu, client, contexto, nui, interface",
-    "example": "pr_lib.translator.translateMenu('value', 'value')"
+    "example": "local result = pr_lib.translator.translateMenu(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "translator",
@@ -4968,7 +4968,7 @@ export const PR_BRIDGE_API = [
     "detail": "Traduz um texto individual (text) para o idioma informado (targetLang) de forma assíncrona, retornando o resultado no callback cb e em uma Promise.",
     "directory": "pr_bridge/bridge/translator/client.lua",
     "tags": "translator, translate, text, client",
-    "example": "pr_lib.translator.translateText('value', 'value')"
+    "example": "local result = pr_lib.translator.translateText('Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "translator",
@@ -4977,7 +4977,7 @@ export const PR_BRIDGE_API = [
     "detail": "Traduz um texto individual (text) para o idioma informado (targetLang) de forma assíncrona, retornando o resultado no callback cb e em uma Promise.",
     "directory": "pr_bridge/bridge/translator/server.lua",
     "tags": "translator, translate, text, server",
-    "example": "pr_lib.translator.translateText('value', 'value', function(...) return true end)"
+    "example": "local result = pr_lib.translator.translateText('Exemplo do PR Bridge', nil, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "github",
@@ -4986,7 +4986,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “check dependency” por meio da API pública do módulo `github`.",
     "directory": "pr_bridge/bridge/github/client.lua",
     "tags": "github, check, dependency, client",
-    "example": "pr_lib.github.checkDependency(source, 'value', 'value')"
+    "example": "local result = pr_lib.github.checkDependency('my_resource', nil, 'Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "github",
@@ -4995,7 +4995,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “check dependency” por meio da API pública do módulo `github`.",
     "directory": "pr_bridge/bridge/github/server.lua",
     "tags": "github, check, dependency, server",
-    "example": "pr_lib.github.checkDependency(source, 'value', 'value')"
+    "example": "local result = pr_lib.github.checkDependency('my_resource', nil, 'Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "github",
@@ -5004,7 +5004,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “version check” por meio da API pública do módulo `github`.",
     "directory": "pr_bridge/bridge/github/server.lua",
     "tags": "github, version, check, server",
-    "example": "pr_lib.github.versionCheck('value')"
+    "example": "local result = pr_lib.github.versionCheck(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "utils",
@@ -5013,7 +5013,7 @@ export const PR_BRIDGE_API = [
     "detail": "Clona profundamente uma tabela Lua recursivamente, incluindo metatabelas e evitando referências circulares.",
     "directory": "pr_bridge/bridge/utils/shared.lua",
     "tags": "utils, deep, copy, shared",
-    "example": "pr_lib.utils.deepCopy('value', 'value')"
+    "example": "local result = pr_lib.utils.deepCopy({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "utils",
@@ -5022,7 +5022,7 @@ export const PR_BRIDGE_API = [
     "detail": "Serializa uma tabela complexa em formato legível de texto para console (dump de depuração).",
     "directory": "pr_bridge/bridge/utils/shared.lua",
     "tags": "utils, dump, table, shared",
-    "example": "pr_lib.utils.dumpTable('value', 'value', 'value')"
+    "example": "local result = pr_lib.utils.dumpTable({}, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "utils",
@@ -5031,7 +5031,7 @@ export const PR_BRIDGE_API = [
     "detail": "Garante que o retorno seja sempre uma tabela Lua (caso seja nulo ou string, encapsula/converte).",
     "directory": "pr_bridge/bridge/utils/shared.lua",
     "tags": "utils, ensure, table, shared",
-    "example": "pr_lib.utils.ensureTable('value')"
+    "example": "local result = pr_lib.utils.ensureTable({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "utils",
@@ -5040,7 +5040,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte a primeira letra da string em maiúscula.",
     "directory": "pr_bridge/bridge/utils/shared.lua",
     "tags": "utils, first, to, upper, shared",
-    "example": "pr_lib.utils.firstToUpper('value')"
+    "example": "local result = pr_lib.utils.firstToUpper({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "utils",
@@ -5049,7 +5049,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte uma string em um hash numérico nativo do GTA V (equivalente ao hash do Jenkins One-at-a-time).",
     "directory": "pr_bridge/bridge/utils/shared.lua",
     "tags": "utils, hash, shared",
-    "example": "local result = pr_lib.utils.hash('value')"
+    "example": "local result = pr_lib.utils.hash({})\nprint('Resultado:', result)"
   },
   {
     "module": "utils",
@@ -5058,7 +5058,7 @@ export const PR_BRIDGE_API = [
     "detail": "Arredonda um número de ponto flutuante para a quantidade de casas decimais informada.",
     "directory": "pr_bridge/bridge/utils/shared.lua",
     "tags": "utils, round, shared",
-    "example": "pr_lib.utils.round('value', 'value')"
+    "example": "local result = pr_lib.utils.round({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "utils",
@@ -5067,7 +5067,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove espaços em branco do início e do fim de uma string.",
     "directory": "pr_bridge/bridge/utils/shared.lua",
     "tags": "utils, trim, shared",
-    "example": "pr_lib.utils.trim('value')"
+    "example": "local result = pr_lib.utils.trim({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5076,7 +5076,7 @@ export const PR_BRIDGE_API = [
     "detail": "Compara números de ponto flutuante considerando tolerâncias de arredondamento.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, almost, equal, shared",
-    "example": "pr_lib.math.almostEqual('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.almostEqual(nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5085,7 +5085,7 @@ export const PR_BRIDGE_API = [
     "detail": "Compara números de ponto flutuante considerando tolerâncias de arredondamento.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, almost, equal, shared",
-    "example": "pr_lib.math.AlmostEqual('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.AlmostEqual(nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5094,7 +5094,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limita um número dentro do intervalo especificado entre minimum e maximum.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, clamp, shared",
-    "example": "pr_lib.math.clamp('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.clamp({}, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5103,7 +5103,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limita um número dentro do intervalo especificado entre minimum e maximum.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, clamp, shared",
-    "example": "pr_lib.math.Clamp('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.Clamp({}, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5112,7 +5112,7 @@ export const PR_BRIDGE_API = [
     "detail": "Conversores de ângulos trigonométricos entre graus e radianos.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, deg2, rad, shared",
-    "example": "pr_lib.math.Deg2Rad('value')"
+    "example": "local result = pr_lib.math.Deg2Rad({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5121,7 +5121,7 @@ export const PR_BRIDGE_API = [
     "detail": "Conversores de ângulos trigonométricos entre graus e radianos.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, deg, to, rad, shared",
-    "example": "pr_lib.math.degToRad('value')"
+    "example": "local result = pr_lib.math.degToRad({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5130,7 +5130,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a distância euclidiana geométrica absoluta entre dois pontos no espaço.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, distance2, shared",
-    "example": "pr_lib.math.distance2D('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.distance2D(nil, nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5139,7 +5139,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a distância euclidiana geométrica absoluta entre dois pontos no espaço.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, distance2, shared",
-    "example": "pr_lib.math.Distance2D('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.Distance2D(nil, nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5148,7 +5148,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a distância euclidiana geométrica absoluta entre dois pontos no espaço.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, distance3, shared",
-    "example": "pr_lib.math.distance3D('value', 'value', 'value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.distance3D(nil, nil, nil, nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5157,7 +5157,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a distância euclidiana geométrica absoluta entre dois pontos no espaço.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, distance3, shared",
-    "example": "pr_lib.math.Distance3D('value', 'value', 'value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.Distance3D(nil, nil, nil, nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5166,7 +5166,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “groupdigits” por meio da API pública do módulo `math`.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, groupdigits, shared",
-    "example": "pr_lib.math.groupdigits('value', 'value')"
+    "example": "local result = pr_lib.math.groupdigits({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5175,7 +5175,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte cores de string hexadecimal (ex: \"#FF5500\") em vetores de cores RGB ou RGBA com canais individuais.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, hex, to, rgb, shared",
-    "example": "pr_lib.math.hexToRGB('value')"
+    "example": "local result = pr_lib.math.hexToRGB({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5184,7 +5184,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte cores de string hexadecimal (ex: \"#FF5500\") em vetores de cores RGB ou RGBA com canais individuais.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, hex, to, rgb, shared",
-    "example": "pr_lib.math.HexToRGB('value')"
+    "example": "local result = pr_lib.math.HexToRGB({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5193,7 +5193,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte cores de string hexadecimal (ex: \"#FF5500\") em vetores de cores RGB ou RGBA com canais individuais.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, hex, to, rgba, shared",
-    "example": "pr_lib.math.hexToRGBA('value')"
+    "example": "local result = pr_lib.math.hexToRGBA({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5202,7 +5202,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “hex to rgba” por meio da API pública do módulo `math`.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, hex, to, rgba, shared",
-    "example": "pr_lib.math.HexToRGBA('value')"
+    "example": "local result = pr_lib.math.HexToRGBA({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5211,7 +5211,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o fator decimal linear correspondente ao valor dentro do intervalo.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, inverse, lerp, shared",
-    "example": "pr_lib.math.inverseLerp('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.inverseLerp(nil, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5220,7 +5220,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o fator decimal linear correspondente ao valor dentro do intervalo.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, inverse, lerp, shared",
-    "example": "pr_lib.math.InverseLerp('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.InverseLerp(nil, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5229,7 +5229,7 @@ export const PR_BRIDGE_API = [
     "detail": "Calcula a magnitude geométrica/comprimento de vetores de duas ou três dimensões.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, length2, shared",
-    "example": "pr_lib.math.length2('value', 'value')"
+    "example": "local result = pr_lib.math.length2(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5238,7 +5238,7 @@ export const PR_BRIDGE_API = [
     "detail": "Calcula a magnitude geométrica/comprimento de vetores de duas ou três dimensões.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, length2, shared",
-    "example": "pr_lib.math.Length2('value', 'value')"
+    "example": "local result = pr_lib.math.Length2(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5247,7 +5247,7 @@ export const PR_BRIDGE_API = [
     "detail": "Calcula a magnitude geométrica/comprimento de vetores de duas ou três dimensões.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, length3, shared",
-    "example": "pr_lib.math.length3('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.length3(nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5256,7 +5256,7 @@ export const PR_BRIDGE_API = [
     "detail": "Calcula a magnitude geométrica/comprimento de vetores de duas ou três dimensões.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, length3, shared",
-    "example": "pr_lib.math.Length3('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.Length3(nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5265,7 +5265,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa uma interpolação linear simples entre dois valores baseada no fator decimal.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, lerp, shared",
-    "example": "pr_lib.math.Lerp('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.Lerp(nil, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5274,7 +5274,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa uma interpolação linear simples entre dois valores baseada no fator decimal.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, lerp, shared",
-    "example": "pr_lib.math.lerp('value', 'value', 'value')"
+    "example": "local result = pr_lib.math.lerp(nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5283,7 +5283,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mapeia de forma linear um valor de um intervalo de entrada para outro de saída.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, map, shared",
-    "example": "pr_lib.math.map('value', 'value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.map({}, nil, 1, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5292,7 +5292,7 @@ export const PR_BRIDGE_API = [
     "detail": "Mapeia de forma linear um valor de um intervalo de entrada para outro de saída.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, map, shared",
-    "example": "pr_lib.math.Map('value', 'value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.Map({}, nil, 1, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5301,7 +5301,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte um vetor normal de superfície em um vetor tridimensional de rotação (Pitch, Roll, Yaw).",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, normal, to, rotation, shared",
-    "example": "pr_lib.math.normalToRotation('value')"
+    "example": "local result = pr_lib.math.normalToRotation(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5310,7 +5310,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte um vetor normal de superfície em um vetor tridimensional de rotação (Pitch, Roll, Yaw).",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, normal, to, rotation, shared",
-    "example": "pr_lib.math.NormalToRotation('value')"
+    "example": "local result = pr_lib.math.NormalToRotation(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5319,7 +5319,7 @@ export const PR_BRIDGE_API = [
     "detail": "Processa e valida a consistência de um número dentro de restrições.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, parse, shared",
-    "example": "pr_lib.math.parse('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.parse({}, nil, 1, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5328,7 +5328,7 @@ export const PR_BRIDGE_API = [
     "detail": "Processa e valida a consistência de um número dentro de restrições.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, parse, number, shared",
-    "example": "pr_lib.math.ParseNumber('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.ParseNumber({}, nil, 1, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5337,7 +5337,7 @@ export const PR_BRIDGE_API = [
     "detail": "Conversores de ângulos trigonométricos entre graus e radianos.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, rad2, deg, shared",
-    "example": "pr_lib.math.Rad2Deg('value')"
+    "example": "local result = pr_lib.math.Rad2Deg({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5346,7 +5346,7 @@ export const PR_BRIDGE_API = [
     "detail": "Conversores de ângulos trigonométricos entre graus e radianos.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, rad, to, deg, shared",
-    "example": "pr_lib.math.radToDeg('value')"
+    "example": "local result = pr_lib.math.radToDeg({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5355,7 +5355,7 @@ export const PR_BRIDGE_API = [
     "detail": "Arredonda números de ponto flutuante.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, round, shared",
-    "example": "pr_lib.math.round('value', 'value')"
+    "example": "local result = pr_lib.math.round({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5364,7 +5364,7 @@ export const PR_BRIDGE_API = [
     "detail": "Arredonda números de ponto flutuante.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, round, shared",
-    "example": "pr_lib.math.Round('value', 'value')"
+    "example": "local result = pr_lib.math.Round({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5373,7 +5373,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna -1 se o número for negativo, 1 se for positivo e 0 se for nulo.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, sign, shared",
-    "example": "pr_lib.math.sign('value')"
+    "example": "local result = pr_lib.math.sign({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5382,7 +5382,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna -1 se o número for negativo, 1 se for positivo e 0 se for nulo.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, sign, shared",
-    "example": "pr_lib.math.Sign('value')"
+    "example": "local result = pr_lib.math.Sign({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5391,7 +5391,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte um número inteiro para uma string hexadecimal.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, to, hex, shared",
-    "example": "pr_lib.math.toHex('value', 'value')"
+    "example": "local result = pr_lib.math.toHex({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5400,7 +5400,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte um número inteiro para uma string hexadecimal.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, to, hex, shared",
-    "example": "pr_lib.math.ToHex('value', 'value')"
+    "example": "local result = pr_lib.math.ToHex({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5409,7 +5409,7 @@ export const PR_BRIDGE_API = [
     "detail": "Processa tabelas ou tipos vetoriais normais do FiveM aplicando constraints matemáticas de limites.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, to, scalars, shared",
-    "example": "pr_lib.math.toScalars('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.toScalars({}, nil, 1, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5418,7 +5418,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “to scalars” por meio da API pública do módulo `math`.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, to, scalars, shared",
-    "example": "pr_lib.math.ToScalars('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.ToScalars({}, nil, 1, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5427,7 +5427,7 @@ export const PR_BRIDGE_API = [
     "detail": "Processa tabelas ou tipos vetoriais normais do FiveM aplicando constraints matemáticas de limites.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, to, vector, shared",
-    "example": "pr_lib.math.toVector('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.toVector({}, nil, 1, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "math",
@@ -5436,7 +5436,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “to vector” por meio da API pública do módulo `math`.",
     "directory": "pr_bridge/bridge/utils/numbers.lua",
     "tags": "math, to, vector, shared",
-    "example": "pr_lib.math.ToVector('value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.math.ToVector({}, nil, 1, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5445,7 +5445,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera uma cópia profunda (deep copy) de tabelas e metatabelas.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, clone, shared",
-    "example": "pr_lib.table.clone('value', 'value')"
+    "example": "local result = pr_lib.table.clone({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5454,7 +5454,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se a tabela possui determinado valor entre seus elementos indexados.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, contains, shared",
-    "example": "pr_lib.table.contains(source, 'value')"
+    "example": "local result = pr_lib.table.contains(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5463,7 +5463,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se a tabela possui determinado valor entre seus elementos indexados.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, contains, shared",
-    "example": "pr_lib.table.Contains(source, 'value')"
+    "example": "local result = pr_lib.table.Contains(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5472,7 +5472,7 @@ export const PR_BRIDGE_API = [
     "detail": "Conta o número absoluto de elementos em uma tabela (incluindo chaves associativas não numéricas).",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, count, shared",
-    "example": "pr_lib.table.count(source)"
+    "example": "local result = pr_lib.table.count(source)\nprint('Resultado:', result)"
   },
   {
     "module": "table",
@@ -5481,7 +5481,7 @@ export const PR_BRIDGE_API = [
     "detail": "Conta o número absoluto de elementos em uma tabela (incluindo chaves associativas não numéricas).",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, count, shared",
-    "example": "pr_lib.table.Count(source)"
+    "example": "local result = pr_lib.table.Count(source)\nprint('Resultado:', result)"
   },
   {
     "module": "table",
@@ -5490,7 +5490,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera uma cópia profunda (deep copy) de tabelas e metatabelas.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, deep, clone, shared",
-    "example": "pr_lib.table.DeepClone('value', 'value')"
+    "example": "local result = pr_lib.table.DeepClone({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5499,7 +5499,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “freeze” por meio da API pública do módulo `table`.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, freeze, shared",
-    "example": "pr_lib.table.freeze('value')"
+    "example": "local result = pr_lib.table.freeze({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5508,7 +5508,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica os dados ou a operação “isfrozen” e retorna o estado correspondente.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, isfrozen, shared",
-    "example": "local result = pr_lib.table.isfrozen('value')"
+    "example": "local result = pr_lib.table.isfrozen({})\nprint('Resultado:', result)"
   },
   {
     "module": "table",
@@ -5517,7 +5517,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a projeção e mapeamento de chaves e valores a partir da execução do callback.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, map, shared",
-    "example": "pr_lib.table.map(source, function(...) return true end)"
+    "example": "local result = pr_lib.table.map(source, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5526,7 +5526,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa a projeção e mapeamento de chaves e valores a partir da execução do callback.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, map, shared",
-    "example": "pr_lib.table.Map(source, function(...) return true end)"
+    "example": "local result = pr_lib.table.Map(source, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5535,7 +5535,7 @@ export const PR_BRIDGE_API = [
     "detail": "Compara recursivamente se duas tabelas possuem conteúdo exatamente idêntico.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, matches, shared",
-    "example": "pr_lib.table.matches('value', 'value')"
+    "example": "local result = pr_lib.table.matches(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5544,7 +5544,7 @@ export const PR_BRIDGE_API = [
     "detail": "Compara recursivamente se duas tabelas possuem conteúdo exatamente idêntico.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, matches, shared",
-    "example": "pr_lib.table.Matches('value', 'value')"
+    "example": "local result = pr_lib.table.Matches(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5553,7 +5553,7 @@ export const PR_BRIDGE_API = [
     "detail": "Combina elementos de uma tabela de origem em uma tabela de destino.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, merge, shared",
-    "example": "pr_lib.table.merge('value', source, 'example')"
+    "example": "local result = pr_lib.table.merge(source, source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "table",
@@ -5562,7 +5562,7 @@ export const PR_BRIDGE_API = [
     "detail": "Combina elementos de uma tabela de origem em uma tabela de destino.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, merge, shared",
-    "example": "pr_lib.table.Merge('value', source, 'example')"
+    "example": "local result = pr_lib.table.Merge(source, source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "table",
@@ -5571,7 +5571,7 @@ export const PR_BRIDGE_API = [
     "detail": "Embaralha aleatoriamente a ordem dos elementos numéricos indexados da tabela.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, shuffle, shared",
-    "example": "pr_lib.table.shuffle(source, 'value', 'value')"
+    "example": "local result = pr_lib.table.shuffle(source, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "table",
@@ -5580,7 +5580,7 @@ export const PR_BRIDGE_API = [
     "detail": "Embaralha aleatoriamente a ordem dos elementos numéricos indexados da tabela.",
     "directory": "pr_bridge/bridge/utils/tables.lua",
     "tags": "table, shuffle, shared",
-    "example": "pr_lib.table.Shuffle(source, 'value', 'value')"
+    "example": "local result = pr_lib.table.Shuffle(source, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "ids",
@@ -5589,7 +5589,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera uma string aleatória baseada no padrão (pattern ex: \"ALPHANUMERIC\") com o comprimento fornecido, garantindo sua exclusividade comparando com uma tabela de registros existentes (registry).",
     "directory": "pr_bridge/bridge/utils/ids.lua",
     "tags": "ids, create, unique, id, shared",
-    "example": "local result = pr_lib.ids.createUniqueId('value', 'value', 'value')"
+    "example": "local result = pr_lib.ids.createUniqueId(nil, nil, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "ids",
@@ -5598,7 +5598,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera uma string aleatória baseada no padrão (pattern ex: \"ALPHANUMERIC\") com o comprimento fornecido, garantindo sua exclusividade comparando com uma tabela de registros existentes (registry).",
     "directory": "pr_bridge/bridge/utils/ids.lua",
     "tags": "ids, create, unique, id, shared",
-    "example": "local result = pr_lib.ids.CreateUniqueId('value', 'value', 'value')"
+    "example": "local result = pr_lib.ids.CreateUniqueId(nil, nil, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.raycast",
@@ -5607,7 +5607,7 @@ export const PR_BRIDGE_API = [
     "detail": "Projeta um feixe de raycast tridimensional invisível a partir da câmera do jogador na direção de foco da mira até a distância máxima informada. Retorna se atingiu algo, as coordenadas de impacto, o vetor normal e a ID da entidade atingida (veículo, ped ou objeto).",
     "directory": "pr_bridge/bridge/fivem/raycast/client.lua",
     "tags": "raycast, from, camera, client",
-    "example": "pr_lib.raycast.fromCamera(1, 'value', 'value', entity)"
+    "example": "local result = pr_lib.raycast.fromCamera(1, nil, nil, PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.raycast",
@@ -5616,7 +5616,7 @@ export const PR_BRIDGE_API = [
     "detail": "Projeta um feixe de raycast tridimensional invisível a partir da câmera do jogador na direção de foco da mira até a distância máxima informada. Retorna se atingiu algo, as coordenadas de impacto, o vetor normal e a ID da entidade atingida (veículo, ped ou objeto).",
     "directory": "pr_bridge/bridge/fivem/raycast/client.lua",
     "tags": "raycast, from, camera, client",
-    "example": "pr_lib.raycast.FromCamera(1, 'value', 'value', entity)"
+    "example": "local result = pr_lib.raycast.FromCamera(1, nil, nil, PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.raycast",
@@ -5625,7 +5625,7 @@ export const PR_BRIDGE_API = [
     "detail": "Dispara um feixe de raycast a partir de coordenadas absolutas de origem (origin) para um destino (destination).",
     "directory": "pr_bridge/bridge/fivem/raycast/client.lua",
     "tags": "raycast, from, coords, client",
-    "example": "pr_lib.raycast.fromCoords('value', 'value', 'value', 'value', entity)"
+    "example": "local result = pr_lib.raycast.fromCoords(nil, nil, nil, nil, PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.raycast",
@@ -5634,7 +5634,7 @@ export const PR_BRIDGE_API = [
     "detail": "Dispara um feixe de raycast a partir de coordenadas absolutas de origem (origin) para um destino (destination).",
     "directory": "pr_bridge/bridge/fivem/raycast/client.lua",
     "tags": "raycast, from, coords, client",
-    "example": "pr_lib.raycast.FromCoords('value', 'value', 'value', 'value', entity)"
+    "example": "local result = pr_lib.raycast.FromCoords(nil, nil, nil, nil, PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.net",
@@ -5643,7 +5643,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get entity” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/net/client.lua",
     "tags": "net, get, entity, client",
-    "example": "local result = pr_lib.fivem.net.getEntity(NetworkGetNetworkIdFromEntity(entity), 1)"
+    "example": "local result = pr_lib.fivem.net.getEntity(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5652,7 +5652,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get entity” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/net/server.lua",
     "tags": "net, get, entity, server",
-    "example": "local result = pr_lib.fivem.net.getEntity(NetworkGetNetworkIdFromEntity(entity), 1)"
+    "example": "local result = pr_lib.fivem.net.getEntity(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5661,7 +5661,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get net id” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/net/client.lua",
     "tags": "net, get, id, client",
-    "example": "local result = pr_lib.fivem.net.getNetId(entity)"
+    "example": "local result = pr_lib.fivem.net.getNetId(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5670,7 +5670,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get net id” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/net/server.lua",
     "tags": "net, get, id, server",
-    "example": "local result = pr_lib.fivem.net.getNetId(entity)"
+    "example": "local result = pr_lib.fivem.net.getNetId(0)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5679,7 +5679,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get owner” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/net/client.lua",
     "tags": "net, get, owner, client",
-    "example": "local result = pr_lib.fivem.net.getOwner(entity, 1)"
+    "example": "local result = pr_lib.fivem.net.getOwner(PlayerPedId(), 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5688,7 +5688,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get owner” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/net/server.lua",
     "tags": "net, get, owner, server",
-    "example": "local result = pr_lib.fivem.net.getOwner(entity, 1)"
+    "example": "local result = pr_lib.fivem.net.getOwner(0, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5697,7 +5697,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get vehicle” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/net/client.lua",
     "tags": "net, get, vehicle, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.net.getVehicle(NetworkGetNetworkIdFromEntity(entity), 1)"
+    "example": "local result = pr_lib.fivem.net.getVehicle(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5706,7 +5706,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get vehicle” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/net/server.lua",
     "tags": "net, get, vehicle, server, veículo, carro",
-    "example": "local result = pr_lib.fivem.net.getVehicle(NetworkGetNetworkIdFromEntity(entity), 1)"
+    "example": "local result = pr_lib.fivem.net.getVehicle(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5715,7 +5715,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica os dados ou a operação “is valid net id” e retorna o estado correspondente.",
     "directory": "pr_bridge/bridge/fivem/net/client.lua",
     "tags": "net, is, valid, id, client",
-    "example": "local result = pr_lib.fivem.net.isValidNetId(NetworkGetNetworkIdFromEntity(entity))"
+    "example": "local result = pr_lib.fivem.net.isValidNetId(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5724,7 +5724,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica os dados ou a operação “is valid net id” e retorna o estado correspondente.",
     "directory": "pr_bridge/bridge/fivem/net/server.lua",
     "tags": "net, is, valid, id, server",
-    "example": "local result = pr_lib.fivem.net.isValidNetId(NetworkGetNetworkIdFromEntity(entity))"
+    "example": "local result = pr_lib.fivem.net.isValidNetId(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5733,7 +5733,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “resolve vehicle” por meio da API pública do módulo `fivem.net`.",
     "directory": "pr_bridge/bridge/fivem/net/client.lua",
     "tags": "net, resolve, vehicle, client, veículo, carro",
-    "example": "pr_lib.fivem.net.resolveVehicle(entity, 1)"
+    "example": "local result = pr_lib.fivem.net.resolveVehicle(PlayerPedId(), 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.net",
@@ -5742,7 +5742,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “resolve vehicle” por meio da API pública do módulo `fivem.net`.",
     "directory": "pr_bridge/bridge/fivem/net/server.lua",
     "tags": "net, resolve, vehicle, server, veículo, carro",
-    "example": "pr_lib.fivem.net.resolveVehicle(entity, 1)"
+    "example": "local result = pr_lib.fivem.net.resolveVehicle(0, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.ui",
@@ -5751,7 +5751,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define ou atualiza os dados ou a operação “set clipboard” usando a autoridade do módulo.",
     "directory": "pr_bridge/bridge/fivem/ui/client.lua",
     "tags": "ui, set, clipboard, client",
-    "example": "pr_lib.setClipboard('value')"
+    "example": "local result = pr_lib.setClipboard({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.ui",
@@ -5760,7 +5760,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha na tela do jogador textos em coordenadas bidimensionais de proporção decimal (de 0.0 a 1.0).",
     "directory": "pr_bridge/bridge/fivem/ui/client.lua",
     "tags": "ui, draw2, dtext, client",
-    "example": "pr_lib.ui.draw2DText('value', 'value', 'value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.ui.draw2DText('Exemplo do PR Bridge', nil, nil, nil, 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.ui",
@@ -5769,7 +5769,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha na tela do jogador textos em coordenadas bidimensionais de proporção decimal (de 0.0 a 1.0).",
     "directory": "pr_bridge/bridge/fivem/ui/client.lua",
     "tags": "ui, draw2, dtext, client",
-    "example": "pr_lib.ui.Draw2DText('value', 'value', 'value', 'value', 'value', 'value')"
+    "example": "local result = pr_lib.ui.Draw2DText('Exemplo do PR Bridge', nil, nil, nil, 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.ui",
@@ -5778,7 +5778,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha textos flutuantes projetados no mundo físico tridimensional em coordenadas GPS.",
     "directory": "pr_bridge/bridge/fivem/ui/client.lua",
     "tags": "ui, draw3, dtext, client",
-    "example": "pr_lib.ui.draw3DText('value', vec3(0.0, 0.0, 0.0), 'value', 'value', 'value')"
+    "example": "local result = pr_lib.ui.draw3DText('Exemplo do PR Bridge', vector3(0.0, 0.0, 0.0), nil, 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.ui",
@@ -5787,7 +5787,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha textos flutuantes projetados no mundo físico tridimensional em coordenadas GPS.",
     "directory": "pr_bridge/bridge/fivem/ui/client.lua",
     "tags": "ui, draw3, dtext, client",
-    "example": "pr_lib.ui.Draw3DText('value', vec3(0.0, 0.0, 0.0), 'value', 'value', 'value')"
+    "example": "local result = pr_lib.ui.Draw3DText('Exemplo do PR Bridge', vector3(0.0, 0.0, 0.0), nil, 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.ui",
@@ -5796,7 +5796,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha retângulos bidimensionais coloridos na HUD da tela do jogador local.",
     "directory": "pr_bridge/bridge/fivem/ui/client.lua",
     "tags": "ui, draw, rect, client",
-    "example": "pr_lib.ui.drawRect('value', 'value', 'example', 'value', 'value')"
+    "example": "local result = pr_lib.ui.drawRect(nil, nil, nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.ui",
@@ -5805,7 +5805,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha retângulos bidimensionais coloridos na HUD da tela do jogador local.",
     "directory": "pr_bridge/bridge/fivem/ui/client.lua",
     "tags": "ui, draw, rect, client",
-    "example": "pr_lib.ui.DrawRect('value', 'value', 'example', 'value', 'value')"
+    "example": "local result = pr_lib.ui.DrawRect(nil, nil, nil, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5814,7 +5814,7 @@ export const PR_BRIDGE_API = [
     "detail": "Força limpeza de texturas.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, clear, server",
-    "example": "pr_lib.dui.clear('value')"
+    "example": "local result = pr_lib.dui.clear(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5823,7 +5823,7 @@ export const PR_BRIDGE_API = [
     "detail": "Comanda sincronizadamente que clientes em target carreguem uma nova instância do navegador DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, create, client",
-    "example": "local result = pr_lib.dui.create({}, 'example', 'value')"
+    "example": "local result = pr_lib.dui.create({}, nil, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5832,7 +5832,7 @@ export const PR_BRIDGE_API = [
     "detail": "Comanda sincronizadamente que clientes em target carreguem uma nova instância do navegador DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, create, server",
-    "example": "local result = pr_lib.dui.create('value', {})"
+    "example": "local result = pr_lib.dui.create(source, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5841,7 +5841,7 @@ export const PR_BRIDGE_API = [
     "detail": "Renderiza o navegador web em polígonos tridimensionais posicionados no espaço.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, create, poly, client",
-    "example": "local result = pr_lib.dui.createPoly('value', {})"
+    "example": "local result = pr_lib.dui.createPoly(GetPlayerServerId(PlayerId()), {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5850,7 +5850,7 @@ export const PR_BRIDGE_API = [
     "detail": "Renderiza o navegador web em polígonos tridimensionais posicionados no espaço.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, create, poly, server",
-    "example": "local result = pr_lib.dui.createPoly('value', {})"
+    "example": "local result = pr_lib.dui.createPoly(source, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5859,7 +5859,7 @@ export const PR_BRIDGE_API = [
     "detail": "Renderiza o navegador web em polígonos tridimensionais posicionados no espaço.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, create, poly4, server",
-    "example": "local result = pr_lib.dui.createPoly4('value', {})"
+    "example": "local result = pr_lib.dui.createPoly4(source, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5868,7 +5868,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a DUI a um render target de textura nativo do GTA (ex: telas internas originais de cinemas ou monitores).",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, create, render, target, client, alvo, interação, zona",
-    "example": "local result = pr_lib.dui.createRenderTarget('value', {})"
+    "example": "local result = pr_lib.dui.createRenderTarget(GetPlayerServerId(PlayerId()), {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5877,7 +5877,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a DUI a um render target de textura nativo do GTA (ex: telas internas originais de cinemas ou monitores).",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, create, render, target, server, alvo, interação, zona",
-    "example": "local result = pr_lib.dui.createRenderTarget('value', {})"
+    "example": "local result = pr_lib.dui.createRenderTarget(source, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5886,7 +5886,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs locais de projeção e substituição de texturas físicas tridimensionais no mundo 3D por renderizadores DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, create, replacement, client",
-    "example": "local result = pr_lib.dui.createReplacement('value', {})"
+    "example": "local result = pr_lib.dui.createReplacement(GetPlayerServerId(PlayerId()), {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5895,7 +5895,7 @@ export const PR_BRIDGE_API = [
     "detail": "Substitui texturas físicas de modelos 3D originais do GTA pelo navegador web.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, create, replace, texture, client",
-    "example": "local result = pr_lib.dui.createReplaceTexture('value', {})"
+    "example": "local result = pr_lib.dui.createReplaceTexture(GetPlayerServerId(PlayerId()), {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5904,7 +5904,7 @@ export const PR_BRIDGE_API = [
     "detail": "Substitui texturas físicas de modelos 3D originais do GTA pelo navegador web.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, create, replace, texture, server",
-    "example": "local result = pr_lib.dui.createReplaceTexture('value', {})"
+    "example": "local result = pr_lib.dui.createReplaceTexture(source, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5913,7 +5913,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha texturas DUI em elementos gráficos 2D.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, create, sprite, client",
-    "example": "local result = pr_lib.dui.createSprite({})"
+    "example": "local result = pr_lib.dui.createSprite({})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5922,7 +5922,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha texturas DUI em elementos gráficos 2D.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, create, sprite, server",
-    "example": "local result = pr_lib.dui.createSprite('value', {})"
+    "example": "local result = pr_lib.dui.createSprite(source, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5931,7 +5931,7 @@ export const PR_BRIDGE_API = [
     "detail": "Fecha e apaga a instância DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, destroy, client",
-    "example": "pr_lib.dui.destroy('value')"
+    "example": "local result = pr_lib.dui.destroy(GetPlayerServerId(PlayerId()))\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5940,7 +5940,7 @@ export const PR_BRIDGE_API = [
     "detail": "Fecha e apaga a instância DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, destroy, server",
-    "example": "pr_lib.dui.destroy('value', 'example')"
+    "example": "local result = pr_lib.dui.destroy(source, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5949,7 +5949,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe e controla ponteiros de mouses interativos em cima do navegador web.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, disable, mouse, client",
-    "example": "pr_lib.dui.disableMouse('value')"
+    "example": "local result = pr_lib.dui.disableMouse(GetPlayerServerId(PlayerId()))\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5958,7 +5958,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs locais de projeção e substituição de texturas físicas tridimensionais no mundo 3D por renderizadores DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, draw, sprite, client",
-    "example": "pr_lib.dui.drawSprite('value', {})"
+    "example": "local result = pr_lib.dui.drawSprite(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5967,7 +5967,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe e controla ponteiros de mouses interativos em cima do navegador web.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, enable, mouse, client",
-    "example": "pr_lib.dui.enableMouse('value', {})"
+    "example": "local result = pr_lib.dui.enableMouse(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5976,7 +5976,7 @@ export const PR_BRIDGE_API = [
     "detail": "Foca o controle de teclado e mouse do jogador para interagir diretamente com o navegador.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, focus, client",
-    "example": "pr_lib.dui.focus('value', {})"
+    "example": "local result = pr_lib.dui.focus(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5985,7 +5985,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas de status e instâncias de DUIs server-side.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, get, client",
-    "example": "local result = pr_lib.dui.get('example')"
+    "example": "local result = pr_lib.dui.get(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -5994,7 +5994,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas de status e instâncias de DUIs server-side.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, get, server",
-    "example": "local result = pr_lib.dui.get('example')"
+    "example": "local result = pr_lib.dui.get(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6003,7 +6003,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas de status e instâncias de DUIs server-side.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, list, client",
-    "example": "pr_lib.dui.list()"
+    "example": "local result = pr_lib.dui.list()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6012,7 +6012,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas de status e instâncias de DUIs server-side.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, list, server",
-    "example": "pr_lib.dui.list()"
+    "example": "local result = pr_lib.dui.list()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6021,7 +6021,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera endereços locais válidos apontando para páginas HTML e assets de recursos NUI.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, nui, url, client",
-    "example": "pr_lib.dui.nuiUrl('value', source)"
+    "example": "local result = pr_lib.dui.nuiUrl('@my_resource/data/config.json', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6030,7 +6030,7 @@ export const PR_BRIDGE_API = [
     "detail": "Renderiza o navegador web em polígonos tridimensionais posicionados no espaço.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, poly, client",
-    "example": "pr_lib.dui.poly('value', {})"
+    "example": "local result = pr_lib.dui.poly(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6039,7 +6039,7 @@ export const PR_BRIDGE_API = [
     "detail": "Renderiza o navegador web em polígonos tridimensionais posicionados no espaço.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, poly, server",
-    "example": "pr_lib.dui.poly('value', {})"
+    "example": "local result = pr_lib.dui.poly(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6048,7 +6048,7 @@ export const PR_BRIDGE_API = [
     "detail": "Renderiza o navegador web em polígonos tridimensionais posicionados no espaço.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, poly4, server",
-    "example": "pr_lib.dui.poly4('value', {})"
+    "example": "local result = pr_lib.dui.poly4(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6057,7 +6057,7 @@ export const PR_BRIDGE_API = [
     "detail": "Fecha e apaga a instância DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, remove, server",
-    "example": "pr_lib.dui.remove('value', 'example')"
+    "example": "local result = pr_lib.dui.remove(source, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6066,7 +6066,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs locais de projeção e substituição de texturas físicas tridimensionais no mundo 3D por renderizadores DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, remove, replace, texture, client",
-    "example": "pr_lib.dui.removeReplaceTexture('value', {})"
+    "example": "local result = pr_lib.dui.removeReplaceTexture(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6075,7 +6075,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a DUI a um render target de textura nativo do GTA (ex: telas internas originais de cinemas ou monitores).",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, render, target, client, alvo, interação, zona",
-    "example": "pr_lib.dui.renderTarget('value', {})"
+    "example": "local result = pr_lib.dui.renderTarget(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6084,7 +6084,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a DUI a um render target de textura nativo do GTA (ex: telas internas originais de cinemas ou monitores).",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, render, target, server, alvo, interação, zona",
-    "example": "pr_lib.dui.renderTarget('value', {})"
+    "example": "local result = pr_lib.dui.renderTarget(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6093,7 +6093,7 @@ export const PR_BRIDGE_API = [
     "detail": "Substitui texturas físicas de modelos 3D originais do GTA pelo navegador web.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, replace, texture, client",
-    "example": "pr_lib.dui.replaceTexture('value', {})"
+    "example": "local result = pr_lib.dui.replaceTexture(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6102,7 +6102,7 @@ export const PR_BRIDGE_API = [
     "detail": "Substitui texturas físicas de modelos 3D originais do GTA pelo navegador web.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, replace, texture, server",
-    "example": "pr_lib.dui.replaceTexture('value', {})"
+    "example": "local result = pr_lib.dui.replaceTexture(source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6111,7 +6111,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia mensagens estruturadas (postMessage) para o javascript rodando no navegador da DUI especificada.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, send, client",
-    "example": "pr_lib.dui.send('value', 'value')"
+    "example": "local result = pr_lib.dui.send(GetPlayerServerId(PlayerId()), 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6120,7 +6120,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia mensagens estruturadas (postMessage) para o javascript rodando no navegador da DUI especificada.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, send, server",
-    "example": "pr_lib.dui.send('value', 'example', 'value')"
+    "example": "local result = pr_lib.dui.send(source, nil, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6129,7 +6129,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia mensagens estruturadas (postMessage) para o javascript rodando no navegador da DUI especificada.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, send, message, client",
-    "example": "pr_lib.dui.sendMessage('value', 'value')"
+    "example": "local result = pr_lib.dui.sendMessage(GetPlayerServerId(PlayerId()), 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6138,7 +6138,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia mensagens estruturadas (postMessage) para o javascript rodando no navegador da DUI especificada.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, send, message, server",
-    "example": "pr_lib.dui.sendMessage('value', 'example', 'value')"
+    "example": "local result = pr_lib.dui.sendMessage(source, nil, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6147,7 +6147,7 @@ export const PR_BRIDGE_API = [
     "detail": "Simula eventos de clique, movimento e rolagem no navegador DUI baseado em entradas físicas do jogador.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, send, mouse, down, client",
-    "example": "pr_lib.dui.sendMouseDown('value', 'value')"
+    "example": "local result = pr_lib.dui.sendMouseDown(GetPlayerServerId(PlayerId()), nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6156,7 +6156,7 @@ export const PR_BRIDGE_API = [
     "detail": "Simula eventos de clique, movimento e rolagem no navegador DUI baseado em entradas físicas do jogador.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, send, mouse, move, client",
-    "example": "pr_lib.dui.sendMouseMove('value', 'value', 'value')"
+    "example": "local result = pr_lib.dui.sendMouseMove(GetPlayerServerId(PlayerId()), nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6165,7 +6165,7 @@ export const PR_BRIDGE_API = [
     "detail": "Simula eventos de clique, movimento e rolagem no navegador DUI baseado em entradas físicas do jogador.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, send, mouse, up, client",
-    "example": "pr_lib.dui.sendMouseUp('value', 'value')"
+    "example": "local result = pr_lib.dui.sendMouseUp(GetPlayerServerId(PlayerId()), nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6174,7 +6174,7 @@ export const PR_BRIDGE_API = [
     "detail": "Simula eventos de clique, movimento e rolagem no navegador DUI baseado em entradas físicas do jogador.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, send, mouse, wheel, client",
-    "example": "pr_lib.dui.sendMouseWheel('value', 'value', 'value')"
+    "example": "local result = pr_lib.dui.sendMouseWheel(GetPlayerServerId(PlayerId()), nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6183,7 +6183,7 @@ export const PR_BRIDGE_API = [
     "detail": "Controla opacidade e brilho de renderização da textura.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, set, brightness, client",
-    "example": "pr_lib.dui.setBrightness('value', 'value')"
+    "example": "local result = pr_lib.dui.setBrightness(GetPlayerServerId(PlayerId()), nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6192,7 +6192,7 @@ export const PR_BRIDGE_API = [
     "detail": "Controla opacidade e brilho de renderização da textura.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, set, brightness, server",
-    "example": "pr_lib.dui.setBrightness('value', 'example', 'value')"
+    "example": "local result = pr_lib.dui.setBrightness(source, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6201,7 +6201,7 @@ export const PR_BRIDGE_API = [
     "detail": "Controla opacidade e brilho de renderização da textura.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, set, opacity, client",
-    "example": "pr_lib.dui.setOpacity('value', 'value')"
+    "example": "local result = pr_lib.dui.setOpacity(GetPlayerServerId(PlayerId()), nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6210,7 +6210,7 @@ export const PR_BRIDGE_API = [
     "detail": "Controla opacidade e brilho de renderização da textura.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, set, opacity, server",
-    "example": "pr_lib.dui.setOpacity('value', 'example', 'value')"
+    "example": "local result = pr_lib.dui.setOpacity(source, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6219,7 +6219,7 @@ export const PR_BRIDGE_API = [
     "detail": "Redireciona o navegador DUI para outro endereço web.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, set, url, client",
-    "example": "pr_lib.dui.setUrl('value', 'value')"
+    "example": "local result = pr_lib.dui.setUrl(GetPlayerServerId(PlayerId()), nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6228,7 +6228,7 @@ export const PR_BRIDGE_API = [
     "detail": "Redireciona o navegador DUI para outro endereço web.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, set, url, server",
-    "example": "pr_lib.dui.setUrl('value', 'example', 'value')"
+    "example": "local result = pr_lib.dui.setUrl(source, nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6237,7 +6237,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs locais de projeção e substituição de texturas físicas tridimensionais no mundo 3D por renderizadores DUI.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, start, poly, client",
-    "example": "pr_lib.dui.startPoly('value', {})"
+    "example": "local result = pr_lib.dui.startPoly(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6246,7 +6246,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha texturas DUI em elementos gráficos 2D.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, start, sprite, client",
-    "example": "pr_lib.dui.startSprite('value', {})"
+    "example": "local result = pr_lib.dui.startSprite(GetPlayerServerId(PlayerId()), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6255,7 +6255,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha texturas DUI em elementos gráficos 2D.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, start, sprite, server",
-    "example": "pr_lib.dui.startSprite('value', 'example', {})"
+    "example": "local result = pr_lib.dui.startSprite(source, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6264,7 +6264,7 @@ export const PR_BRIDGE_API = [
     "detail": "Renderiza o navegador web em polígonos tridimensionais posicionados no espaço.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, stop, poly, client",
-    "example": "pr_lib.dui.stopPoly('value')"
+    "example": "local result = pr_lib.dui.stopPoly(GetPlayerServerId(PlayerId()))\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6273,7 +6273,7 @@ export const PR_BRIDGE_API = [
     "detail": "Renderiza o navegador web em polígonos tridimensionais posicionados no espaço.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, stop, poly, server",
-    "example": "pr_lib.dui.stopPoly('value', 'example')"
+    "example": "local result = pr_lib.dui.stopPoly(source, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6282,7 +6282,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a DUI a um render target de textura nativo do GTA (ex: telas internas originais de cinemas ou monitores).",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, stop, render, target, client, alvo, interação, zona",
-    "example": "pr_lib.dui.stopRenderTarget('value')"
+    "example": "local result = pr_lib.dui.stopRenderTarget(GetPlayerServerId(PlayerId()))\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6291,7 +6291,7 @@ export const PR_BRIDGE_API = [
     "detail": "Associa a DUI a um render target de textura nativo do GTA (ex: telas internas originais de cinemas ou monitores).",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, stop, render, target, server, alvo, interação, zona",
-    "example": "pr_lib.dui.stopRenderTarget('value', 'example')"
+    "example": "local result = pr_lib.dui.stopRenderTarget(source, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6300,7 +6300,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha texturas DUI em elementos gráficos 2D.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, stop, sprite, client",
-    "example": "pr_lib.dui.stopSprite('value')"
+    "example": "local result = pr_lib.dui.stopSprite(GetPlayerServerId(PlayerId()))\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6309,7 +6309,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha texturas DUI em elementos gráficos 2D.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, stop, sprite, server",
-    "example": "pr_lib.dui.stopSprite('value', 'example')"
+    "example": "local result = pr_lib.dui.stopSprite(source, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6318,7 +6318,7 @@ export const PR_BRIDGE_API = [
     "detail": "Sincroniza DUIs ativas com novos jogadores conectados que entraram no escopo.",
     "directory": "pr_bridge/bridge/fivem/dui/server.lua",
     "tags": "dui, sync, server",
-    "example": "pr_lib.dui.sync('value')"
+    "example": "local result = pr_lib.dui.sync(source)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6327,7 +6327,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe e controla ponteiros de mouses interativos em cima do navegador web.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, toggle, mouse, client",
-    "example": "pr_lib.dui.toggleMouse('value', true)"
+    "example": "local result = pr_lib.dui.toggleMouse(GetPlayerServerId(PlayerId()), false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6336,7 +6336,7 @@ export const PR_BRIDGE_API = [
     "detail": "Foca o controle de teclado e mouse do jogador para interagir diretamente com o navegador.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, unfocus, client",
-    "example": "pr_lib.dui.unfocus()"
+    "example": "local result = pr_lib.dui.unfocus()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.dui",
@@ -6345,7 +6345,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera endereços locais válidos apontando para páginas HTML e assets de recursos NUI.",
     "directory": "pr_bridge/bridge/fivem/dui/client.lua",
     "tags": "dui, url, client",
-    "example": "pr_lib.dui.url('value', source)"
+    "example": "local result = pr_lib.dui.url('@my_resource/data/config.json', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6354,7 +6354,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aplica modificações físicas, cores e upgrades no veículo.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, apply, client",
-    "example": "pr_lib.fivem.tuning.apply(entity, 'value', {})"
+    "example": "local result = pr_lib.fivem.tuning.apply(PlayerPedId(), {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6363,7 +6363,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aplica modificações físicas, cores e upgrades no veículo.",
     "directory": "pr_bridge/bridge/fivem/tuning/server.lua",
     "tags": "tuning, apply, server",
-    "example": "pr_lib.fivem.tuning.apply(entity, 'value', {})"
+    "example": "local result = pr_lib.fivem.tuning.apply(0, {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6372,7 +6372,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia comando para que clientes apliquem propriedades em um veículo baseado na sua ID de rede.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, apply, net, id, client",
-    "example": "pr_lib.fivem.tuning.applyNetId(NetworkGetNetworkIdFromEntity(entity), 'value', {})"
+    "example": "local result = pr_lib.fivem.tuning.applyNetId(nil, {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6381,7 +6381,7 @@ export const PR_BRIDGE_API = [
     "detail": "Envia comando para que clientes apliquem propriedades em um veículo baseado na sua ID de rede.",
     "directory": "pr_bridge/bridge/fivem/tuning/server.lua",
     "tags": "tuning, apply, net, id, server",
-    "example": "pr_lib.fivem.tuning.applyNetId(NetworkGetNetworkIdFromEntity(entity), 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.tuning.applyNetId(nil, {}, source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6390,7 +6390,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna uma tabela contendo todas as propriedades de customizações, modificações mecânicas, cores e níveis de integridade do veículo correspondente.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, get, client",
-    "example": "local result = pr_lib.fivem.tuning.get(entity)"
+    "example": "local result = pr_lib.fivem.tuning.get(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6399,7 +6399,7 @@ export const PR_BRIDGE_API = [
     "detail": "Conserta visualmente e mecanicamente o motor, carroceria e pneus do veículo.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, repair, client",
-    "example": "pr_lib.fivem.tuning.repair(entity)"
+    "example": "local result = pr_lib.fivem.tuning.repair(PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6408,7 +6408,7 @@ export const PR_BRIDGE_API = [
     "detail": "Restaura o estado do veículo a partir de um snapshot salvo.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, restore, client",
-    "example": "pr_lib.fivem.tuning.restore(entity, 'value', {})"
+    "example": "local result = pr_lib.fivem.tuning.restore(PlayerPedId(), nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6417,7 +6417,7 @@ export const PR_BRIDGE_API = [
     "detail": "Restaura o estado do veículo a partir de um snapshot salvo.",
     "directory": "pr_bridge/bridge/fivem/tuning/server.lua",
     "tags": "tuning, restore, server",
-    "example": "pr_lib.fivem.tuning.restore(entity, 'value', {})"
+    "example": "local result = pr_lib.fivem.tuning.restore(0, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6426,7 +6426,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ativa ou remove extras e acessórios nativos de carroceria instalados no veículo.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, set, extra, client",
-    "example": "pr_lib.fivem.tuning.setExtra(entity, {}, true)"
+    "example": "local result = pr_lib.fivem.tuning.setExtra(PlayerPedId(), nil, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6435,7 +6435,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera diretamente o nível físico de combustível do motor do veículo.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, set, fuel, client",
-    "example": "pr_lib.fivem.tuning.setFuel(entity, 'value')"
+    "example": "local result = pr_lib.fivem.tuning.setFuel(PlayerPedId(), nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6444,7 +6444,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera peças de modificação mecânica (como Motor, Transmissão, Suspensão) ou visual (aerofólios, capôs).",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, set, mod, client",
-    "example": "pr_lib.fivem.tuning.setMod(entity, 'value', 'value', 'value')"
+    "example": "local result = pr_lib.fivem.tuning.setMod(PlayerPedId(), 'default', 1, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6453,7 +6453,7 @@ export const PR_BRIDGE_API = [
     "detail": "Configura luzes de neons instaladas embaixo do chassi do veículo.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, set, neon, client",
-    "example": "pr_lib.fivem.tuning.setNeon(entity, true, 'value')"
+    "example": "local result = pr_lib.fivem.tuning.setNeon(PlayerPedId(), false, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6462,7 +6462,7 @@ export const PR_BRIDGE_API = [
     "detail": "Modifica a string exibida na placa física do veículo.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, set, plate, client",
-    "example": "pr_lib.fivem.tuning.setPlate(entity, 'value')"
+    "example": "local result = pr_lib.fivem.tuning.setPlate(PlayerPedId(), 'ABC1234')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6471,7 +6471,7 @@ export const PR_BRIDGE_API = [
     "detail": "Configura faróis de Xenon e tonalidades de cores nos faróis do veículo.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, set, xenon, client",
-    "example": "pr_lib.fivem.tuning.setXenon(entity, true, 'value')"
+    "example": "local result = pr_lib.fivem.tuning.setXenon(PlayerPedId(), false, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6480,7 +6480,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna tabela vazia para stubs do servidor.",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, snapshot, client",
-    "example": "pr_lib.fivem.tuning.snapshot(entity)"
+    "example": "local result = pr_lib.fivem.tuning.snapshot(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6489,7 +6489,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna tabela vazia para stubs do servidor.",
     "directory": "pr_bridge/bridge/fivem/tuning/server.lua",
     "tags": "tuning, snapshot, server",
-    "example": "pr_lib.fivem.tuning.snapshot()"
+    "example": "local result = pr_lib.fivem.tuning.snapshot()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.tuning",
@@ -6498,7 +6498,7 @@ export const PR_BRIDGE_API = [
     "detail": "Liga ou desliga modificações de performance específicas (como Turbo).",
     "directory": "pr_bridge/bridge/fivem/tuning/client.lua",
     "tags": "tuning, toggle, mod, client",
-    "example": "pr_lib.fivem.tuning.toggleMod(entity, 'value', true)"
+    "example": "local result = pr_lib.fivem.tuning.toggleMod(PlayerPedId(), 'default', false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6507,7 +6507,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera o texto ou propriedades do painel DrawText ativo na tela.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, change, client",
-    "example": "pr_lib.drawtext.change('value', 'value', {})"
+    "example": "local result = pr_lib.drawtext.change('Exemplo do PR Bridge', vector3(0.0, 0.0, 0.0), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6516,7 +6516,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera o texto ou propriedades do painel DrawText ativo na tela.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, change, text, client",
-    "example": "pr_lib.drawtext.ChangeText('value', 'value', {})"
+    "example": "local result = pr_lib.drawtext.ChangeText('Exemplo do PR Bridge', vector3(0.0, 0.0, 0.0), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6525,7 +6525,7 @@ export const PR_BRIDGE_API = [
     "detail": "Métodos de desenho 2D.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw2d, client",
-    "example": "pr_lib.drawtext.draw2d('value')"
+    "example": "local result = pr_lib.drawtext.draw2d(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6534,7 +6534,7 @@ export const PR_BRIDGE_API = [
     "detail": "Métodos de desenho de textos tridimensionais.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw3d, client",
-    "example": "pr_lib.drawtext.draw3d('value')"
+    "example": "local result = pr_lib.drawtext.draw3d(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6543,7 +6543,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe textos flutuantes formatados.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw, text, client",
-    "example": "pr_lib.drawtext.DrawText('value', 'value', {})"
+    "example": "local result = pr_lib.drawtext.DrawText('Exemplo do PR Bridge', vector3(0.0, 0.0, 0.0), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6552,7 +6552,7 @@ export const PR_BRIDGE_API = [
     "detail": "Métodos de desenho 2D.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw, text2d, client",
-    "example": "pr_lib.drawtext.drawText2d('value')"
+    "example": "local result = pr_lib.drawtext.drawText2d(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6561,7 +6561,7 @@ export const PR_BRIDGE_API = [
     "detail": "Métodos de desenho 2D.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw, text2d, client",
-    "example": "pr_lib.drawtext.DrawText2d('value')"
+    "example": "local result = pr_lib.drawtext.DrawText2d(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6570,7 +6570,7 @@ export const PR_BRIDGE_API = [
     "detail": "Métodos de desenho 2D.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw, text2, client",
-    "example": "pr_lib.drawtext.DrawText2D('value')"
+    "example": "local result = pr_lib.drawtext.DrawText2D(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6579,7 +6579,7 @@ export const PR_BRIDGE_API = [
     "detail": "Métodos de desenho de textos tridimensionais.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw, text3d, client",
-    "example": "pr_lib.drawtext.drawText3d('value')"
+    "example": "local result = pr_lib.drawtext.drawText3d(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6588,7 +6588,7 @@ export const PR_BRIDGE_API = [
     "detail": "Métodos de desenho de textos tridimensionais.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw, text3d, client",
-    "example": "pr_lib.drawtext.DrawText3d('value')"
+    "example": "local result = pr_lib.drawtext.DrawText3d(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6597,7 +6597,7 @@ export const PR_BRIDGE_API = [
     "detail": "Métodos de desenho de textos tridimensionais.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, draw, text3, client",
-    "example": "pr_lib.drawtext.DrawText3D('value')"
+    "example": "local result = pr_lib.drawtext.DrawText3D(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6606,7 +6606,7 @@ export const PR_BRIDGE_API = [
     "detail": "Apaga o painel de texto.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, hide, client",
-    "example": "pr_lib.drawtext.hide()"
+    "example": "local result = pr_lib.drawtext.hide()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6615,7 +6615,7 @@ export const PR_BRIDGE_API = [
     "detail": "Apaga o painel de texto.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, hide, text, client",
-    "example": "pr_lib.drawtext.HideText()"
+    "example": "local result = pr_lib.drawtext.HideText()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6624,7 +6624,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna se há algum painel de DrawText ativo na tela.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, is, open, client",
-    "example": "local result = pr_lib.drawtext.isOpen()"
+    "example": "local result = pr_lib.drawtext.isOpen()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6633,7 +6633,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra o acionamento de teclas de atalho de interações DrawText com debounce (delay).",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, key, pressed, client",
-    "example": "pr_lib.drawtext.keyPressed('value')"
+    "example": "local result = pr_lib.drawtext.keyPressed(1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6642,7 +6642,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra o acionamento de teclas de atalho de interações DrawText com debounce (delay).",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, key, pressed, client",
-    "example": "pr_lib.drawtext.KeyPressed('value')"
+    "example": "local result = pr_lib.drawtext.KeyPressed(1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.drawtext",
@@ -6651,7 +6651,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe textos flutuantes formatados.",
     "directory": "pr_bridge/bridge/fivem/drawtext/client.lua",
     "tags": "drawtext, show, client",
-    "example": "pr_lib.drawtext.show('value', 'value', {})"
+    "example": "local result = pr_lib.drawtext.show('Exemplo do PR Bridge', vector3(0.0, 0.0, 0.0), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6660,7 +6660,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias de compatibilidade para vehicleProperties.get.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/client.lua",
     "tags": "vehicle, properties, get, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.getVehicleProperties(entity)"
+    "example": "local result = pr_lib.fivem.getVehicleProperties(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6669,7 +6669,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias de compatibilidade para vehicleProperties.set.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/client.lua",
     "tags": "vehicle, properties, set, client, veículo, carro",
-    "example": "pr_lib.fivem.setVehicleProperties(entity, 'value')"
+    "example": "local result = pr_lib.fivem.setVehicleProperties(PlayerPedId(), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6678,7 +6678,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias de compatibilidade para vehicleProperties.set.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/server.lua",
     "tags": "vehicle, properties, set, server, veículo, carro",
-    "example": "pr_lib.fivem.setVehicleProperties(entity, 'value', {})"
+    "example": "local result = pr_lib.fivem.setVehicleProperties(0, {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6687,7 +6687,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela completa contendo as propriedades estéticas e mecânicas instaladas no veículo (compatível com ESX/QBCore).",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/client.lua",
     "tags": "vehicle, properties, get, client, veículo, carro",
-    "example": "local result = pr_lib.vehicleProperties.get(entity)"
+    "example": "local result = pr_lib.vehicleProperties.get(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6696,7 +6696,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a tabela completa contendo as propriedades estéticas e mecânicas instaladas no veículo (compatível com ESX/QBCore).",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/client.lua",
     "tags": "vehicle, properties, get, client, veículo, carro",
-    "example": "local result = pr_lib.vehicleProperties.GetVehicleProperties(entity)"
+    "example": "local result = pr_lib.vehicleProperties.GetVehicleProperties(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6705,7 +6705,7 @@ export const PR_BRIDGE_API = [
     "detail": "Modifica as propriedades físicas gerais de customização de um veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/client.lua",
     "tags": "vehicle, properties, set, client, veículo, carro",
-    "example": "pr_lib.vehicleProperties.set(entity, 'value', entity)"
+    "example": "local result = pr_lib.vehicleProperties.set(PlayerPedId(), {}, PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6714,7 +6714,7 @@ export const PR_BRIDGE_API = [
     "detail": "Modifica as propriedades físicas gerais de customização de um veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/server.lua",
     "tags": "vehicle, properties, set, server, veículo, carro",
-    "example": "pr_lib.vehicleProperties.set(entity, 'value', {})"
+    "example": "local result = pr_lib.vehicleProperties.set(0, {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6723,7 +6723,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aplica propriedades sincronizadas via rede utilizando a ID de rede do veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/server.lua",
     "tags": "vehicle, properties, set, net, id, server, veículo, carro",
-    "example": "pr_lib.vehicleProperties.setNetId(NetworkGetNetworkIdFromEntity(entity), 'value', 'value', {})"
+    "example": "local result = pr_lib.vehicleProperties.setNetId(nil, {}, source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6732,7 +6732,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aplica propriedades sincronizadas via rede utilizando a ID de rede do veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/server.lua",
     "tags": "vehicle, properties, set, net, id, server, veículo, carro",
-    "example": "pr_lib.vehicleProperties.SetNetIdProperties(NetworkGetNetworkIdFromEntity(entity), 'value', 'value', {})"
+    "example": "local result = pr_lib.vehicleProperties.SetNetIdProperties(nil, {}, source, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6741,7 +6741,7 @@ export const PR_BRIDGE_API = [
     "detail": "Modifica as propriedades físicas gerais de customização de um veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/client.lua",
     "tags": "vehicle, properties, set, client, veículo, carro",
-    "example": "pr_lib.vehicleProperties.SetVehicleProperties(entity, 'value', entity)"
+    "example": "local result = pr_lib.vehicleProperties.SetVehicleProperties(PlayerPedId(), {}, PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleProperties",
@@ -6750,7 +6750,7 @@ export const PR_BRIDGE_API = [
     "detail": "Modifica as propriedades físicas gerais de customização de um veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleProperties/server.lua",
     "tags": "vehicle, properties, set, server, veículo, carro",
-    "example": "pr_lib.vehicleProperties.SetVehicleProperties(entity, 'value', {})"
+    "example": "local result = pr_lib.vehicleProperties.SetVehicleProperties(0, {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6759,7 +6759,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aplica opções de físicas, colisões, congelamento e persistência na entidade.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, configure, entity, client",
-    "example": "pr_lib.fivem.streaming.configureEntity(entity, {})"
+    "example": "local result = pr_lib.fivem.streaming.configureEntity(PlayerPedId(), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6768,7 +6768,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs otimizadas que carregam o modelo correspondente e criam objetos, peds ou veículos locais no cliente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, create, entity, client",
-    "example": "local result = pr_lib.fivem.streaming.createEntity('value', 'prop_tool_bench02', vec3(0.0, 0.0, 0.0), 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.createEntity('default', 'prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), nil, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6777,7 +6777,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs otimizadas que carregam o modelo correspondente e criam objetos, peds ou veículos locais no cliente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, create, object, client",
-    "example": "local result = pr_lib.fivem.streaming.createObject('prop_tool_bench02', vec3(0.0, 0.0, 0.0), {})"
+    "example": "local result = pr_lib.fivem.streaming.createObject('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6786,7 +6786,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs otimizadas que carregam o modelo correspondente e criam objetos, peds ou veículos locais no cliente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, create, ped, client",
-    "example": "local result = pr_lib.fivem.streaming.createPed('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.createPed('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), nil, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6795,7 +6795,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs otimizadas que carregam o modelo correspondente e criam objetos, peds ou veículos locais no cliente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, create, prop, client",
-    "example": "local result = pr_lib.fivem.streaming.createProp('prop_tool_bench02', vec3(0.0, 0.0, 0.0), {})"
+    "example": "local result = pr_lib.fivem.streaming.createProp('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6804,7 +6804,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs otimizadas que carregam o modelo correspondente e criam objetos, peds ou veículos locais no cliente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, create, vehicle, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.streaming.createVehicle('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.createVehicle('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), nil, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6813,7 +6813,7 @@ export const PR_BRIDGE_API = [
     "detail": "Apaga uma entidade (ped, veículo ou objeto) local liberando memória.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, delete, client",
-    "example": "pr_lib.fivem.streaming.delete(entity)"
+    "example": "local result = pr_lib.fivem.streaming.delete(PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6822,7 +6822,7 @@ export const PR_BRIDGE_API = [
     "detail": "Apaga uma entidade (ped, veículo ou objeto) local liberando memória.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, delete, entity, client",
-    "example": "pr_lib.fivem.streaming.deleteEntity(entity)"
+    "example": "local result = pr_lib.fivem.streaming.deleteEntity(PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6831,7 +6831,7 @@ export const PR_BRIDGE_API = [
     "detail": "Varre verticalmente o mapa para obter as coordenadas Z precisas do solo abaixo da posição indicada.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, find, ground, client",
-    "example": "local result = pr_lib.fivem.streaming.findGroundZ(vec3(0.0, 0.0, 0.0), {})"
+    "example": "local result = pr_lib.fivem.streaming.findGroundZ(vector3(0.0, 0.0, 0.0), {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6840,7 +6840,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna as dimensões de bounding box (mínimo e máximo) do modelo especificado.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, get, model, dimensions, client",
-    "example": "local result = pr_lib.fivem.streaming.getModelDimensions('prop_tool_bench02', 1)"
+    "example": "local result = pr_lib.fivem.streaming.getModelDimensions('prop_ld_flow_bottle', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6849,7 +6849,7 @@ export const PR_BRIDGE_API = [
     "detail": "Calcula a compensação de altura vertical necessária para posicionar o objeto rente ao chão.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, get, model, ground, offset, client",
-    "example": "local result = pr_lib.fivem.streaming.getModelGroundOffset('prop_tool_bench02', 1)"
+    "example": "local result = pr_lib.fivem.streaming.getModelGroundOffset('prop_ld_flow_bottle', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6858,7 +6858,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o hash numérico de um modelo 3D.",
     "directory": "pr_bridge/bridge/fivem/streaming/server.lua",
     "tags": "streaming, hash, server",
-    "example": "local result = pr_lib.fivem.streaming.hash('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.streaming.hash('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6867,7 +6867,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega dicionários contendo arquivos de animações esqueléticas para peds.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, load, anim, dict, client",
-    "example": "local result = pr_lib.fivem.streaming.loadAnimDict('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.loadAnimDict(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6876,7 +6876,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega modelos de armas de fogo nativas e suas propriedades.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, load, weapon, asset, client",
-    "example": "local result = pr_lib.fivem.streaming.loadWeaponAsset('prop_tool_bench02', 1)"
+    "example": "local result = pr_lib.fivem.streaming.loadWeaponAsset('prop_ld_flow_bottle', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6885,7 +6885,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para acionar ações cinemáticas combinadas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, perform, action, client",
-    "example": "pr_lib.fivem.streaming.performAction({})"
+    "example": "local result = pr_lib.fivem.streaming.performAction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6894,7 +6894,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para acionar ações cinemáticas combinadas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, perform, action, client",
-    "example": "pr_lib.fivem.streaming.PerformAction({})"
+    "example": "local result = pr_lib.fivem.streaming.PerformAction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6903,7 +6903,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ajusta a altura e rotação de uma entidade para que ela fique alinhada corretamente com a superfície do solo.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, place, entity, properly, client",
-    "example": "pr_lib.fivem.streaming.placeEntityProperly(entity, 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.placeEntityProperly(PlayerPedId(), 'default', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6912,7 +6912,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para acionar ações cinemáticas combinadas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, play, action, client",
-    "example": "pr_lib.fivem.streaming.playAction({})"
+    "example": "local result = pr_lib.fivem.streaming.playAction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6921,7 +6921,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para acionar ações cinemáticas combinadas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, play, action, client",
-    "example": "pr_lib.fivem.streaming.PlayAction({})"
+    "example": "local result = pr_lib.fivem.streaming.PlayAction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6930,7 +6930,7 @@ export const PR_BRIDGE_API = [
     "detail": "Força uma entidade ped (geralmente o jogador local) a reproduzir uma animação esquelética de forma simplificada, carregando o dicionário de animação previamente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, play, anim, client",
-    "example": "pr_lib.fivem.streaming.playAnim({}, 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.playAnim({}, nil, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6939,7 +6939,7 @@ export const PR_BRIDGE_API = [
     "detail": "Força uma entidade ped (geralmente o jogador local) a reproduzir uma animação esquelética de forma simplificada, carregando o dicionário de animação previamente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, play, anim, client",
-    "example": "pr_lib.fivem.streaming.PlayAnim({}, 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.PlayAnim({}, nil, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6948,7 +6948,7 @@ export const PR_BRIDGE_API = [
     "detail": "Força uma entidade ped (geralmente o jogador local) a reproduzir uma animação esquelética de forma simplificada, carregando o dicionário de animação previamente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, play, animation, client",
-    "example": "pr_lib.fivem.streaming.playAnimation({}, 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.playAnimation({}, nil, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6957,7 +6957,7 @@ export const PR_BRIDGE_API = [
     "detail": "Força uma entidade ped (geralmente o jogador local) a reproduzir uma animação esquelética de forma simplificada, carregando o dicionário de animação previamente.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, play, animation, client",
-    "example": "pr_lib.fivem.streaming.PlayAnimation({}, 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.PlayAnimation({}, nil, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6966,7 +6966,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para acionar ações cinemáticas combinadas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, play, interaction, client",
-    "example": "pr_lib.fivem.streaming.playInteraction({})"
+    "example": "local result = pr_lib.fivem.streaming.playInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6975,7 +6975,7 @@ export const PR_BRIDGE_API = [
     "detail": "APIs utilitárias para acionar ações cinemáticas combinadas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, play, interaction, client",
-    "example": "pr_lib.fivem.streaming.PlayInteraction({})"
+    "example": "local result = pr_lib.fivem.streaming.PlayInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6984,7 +6984,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega dicionários contendo arquivos de animações esqueléticas para peds.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, release, anim, dict, client",
-    "example": "pr_lib.fivem.streaming.releaseAnimDict('value')"
+    "example": "local result = pr_lib.fivem.streaming.releaseAnimDict(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -6993,7 +6993,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega arquivos de sets de animações de postura/caminhar (walkstyles).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, release, anim, set, client",
-    "example": "pr_lib.fivem.streaming.releaseAnimSet('value')"
+    "example": "local result = pr_lib.fivem.streaming.releaseAnimSet(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7002,7 +7002,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega pacotes de efeitos sonoros e áudios nativos.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, release, audio, bank, client",
-    "example": "pr_lib.fivem.streaming.releaseAudioBank('value')"
+    "example": "local result = pr_lib.fivem.streaming.releaseAudioBank(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7011,7 +7011,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega e retém na memória de vídeo do jogo o modelo 3D informado (model), liberando-o da memória após o uso.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, release, model, client",
-    "example": "pr_lib.fivem.streaming.releaseModel('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.streaming.releaseModel('prop_ld_flow_bottle')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7020,7 +7020,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega bibliotecas de efeitos de partículas (Ptfx, ex: fumaças, faíscas).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, release, ptfx, asset, client",
-    "example": "pr_lib.fivem.streaming.releasePtfxAsset('value')"
+    "example": "local result = pr_lib.fivem.streaming.releasePtfxAsset(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7029,7 +7029,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega arquivos Scaleforms Flash nativos do GTA V (ex: botões instrucionais, mini-games, telas de computadores).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, release, scaleform, movie, client",
-    "example": "pr_lib.fivem.streaming.releaseScaleformMovie('value')"
+    "example": "local result = pr_lib.fivem.streaming.releaseScaleformMovie(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7038,7 +7038,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega dicionários contendo texturas e imagens nativas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, release, texture, dict, client",
-    "example": "pr_lib.fivem.streaming.releaseTextureDict('value')"
+    "example": "local result = pr_lib.fivem.streaming.releaseTextureDict('Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7047,7 +7047,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega modelos de armas de fogo nativas e suas propriedades.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, release, weapon, asset, client",
-    "example": "pr_lib.fivem.streaming.releaseWeaponAsset('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.streaming.releaseWeaponAsset('prop_ld_flow_bottle')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7056,7 +7056,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega dicionários contendo arquivos de animações esqueléticas para peds.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, anim, dict, client",
-    "example": "pr_lib.fivem.streaming.requestAnimDict('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.requestAnimDict(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7065,7 +7065,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega dicionários contendo arquivos de animações esqueléticas para peds.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, anim, dict, client",
-    "example": "pr_lib.fivem.streaming.RequestAnimDict('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.RequestAnimDict(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7074,7 +7074,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega arquivos de sets de animações de postura/caminhar (walkstyles).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, anim, set, client",
-    "example": "pr_lib.fivem.streaming.requestAnimSet('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.requestAnimSet(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7083,7 +7083,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega arquivos de sets de animações de postura/caminhar (walkstyles).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, anim, set, client",
-    "example": "pr_lib.fivem.streaming.RequestAnimSet('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.RequestAnimSet(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7092,7 +7092,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega pacotes de efeitos sonoros e áudios nativos.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, audio, bank, client",
-    "example": "pr_lib.fivem.streaming.RequestAudioBank('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.RequestAudioBank(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7101,7 +7101,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega pacotes de efeitos sonoros e áudios nativos.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, audio, bank, client",
-    "example": "pr_lib.fivem.streaming.requestAudioBank('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.requestAudioBank(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7110,7 +7110,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega e retém na memória de vídeo do jogo o modelo 3D informado (model), liberando-o da memória após o uso.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, model, client",
-    "example": "pr_lib.fivem.streaming.requestModel('prop_tool_bench02', 1)"
+    "example": "local result = pr_lib.fivem.streaming.requestModel('prop_ld_flow_bottle', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7119,7 +7119,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega e retém na memória de vídeo do jogo o modelo 3D informado (model), liberando-o da memória após o uso.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, model, client",
-    "example": "pr_lib.fivem.streaming.RequestModel('prop_tool_bench02', 1)"
+    "example": "local result = pr_lib.fivem.streaming.RequestModel('prop_ld_flow_bottle', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7128,7 +7128,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega bibliotecas de efeitos de partículas (Ptfx, ex: fumaças, faíscas).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, named, ptfx, asset, client",
-    "example": "pr_lib.fivem.streaming.RequestNamedPtfxAsset('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.RequestNamedPtfxAsset(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7137,7 +7137,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega bibliotecas de efeitos de partículas (Ptfx, ex: fumaças, faíscas).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, ptfx, asset, client",
-    "example": "pr_lib.fivem.streaming.requestPtfxAsset('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.requestPtfxAsset(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7146,7 +7146,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega arquivos Scaleforms Flash nativos do GTA V (ex: botões instrucionais, mini-games, telas de computadores).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, scaleform, movie, client",
-    "example": "pr_lib.fivem.streaming.RequestScaleformMovie('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.RequestScaleformMovie(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7155,7 +7155,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega arquivos Scaleforms Flash nativos do GTA V (ex: botões instrucionais, mini-games, telas de computadores).",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, scaleform, movie, client",
-    "example": "pr_lib.fivem.streaming.requestScaleformMovie('example', 1)"
+    "example": "local result = pr_lib.fivem.streaming.requestScaleformMovie('example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7164,7 +7164,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega dicionários contendo texturas e imagens nativas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, streamed, texture, dict, client",
-    "example": "pr_lib.fivem.streaming.RequestStreamedTextureDict('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.RequestStreamedTextureDict(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7173,7 +7173,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega dicionários contendo texturas e imagens nativas.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, texture, dict, client",
-    "example": "pr_lib.fivem.streaming.requestTextureDict('value', 1)"
+    "example": "local result = pr_lib.fivem.streaming.requestTextureDict('Exemplo do PR Bridge', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7182,7 +7182,7 @@ export const PR_BRIDGE_API = [
     "detail": "Carrega modelos de armas de fogo nativas e suas propriedades.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, request, weapon, asset, client",
-    "example": "pr_lib.fivem.streaming.requestWeaponAsset('prop_tool_bench02', 1)"
+    "example": "local result = pr_lib.fivem.streaming.requestWeaponAsset('prop_ld_flow_bottle', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.streaming",
@@ -7191,7 +7191,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atualiza a posição e o ângulo horizontal de uma entidade de forma sincronizada.",
     "directory": "pr_bridge/bridge/fivem/streaming/client.lua",
     "tags": "streaming, set, entity, transform, client",
-    "example": "pr_lib.fivem.streaming.setEntityTransform(entity, vec3(0.0, 0.0, 0.0), 'value', {})"
+    "example": "local result = pr_lib.fivem.streaming.setEntityTransform(PlayerPedId(), vector3(0.0, 0.0, 0.0), nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7200,7 +7200,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, find, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.findObjectsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.findObjectsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7209,7 +7209,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, find, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.findObjectsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.findObjectsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7218,7 +7218,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, find, in, radius, using, pool, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.findObjectsInRadiusUsingPool(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.findObjectsInRadiusUsingPool(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7227,7 +7227,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, find, in, radius, using, pool, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.findObjectsInRadiusUsingPool(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.findObjectsInRadiusUsingPool(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7236,7 +7236,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, find, vehicles, in, radius, client, obj, objeto, objetos, object, pool, entidade, veículo, vehicle",
-    "example": "local result = pr_lib.fivem.objects.findVehiclesInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.findVehiclesInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7245,7 +7245,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, find, vehicles, in, radius, server, obj, objeto, objetos, object, pool, entidade, veículo, vehicle",
-    "example": "local result = pr_lib.fivem.objects.findVehiclesInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.findVehiclesInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7254,7 +7254,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, find, vehicles, in, radius, using, pool, client, obj, objeto, objetos, object, entidade, veículo",
-    "example": "local result = pr_lib.fivem.objects.findVehiclesInRadiusUsingPool(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.findVehiclesInRadiusUsingPool(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7263,7 +7263,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, find, vehicles, in, radius, using, pool, server, obj, objeto, objetos, object, entidade, veículo",
-    "example": "local result = pr_lib.fivem.objects.findVehiclesInRadiusUsingPool(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.findVehiclesInRadiusUsingPool(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7272,7 +7272,7 @@ export const PR_BRIDGE_API = [
     "detail": "Congela ou descongela a física de todas as entidades de determinado modelo 3D que estão dentro daquele raio.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, freeze, by, model, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "pr_lib.fivem.objects.freezeByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, true)"
+    "example": "local result = pr_lib.fivem.objects.freezeByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7281,7 +7281,7 @@ export const PR_BRIDGE_API = [
     "detail": "Congela ou descongela a física de todas as entidades de determinado modelo 3D que estão dentro daquele raio.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, freeze, by, model, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "pr_lib.fivem.objects.freezeByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, true)"
+    "example": "local result = pr_lib.fivem.objects.freezeByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7290,7 +7290,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca entidades filtradas por modelo específico e proximidade geográfica.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, by, model, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7299,7 +7299,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca entidades filtradas por modelo específico e proximidade geográfica.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, by, model, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7308,7 +7308,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, by, pool, in, radius, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getByPoolInRadius('example', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getByPoolInRadius(nil, vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7317,7 +7317,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, by, pool, in, radius, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getByPoolInRadius('example', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getByPoolInRadius(nil, vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7326,7 +7326,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca entidades filtradas por modelo específico e proximidade geográfica.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, closest, by, model, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getClosestByModel('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestByModel('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7335,7 +7335,7 @@ export const PR_BRIDGE_API = [
     "detail": "Busca entidades filtradas por modelo específico e proximidade geográfica.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, closest, by, model, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getClosestByModel('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestByModel('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7344,7 +7344,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, closest, from, pool, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getClosestFromPool('example', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestFromPool(nil, vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7353,7 +7353,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, closest, from, pool, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getClosestFromPool('example', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestFromPool(nil, vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7362,7 +7362,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, closest, object, client, obj, objeto, objetos, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getClosestObject(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestObject(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7371,7 +7371,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, closest, object, server, obj, objeto, objetos, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getClosestObject(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestObject(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7380,7 +7380,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, closest, vehicle, client, obj, objeto, objetos, object, pool, entidade, veículo, carro",
-    "example": "local result = pr_lib.fivem.objects.getClosestVehicle(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestVehicle(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7389,7 +7389,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, closest, vehicle, server, obj, objeto, objetos, object, pool, entidade, veículo, carro",
-    "example": "local result = pr_lib.fivem.objects.getClosestVehicle(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestVehicle(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7398,7 +7398,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, closest, vehicle, by, model, client, obj, objeto, objetos, object, pool, entidade, veículo",
-    "example": "local result = pr_lib.fivem.objects.getClosestVehicleByModel('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestVehicleByModel('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7407,7 +7407,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, closest, vehicle, by, model, server, obj, objeto, objetos, object, pool, entidade, veículo",
-    "example": "local result = pr_lib.fivem.objects.getClosestVehicleByModel('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getClosestVehicleByModel('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7416,7 +7416,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, networked, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getNetworkedObjectsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getNetworkedObjectsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7425,7 +7425,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, networked, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getNetworkedObjectsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getNetworkedObjectsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7434,7 +7434,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, by, pool, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getObjectsByPool('example', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getObjectsByPool(nil, vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7443,7 +7443,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, by, pool, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getObjectsByPool('example', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getObjectsByPool(nil, vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7452,7 +7452,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getObjectsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getObjectsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7461,7 +7461,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getObjectsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getObjectsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7470,7 +7470,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, in, radius, using, pool, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getObjectsInRadiusUsingPool(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getObjectsInRadiusUsingPool(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7479,7 +7479,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata e lista todos os objetos físicos gerados dentro do raio informado.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, in, radius, using, pool, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getObjectsInRadiusUsingPool(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getObjectsInRadiusUsingPool(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7488,7 +7488,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata peds (NPCs) próximos.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, peds, by, model, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPedsByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPedsByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7497,7 +7497,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata peds (NPCs) próximos.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, peds, by, model, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPedsByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPedsByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7506,7 +7506,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata peds (NPCs) próximos.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, peds, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPedsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPedsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7515,7 +7515,7 @@ export const PR_BRIDGE_API = [
     "detail": "Resgata peds (NPCs) próximos.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, peds, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPedsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPedsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7524,7 +7524,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza pickups físicas de armas e colecionáveis do mundo GTA.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, pickups, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPickupsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPickupsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7533,7 +7533,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza pickups físicas de armas e colecionáveis do mundo GTA.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, pickups, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPickupsInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPickupsInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7542,7 +7542,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna entidades registradas no pool interno do FiveM.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, pool, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPool('example')"
+    "example": "local result = pr_lib.fivem.objects.getPool(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7551,7 +7551,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna entidades registradas no pool interno do FiveM.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, pool, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPool('example')"
+    "example": "local result = pr_lib.fivem.objects.getPool(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7560,7 +7560,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, pool, by, model, in, radius, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPoolByModelInRadius('example', 'prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPoolByModelInRadius(nil, 'prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7569,7 +7569,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, pool, by, model, in, radius, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPoolByModelInRadius('example', 'prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPoolByModelInRadius(nil, 'prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7578,7 +7578,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, pool, in, radius, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPoolInRadius('example', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPoolInRadius(nil, vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7587,7 +7587,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consultas remotas de localização de entidades cadastradas nos pools do motor do jogo (ex: \"CPed\", \"CVehicle\", \"CObject\").",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, pool, in, radius, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPoolInRadius('example', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getPoolInRadius(nil, vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7596,7 +7596,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna entidades registradas no pool interno do FiveM.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, pool, name, client, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPoolName('example')"
+    "example": "local result = pr_lib.fivem.objects.getPoolName(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7605,7 +7605,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna entidades registradas no pool interno do FiveM.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, pool, name, server, obj, objeto, objetos, object, entidade",
-    "example": "local result = pr_lib.fivem.objects.getPoolName('example')"
+    "example": "local result = pr_lib.fivem.objects.getPoolName(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7614,7 +7614,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, vehicles, by, model, in, radius, client, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getVehiclesByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getVehiclesByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7623,7 +7623,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, vehicles, by, model, in, radius, server, obj, objeto, objetos, object, pool, entidade",
-    "example": "local result = pr_lib.fivem.objects.getVehiclesByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getVehiclesByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7632,7 +7632,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, vehicles, in, radius, client, obj, objeto, objetos, object, pool, entidade, veículo, vehicle",
-    "example": "local result = pr_lib.fivem.objects.getVehiclesInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getVehiclesInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7641,7 +7641,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, vehicles, in, radius, server, obj, objeto, objetos, object, pool, entidade, veículo, vehicle",
-    "example": "local result = pr_lib.fivem.objects.getVehiclesInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getVehiclesInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7650,7 +7650,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/client.lua",
     "tags": "objects, get, vehicles, in, radius, using, pool, client, obj, objeto, objetos, object, entidade, veículo",
-    "example": "local result = pr_lib.fivem.objects.getVehiclesInRadiusUsingPool(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getVehiclesInRadiusUsingPool(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.objects",
@@ -7659,7 +7659,7 @@ export const PR_BRIDGE_API = [
     "detail": "Utilitários avançados de pesquisa de veículos gerados no mapa do servidor.",
     "directory": "pr_bridge/bridge/fivem/objects/server.lua",
     "tags": "objects, get, vehicles, in, radius, using, pool, server, obj, objeto, objetos, object, entidade, veículo",
-    "example": "local result = pr_lib.fivem.objects.getVehiclesInRadiusUsingPool(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.objects.getVehiclesInRadiusUsingPool(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7668,7 +7668,7 @@ export const PR_BRIDGE_API = [
     "detail": "Apaga o cache do veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, clear, shared, invalidação, estado, memória, veículo, carro",
-    "example": "pr_lib.fivem.vehicleCache.clear(entity)"
+    "example": "local result = pr_lib.fivem.vehicleCache.clear(PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7677,7 +7677,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa todo o cache de veículos na memória RAM do recurso.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, clear, all, shared, invalidação, estado, memória, veículo, carro",
-    "example": "pr_lib.fivem.vehicleCache.clearAll()"
+    "example": "local result = pr_lib.fivem.vehicleCache.clearAll()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7686,7 +7686,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna as informações em cache registradas para a ID da entidade do veículo ou ID de rede.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, get, shared, invalidação, estado, memória, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleCache.get(entity)"
+    "example": "local result = pr_lib.fivem.vehicleCache.get(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7695,7 +7695,7 @@ export const PR_BRIDGE_API = [
     "detail": "Recupera dados do veículo pesquisando pela sua placa de identificação.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, get, by, plate, shared, invalidação, estado, memória, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleCache.getByPlate('value')"
+    "example": "local result = pr_lib.fivem.vehicleCache.getByPlate('ABC1234')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7704,7 +7704,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém ou grava metadados persistentes que sobrevivem ao respawn do veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, get, persistent, meta, shared, invalidação, estado, memória, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleCache.getPersistentMeta(entity)"
+    "example": "local result = pr_lib.fivem.vehicleCache.getPersistentMeta(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7713,7 +7713,7 @@ export const PR_BRIDGE_API = [
     "detail": "Consulta uma propriedade do State Bag (estado persistido de rede do FiveM) registrado no veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, get, state, shared, invalidação, estado, memória, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleCache.getState(entity, 'example')"
+    "example": "local result = pr_lib.fivem.vehicleCache.getState(PlayerPedId(), 'example:action')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7722,7 +7722,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera a string do caminho da chave de estado.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, get, state, key, shared, invalidação, estado, memória, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleCache.getStateKey('example')"
+    "example": "local result = pr_lib.fivem.vehicleCache.getStateKey('example:action')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7731,7 +7731,7 @@ export const PR_BRIDGE_API = [
     "detail": "Salva dados customizados no cache persistente do veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, set, shared, invalidação, estado, memória, veículo, carro",
-    "example": "pr_lib.fivem.vehicleCache.set(entity, {})"
+    "example": "local result = pr_lib.fivem.vehicleCache.set(PlayerPedId(), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7740,7 +7740,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém ou grava metadados persistentes que sobrevivem ao respawn do veículo.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, set, persistent, meta, shared, invalidação, estado, memória, veículo, carro",
-    "example": "pr_lib.fivem.vehicleCache.setPersistentMeta(entity, 'value')"
+    "example": "local result = pr_lib.fivem.vehicleCache.setPersistentMeta(PlayerPedId(), nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleCache",
@@ -7749,7 +7749,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera uma propriedade no State Bag do veículo, controlando se ela deve ser replicada para outros clientes.",
     "directory": "pr_bridge/bridge/fivem/vehicleCache/shared.lua",
     "tags": "vehicle, cache, set, state, shared, invalidação, estado, memória, veículo, carro",
-    "example": "pr_lib.fivem.vehicleCache.setState(entity, 'example', 'value', 'value')"
+    "example": "local result = pr_lib.fivem.vehicleCache.setState(PlayerPedId(), 'example:action', {}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7758,7 +7758,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna um dicionário contendo ID, nome do sprite, link da imagem correspondente e dados da cor formatados.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, describe, shared",
-    "example": "pr_lib.fivem.blips.describe('value', 'example')"
+    "example": "local result = pr_lib.fivem.blips.describe({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7767,7 +7767,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gerador de URL generico para imagens de assets, incluindo prop e object.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, asset, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getAssetImageUrl('value', 'value')"
+    "example": "local result = pr_lib.fivem.blips.getAssetImageUrl(nil, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7776,7 +7776,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera uma URL externa direta contendo a imagem .png do blip correspondente.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, blip, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getBlipImageUrl('value')"
+    "example": "local result = pr_lib.fivem.blips.getBlipImageUrl({})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7785,7 +7785,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam URLs contendo imagens demonstrativas de checkponts e marcadores 3D.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, checkpoint, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getCheckpointImageUrl('example')"
+    "example": "local result = pr_lib.fivem.blips.getCheckpointImageUrl(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7794,7 +7794,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna as propriedades de cor do blip do radar (nome e hexadecimal de cor) a partir de seu ID numérico original.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, color, info, shared",
-    "example": "local result = pr_lib.fivem.blips.getColorInfo('example')"
+    "example": "local result = pr_lib.fivem.blips.getColorInfo(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7803,7 +7803,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera uma URL externa direta contendo a imagem .png do blip correspondente.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getImageUrl('value')"
+    "example": "local result = pr_lib.fivem.blips.getImageUrl({})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7812,7 +7812,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retornam URLs contendo imagens demonstrativas de checkponts e marcadores 3D.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, marker, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getMarkerImageUrl('example')"
+    "example": "local result = pr_lib.fivem.blips.getMarkerImageUrl(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7821,7 +7821,7 @@ export const PR_BRIDGE_API = [
     "detail": "Monta a URL de preview de props no padrao [prop_name]-[hash].jpg, por exemplo prop_streetlight_08-1847069612.jpg.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, object, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getObjectImageUrl('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.blips.getObjectImageUrl('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7830,7 +7830,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a URL contendo a imagem de demonstração do modelo do ped.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, ped, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getPedImageUrl('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.blips.getPedImageUrl('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7839,7 +7839,7 @@ export const PR_BRIDGE_API = [
     "detail": "Calcula o hash/ID unsigned do modelo com GetHashKey/joaat, usado no nome dos arquivos de props da Rage MP.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, prop, hash, id, shared",
-    "example": "local result = pr_lib.fivem.blips.getPropHashId('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.blips.getPropHashId('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7848,7 +7848,7 @@ export const PR_BRIDGE_API = [
     "detail": "Monta a URL de preview de props no padrao [prop_name]-[hash].jpg, por exemplo prop_streetlight_08-1847069612.jpg.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, prop, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getPropImageUrl('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.blips.getPropImageUrl('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7857,7 +7857,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna as informações do Blip (ícone do mapa) pelo seu ID numérico ou nome amigável registrado.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, sprite, shared",
-    "example": "local result = pr_lib.fivem.blips.getSprite('value')"
+    "example": "local result = pr_lib.fivem.blips.getSprite({})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7866,7 +7866,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte e recupera nomes ou IDs numéricos equivalentes de sprites de blips do radar.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, sprite, id, shared",
-    "example": "local result = pr_lib.fivem.blips.getSpriteId('value')"
+    "example": "local result = pr_lib.fivem.blips.getSpriteId({})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7875,7 +7875,7 @@ export const PR_BRIDGE_API = [
     "detail": "Converte e recupera nomes ou IDs numéricos equivalentes de sprites de blips do radar.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, sprite, name, shared",
-    "example": "local result = pr_lib.fivem.blips.getSpriteName('value')"
+    "example": "local result = pr_lib.fivem.blips.getSpriteName({})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7884,7 +7884,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a URL contendo a imagem do veículo.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, vehicle, image, url, shared, veículo, carro",
-    "example": "local result = pr_lib.fivem.blips.getVehicleImageUrl('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.blips.getVehicleImageUrl('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7893,7 +7893,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a URL contendo a imagem da arma de fogo.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, get, weapon, image, url, shared",
-    "example": "local result = pr_lib.fivem.blips.getWeaponImageUrl('prop_tool_bench02')"
+    "example": "local result = pr_lib.fivem.blips.getWeaponImageUrl('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7902,7 +7902,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista completa indexada de sprites e cores originais suportados nativamente pelo FiveM.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, list, colors, shared",
-    "example": "pr_lib.fivem.blips.listColors()"
+    "example": "local result = pr_lib.fivem.blips.listColors()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7911,7 +7911,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a lista completa indexada de sprites e cores originais suportados nativamente pelo FiveM.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, list, sprites, shared",
-    "example": "pr_lib.fivem.blips.listSprites()"
+    "example": "local result = pr_lib.fivem.blips.listSprites()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7920,7 +7920,7 @@ export const PR_BRIDGE_API = [
     "detail": "Permite atualizar o caminho do servidor de documentação base do FiveM de onde as imagens de assets são baixadas.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, set, docs, base, url, shared",
-    "example": "pr_lib.fivem.blips.setDocsBaseUrl('value')"
+    "example": "local result = pr_lib.fivem.blips.setDocsBaseUrl(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.blips",
@@ -7929,7 +7929,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ajusta a URL base usada para imagens de props da Rage MP. Padrao: https://cdn.rage.mp/public/odb/imgs.",
     "directory": "pr_bridge/bridge/fivem/blips/shared.lua",
     "tags": "blips, set, rage, props, base, url, shared",
-    "example": "pr_lib.fivem.blips.setRagePropsBaseUrl('value')"
+    "example": "local result = pr_lib.fivem.blips.setRagePropsBaseUrl(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -7938,7 +7938,7 @@ export const PR_BRIDGE_API = [
     "detail": "Varre e retorna uma tabela contendo todos os identificadores conhecidos do jogador logado (discord, license, license2, steam, fivem, ip, etc.) e determina qual licença deve ser tratada como principal (primaryLicense).",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, get, all, server",
-    "example": "local result = pr_lib.fivem.identifiers.getAll(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.getAll(source)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -7947,7 +7947,7 @@ export const PR_BRIDGE_API = [
     "detail": "Varre e retorna uma tabela contendo todos os identificadores conhecidos do jogador logado (discord, license, license2, steam, fivem, ip, etc.) e determina qual licença deve ser tratada como principal (primaryLicense).",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, get, all, server",
-    "example": "local result = pr_lib.fivem.identifiers.GetAll(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.GetAll(source)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -7956,7 +7956,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o identificador específico de conexão de rede de um jogador chamando a API nativa (ex: identifierType pode ser \"license\", \"discord\", \"steam\", \"ip\").",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, get, by, type, server",
-    "example": "local result = pr_lib.fivem.identifiers.getByType(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.getByType(source, 'license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -7965,7 +7965,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o identificador específico de conexão de rede de um jogador chamando a API nativa (ex: identifierType pode ser \"license\", \"discord\", \"steam\", \"ip\").",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, get, by, type, server",
-    "example": "local result = pr_lib.fivem.identifiers.GetByType(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.GetByType(source, 'license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -7974,7 +7974,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera uma tabela contendo as licenças normais de identificação do jogador, permitindo mesclar chaves adicionais informadas.",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, get, license, set, server",
-    "example": "local result = pr_lib.fivem.identifiers.getLicenseSet(source, {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.getLicenseSet(source, 'license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -7983,7 +7983,7 @@ export const PR_BRIDGE_API = [
     "detail": "Gera uma tabela contendo as licenças normais de identificação do jogador, permitindo mesclar chaves adicionais informadas.",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, get, license, set, server",
-    "example": "local result = pr_lib.fivem.identifiers.GetLicenseSet(source, {})"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.GetLicenseSet(source, 'license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -7992,7 +7992,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a licença Rockstar de prioridade primária do jogador local (license2 ou license).",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, get, primary, license, server",
-    "example": "local result = pr_lib.fivem.identifiers.getPrimaryLicense(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.getPrimaryLicense(source)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -8001,7 +8001,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna a licença Rockstar de prioridade primária do jogador local (license2 ou license).",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, get, primary, license, server",
-    "example": "local result = pr_lib.fivem.identifiers.GetPrimaryLicense(source)"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.GetPrimaryLicense(source)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -8010,7 +8010,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador especificado possui o identificador exato informado.",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, has, server",
-    "example": "local result = pr_lib.fivem.identifiers.has(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.has(source, 'license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.identifiers",
@@ -8019,7 +8019,7 @@ export const PR_BRIDGE_API = [
     "detail": "Verifica se o jogador especificado possui o identificador exato informado.",
     "directory": "pr_bridge/bridge/fivem/identifiers/server.lua",
     "tags": "identifiers, has, server",
-    "example": "local result = pr_lib.fivem.identifiers.Has(source, 'example')"
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.fivem.identifiers.Has(source, 'license:example')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.instructionalButtons",
@@ -8028,7 +8028,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicializa e carrega a scaleform INSTRUCTIONAL_BUTTONS na memória, desenhando de forma customizada e retornando um manipulador de instância. A tabela buttons descreve o texto (label) e a tecla/controle correspondente (ex: \"~INPUT_FRONTEND_ACCEPT~\").",
     "directory": "pr_bridge/bridge/fivem/instructionalButtons/client.lua",
     "tags": "instructional, buttons, create, client",
-    "example": "local result = pr_lib.fivem.instructionalButtons.create('value', {})"
+    "example": "local result = pr_lib.fivem.instructionalButtons.create(nil, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.instructionalButtons",
@@ -8037,7 +8037,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria e exibe dinamicamente o painel de botões na tela por um tempo limitado ou até que o jogador pressione uma tecla. Retorna se o usuário interagiu com algum botão.",
     "directory": "pr_bridge/bridge/fivem/instructionalButtons/client.lua",
     "tags": "instructional, buttons, show, client",
-    "example": "pr_lib.fivem.instructionalButtons.show('value', {})"
+    "example": "local result = pr_lib.fivem.instructionalButtons.show(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.instructionalButtons",
@@ -8046,7 +8046,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria um botão modal com interação direta pelo mouse. Durante a seleção, libera o foco de qualquer NUI Chromium, mantém o Scaleform estável entre os frames e retorna pressed, o botão selecionado e o controlId.",
     "directory": "pr_bridge/bridge/fivem/instructionalButtons/client.lua",
     "tags": "instructional, buttons, show, clickable, client",
-    "example": "pr_lib.fivem.instructionalButtons.showClickable('value', 'value', 'example', {})"
+    "example": "local result = pr_lib.fivem.instructionalButtons.showClickable('Exemplo do PR Bridge', nil, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.instructionalButtons",
@@ -8055,7 +8055,7 @@ export const PR_BRIDGE_API = [
     "detail": "Exibe de forma rápida e simplificada um único botão informativo no canto da tela (ex: *\"Confirmar\"* associado ao botão enter).",
     "directory": "pr_bridge/bridge/fivem/instructionalButtons/client.lua",
     "tags": "instructional, buttons, show, simple, client",
-    "example": "pr_lib.fivem.instructionalButtons.showSimple('value', 'value', {})"
+    "example": "local result = pr_lib.fivem.instructionalButtons.showSimple('Exemplo do PR Bridge', nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8064,7 +8064,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicializa o modo de posicionamento visual tridimensional de objetos, peds ou veículos na tela do jogador. Permite rotacionar e movimentar o objeto usando o teclado ou gizmos de translação tridimensionais, acionando o callback cb ao confirmar.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, create, placement, client",
-    "example": "local result = pr_lib.devtools.createPlacement('value', 'prop_tool_bench02', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.devtools.createPlacement('default', 'prop_ld_flow_bottle', 1, function(value) print('Callback:', value) end, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8073,7 +8073,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ferramentas gráficas locais que desenham polígonos no espaço para demarcação física de zonas de desenvolvimento.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, create, polyzone, client",
-    "example": "local result = pr_lib.devtools.createPolyzone({}, function(...) return true end)"
+    "example": "local result = pr_lib.devtools.createPolyzone({}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8082,7 +8082,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria e renderiza esferas tridimensionais físicas na HUD para demarcação gráfica.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, create, sphere, zone, client",
-    "example": "local result = pr_lib.devtools.createSphereZone({}, function(...) return true end)"
+    "example": "local result = pr_lib.devtools.createSphereZone({}, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8091,7 +8091,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha o wireframe/drawbox de um modelo em coordenadas informadas. Deve ser chamado por frame enquanto o debug ou preview estiver ativo.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, model, box, at, coords, client",
-    "example": "pr_lib.devtools.drawModelBoxAtCoords({})"
+    "example": "local result = pr_lib.devtools.drawModelBoxAtCoords({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8100,7 +8100,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “draw model box at coords” por meio da API pública do módulo `fivem.devtools`.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, model, box, at, coords, client",
-    "example": "pr_lib.devtools.DrawModelBoxAtCoords({})"
+    "example": "local result = pr_lib.devtools.DrawModelBoxAtCoords({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8109,7 +8109,7 @@ export const PR_BRIDGE_API = [
     "detail": "Desenha o wireframe/drawbox de um modelo em coordenadas informadas. Deve ser chamado por frame enquanto o debug ou preview estiver ativo.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, ped, box, client",
-    "example": "pr_lib.devtools.drawPedBox(vec3(0.0, 0.0, 0.0), 'value', 'prop_tool_bench02', {})"
+    "example": "local result = pr_lib.devtools.drawPedBox(vector3(0.0, 0.0, 0.0), nil, 'prop_ld_flow_bottle', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8118,7 +8118,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “draw ped box” por meio da API pública do módulo `fivem.devtools`.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, ped, box, client",
-    "example": "pr_lib.devtools.DrawPedBox(vec3(0.0, 0.0, 0.0), 'value', 'prop_tool_bench02', {})"
+    "example": "local result = pr_lib.devtools.DrawPedBox(vector3(0.0, 0.0, 0.0), nil, 'prop_ld_flow_bottle', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8127,7 +8127,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ferramentas gráficas locais que desenham polígonos no espaço para demarcação física de zonas de desenvolvimento.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, polyzone3, client",
-    "example": "pr_lib.devtools.drawPolyzone3D({}, function(...) return true end)"
+    "example": "local result = pr_lib.devtools.drawPolyzone3D({}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8136,7 +8136,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ferramentas gráficas locais que desenham polígonos no espaço para demarcação física de zonas de desenvolvimento.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, polyzone3, client",
-    "example": "pr_lib.devtools.DrawPolyzone3D({}, function(...) return true end)"
+    "example": "local result = pr_lib.devtools.DrawPolyzone3D({}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8145,7 +8145,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria e renderiza esferas tridimensionais físicas na HUD para demarcação gráfica.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, sphere, zone, client",
-    "example": "pr_lib.devtools.drawSphereZone({}, function(...) return true end)"
+    "example": "local result = pr_lib.devtools.drawSphereZone({}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8154,7 +8154,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria e renderiza esferas tridimensionais físicas na HUD para demarcação gráfica.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, sphere, zone3, client",
-    "example": "pr_lib.devtools.drawSphereZone3D({}, function(...) return true end)"
+    "example": "local result = pr_lib.devtools.drawSphereZone3D({}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8163,7 +8163,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria e renderiza esferas tridimensionais físicas na HUD para demarcação gráfica.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, draw, sphere, zone3, client",
-    "example": "pr_lib.devtools.DrawSphereZone3D({}, function(...) return true end)"
+    "example": "local result = pr_lib.devtools.DrawSphereZone3D({}, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8172,16 +8172,16 @@ export const PR_BRIDGE_API = [
     "detail": "Inicia modos de colocação específicos para objetos, peds e veículos.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, place, object, client",
-    "example": "pr_lib.devtools.placeObject('prop_tool_bench02', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.devtools.placeObject('prop_ld_flow_bottle', 1, function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
     "context": "client",
     "signature": "pr_lib.devtools.placePed(modelName, maxSlots, cb, options)",
-    "detail": "Inicia modos de colocação específicos para objetos, peds e veículos.",
+    "detail": "Inicia posicionamento de NPC e devolve ponto/lista com x/y/z/heading. As coordenadas usam referência de superfície; não subtraia altura arbitrária do ped ao interpretar o retorno. options.animations, animationIndex e showPlacementGuides permitem preview animado e controle das guias; placeAnimatedPed oferece atalho dedicado.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, place, ped, client",
-    "example": "pr_lib.devtools.placePed('prop_tool_bench02', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.devtools.placePed('prop_ld_flow_bottle', 1, function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8190,7 +8190,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicia modos de colocação específicos para objetos, peds e veículos.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, place, vehicle, client, veículo, carro",
-    "example": "pr_lib.devtools.placeVehicle('prop_tool_bench02', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.devtools.placeVehicle('prop_ld_flow_bottle', 1, function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8199,7 +8199,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicializa o modo de posicionamento visual tridimensional de objetos, peds ou veículos na tela do jogador. Permite rotacionar e movimentar o objeto usando o teclado ou gizmos de translação tridimensionais, acionando o callback cb ao confirmar.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, start, entity, placement, client",
-    "example": "pr_lib.devtools.startEntityPlacement('value', 'prop_tool_bench02', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.devtools.startEntityPlacement('default', 'prop_ld_flow_bottle', 1, function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8208,7 +8208,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicializa o modo de posicionamento visual tridimensional de objetos, peds ou veículos na tela do jogador. Permite rotacionar e movimentar o objeto usando o teclado ou gizmos de translação tridimensionais, acionando o callback cb ao confirmar.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, start, entity, placement, client",
-    "example": "pr_lib.devtools.StartEntityPlacement('value', 'prop_tool_bench02', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.devtools.StartEntityPlacement('default', 'prop_ld_flow_bottle', 1, function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -8217,7 +8217,7 @@ export const PR_BRIDGE_API = [
     "detail": "Encerra imediatamente qualquer modo de criação ou posicionamento de entidades ou zonas em andamento.",
     "directory": "pr_bridge/bridge/fivem/devtools/client.lua",
     "tags": "devtools, stop, client",
-    "example": "pr_lib.devtools.stop()"
+    "example": "local result = pr_lib.devtools.stop()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8226,7 +8226,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find closest” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, find, closest, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.findClosest(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicle.findClosest(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8235,7 +8235,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find closest” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicle, find, closest, server, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.findClosest(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicle.findClosest(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8244,7 +8244,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find in radius” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, find, in, radius, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.findInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicle.findInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8253,7 +8253,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find in radius” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicle, find, in, radius, server, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.findInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicle.findInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8262,7 +8262,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get entity” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, get, entity, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getEntity(NetworkGetNetworkIdFromEntity(entity), 1)"
+    "example": "local result = pr_lib.fivem.vehicle.getEntity(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8271,7 +8271,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get entity” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicle, get, entity, server, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getEntity(NetworkGetNetworkIdFromEntity(entity), 1)"
+    "example": "local result = pr_lib.fivem.vehicle.getEntity(nil, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8280,7 +8280,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get net id” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, get, net, id, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getNetId(entity)"
+    "example": "local result = pr_lib.fivem.vehicle.getNetId(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8289,7 +8289,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get net id” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicle, get, net, id, server, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getNetId(entity)"
+    "example": "local result = pr_lib.fivem.vehicle.getNetId(0)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8298,7 +8298,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get owner” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, get, owner, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getOwner(entity)"
+    "example": "local result = pr_lib.fivem.vehicle.getOwner(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8307,7 +8307,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get owner” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicle, get, owner, server, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getOwner(entity)"
+    "example": "local result = pr_lib.fivem.vehicle.getOwner(0)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8316,7 +8316,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get properties” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, get, properties, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getProperties(entity)"
+    "example": "local result = pr_lib.fivem.vehicle.getProperties(PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8325,7 +8325,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get vehicle” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, get, client, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getVehicle(entity, 1)"
+    "example": "local result = pr_lib.fivem.vehicle.getVehicle(PlayerPedId(), 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8334,7 +8334,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get vehicle” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicle, get, server, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicle.getVehicle(entity, 1)"
+    "example": "local result = pr_lib.fivem.vehicle.getVehicle(0, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8343,7 +8343,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “resolve” por meio da API pública do módulo `fivem.vehicle`.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, resolve, client, veículo, carro",
-    "example": "pr_lib.fivem.vehicle.resolve(entity, 1)"
+    "example": "local result = pr_lib.fivem.vehicle.resolve(PlayerPedId(), 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8352,7 +8352,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “resolve” por meio da API pública do módulo `fivem.vehicle`.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicle, resolve, server, veículo, carro",
-    "example": "pr_lib.fivem.vehicle.resolve(entity, 1)"
+    "example": "local result = pr_lib.fivem.vehicle.resolve(0, 1)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8361,7 +8361,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define ou atualiza os dados ou a operação “set properties” usando a autoridade do módulo.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicle, set, properties, client, veículo, carro",
-    "example": "pr_lib.fivem.vehicle.setProperties(entity, 'value')"
+    "example": "local result = pr_lib.fivem.vehicle.setProperties(PlayerPedId(), {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8370,7 +8370,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define ou atualiza os dados ou a operação “set properties” usando a autoridade do módulo.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicle, set, properties, server, veículo, carro",
-    "example": "pr_lib.fivem.vehicle.setProperties(entity, 'value', {})"
+    "example": "local result = pr_lib.fivem.vehicle.setProperties(0, {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8379,7 +8379,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find by model in radius” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicles, find, by, model, in, radius, client, veículo, vehicle, carro",
-    "example": "local result = pr_lib.fivem.vehicles.findByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicles.findByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8388,7 +8388,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find by model in radius” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicles, find, by, model, in, radius, server, veículo, vehicle, carro",
-    "example": "local result = pr_lib.fivem.vehicles.findByModelInRadius('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicles.findByModelInRadius('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8397,7 +8397,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find closest” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicles, find, closest, client, veículo, vehicle, carro",
-    "example": "local result = pr_lib.fivem.vehicles.findClosest(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicles.findClosest(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8406,7 +8406,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find closest” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicles, find, closest, server, veículo, vehicle, carro",
-    "example": "local result = pr_lib.fivem.vehicles.findClosest(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicles.findClosest(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8415,7 +8415,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find closest by model” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicles, find, closest, by, model, client, veículo, vehicle, carro",
-    "example": "local result = pr_lib.fivem.vehicles.findClosestByModel('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicles.findClosestByModel('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8424,7 +8424,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find closest by model” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicles, find, closest, by, model, server, veículo, vehicle, carro",
-    "example": "local result = pr_lib.fivem.vehicles.findClosestByModel('prop_tool_bench02', vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicles.findClosestByModel('prop_ld_flow_bottle', vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8433,7 +8433,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find in radius” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/client.lua",
     "tags": "aliases, vehicles, find, in, radius, client, veículo, vehicle, carro",
-    "example": "local result = pr_lib.fivem.vehicles.findInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicles.findInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.aliases",
@@ -8442,7 +8442,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza os dados ou a operação “find in radius” conforme os filtros informados.",
     "directory": "pr_bridge/bridge/fivem/server.lua",
     "tags": "aliases, vehicles, find, in, radius, server, veículo, vehicle, carro",
-    "example": "local result = pr_lib.fivem.vehicles.findInRadius(vec3(0.0, 0.0, 0.0), 1, {})"
+    "example": "local result = pr_lib.fivem.vehicles.findInRadius(vector3(0.0, 0.0, 0.0), 1, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8451,7 +8451,7 @@ export const PR_BRIDGE_API = [
     "detail": "cria canal isolado com opções padrão. Estão pré-cadastrados mileage, keys, fueltech, suspension e dynamo.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, channel, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.channel('example', 'value')"
+    "example": "local result = pr_lib.fivem.vehicleState.channel('example:action', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8460,7 +8460,7 @@ export const PR_BRIDGE_API = [
     "detail": "observa uma chave exata em uma entidade ou em todas as entidades do tipo do escopo. Handlers são liberados no encerramento do recurso.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, clear, watchers, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.clearWatchers()"
+    "example": "local result = pr_lib.fivem.vehicleState.clearWatchers()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8469,7 +8469,7 @@ export const PR_BRIDGE_API = [
     "detail": "lê, grava ou remove uma chave validada. Escrita replicada usa autoridade do servidor por padrão nos canais oficiais.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, get, shared, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleState.get(entity, 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.vehicleState.get(PlayerPedId(), nil, 'example_key', {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8478,7 +8478,7 @@ export const PR_BRIDGE_API = [
     "detail": "retorna leituras, escritas, rejeições, payloads excessivos, duplicatas, rate limits e handlers.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, get, metrics, shared, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleState.getMetrics()"
+    "example": "local result = pr_lib.fivem.vehicleState.getMetrics()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8487,7 +8487,7 @@ export const PR_BRIDGE_API = [
     "detail": "registra vínculo compacto do prop de rede com o netId do veículo pai. Opções suportadas",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, props, link, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.props.link('value', entity, {}, {})"
+    "example": "local result = pr_lib.fivem.vehicleState.props.link(nil, PlayerPedId(), {}, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8496,7 +8496,7 @@ export const PR_BRIDGE_API = [
     "detail": "cria canal isolado com opções padrão. Estão pré-cadastrados mileage, keys, fueltech, suspension e dynamo.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, register, channel, shared, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleState.registerChannel('example', 'value')"
+    "example": "local result = pr_lib.fivem.vehicleState.registerChannel('example:action', nil)\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8505,7 +8505,7 @@ export const PR_BRIDGE_API = [
     "detail": "lê, grava ou remove uma chave validada. Escrita replicada usa autoridade do servidor por padrão nos canais oficiais.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, remove, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.remove(args)"
+    "example": "local result = pr_lib.fivem.vehicleState.remove()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8514,7 +8514,7 @@ export const PR_BRIDGE_API = [
     "detail": "lê, grava ou remove uma chave validada. Escrita replicada usa autoridade do servidor por padrão nos canais oficiais.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, set, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.set(args)"
+    "example": "local result = pr_lib.fivem.vehicleState.set()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8523,7 +8523,7 @@ export const PR_BRIDGE_API = [
     "detail": "valida todo o lote antes de gravá-lo.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, set, many, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.setMany(entity, 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.vehicleState.setMany(PlayerPedId(), nil, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8532,7 +8532,7 @@ export const PR_BRIDGE_API = [
     "detail": "retorna somente a lista explícita de chaves solicitadas.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, snapshot, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.snapshot(entity, 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.vehicleState.snapshot(PlayerPedId(), nil, 'example_key', {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8541,7 +8541,7 @@ export const PR_BRIDGE_API = [
     "detail": "observa uma chave exata em uma entidade ou em todas as entidades do tipo do escopo. Handlers são liberados no encerramento do recurso.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, unwatch, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.unwatch('example')"
+    "example": "local result = pr_lib.fivem.vehicleState.unwatch(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8550,7 +8550,7 @@ export const PR_BRIDGE_API = [
     "detail": "altera um valor a partir do valor atual.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, update, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.update(entity, 'value', 'value', 'value', {})"
+    "example": "local result = pr_lib.fivem.vehicleState.update(PlayerPedId(), nil, 'example_key', nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8559,7 +8559,7 @@ export const PR_BRIDGE_API = [
     "detail": "aguarda valor esperado ou predicado sem loop de frame.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, wait, shared, veículo, carro",
-    "example": "local result = pr_lib.fivem.vehicleState.wait(entity, 'value', 'value', 'value', 1, {})"
+    "example": "local result = pr_lib.fivem.vehicleState.wait(PlayerPedId(), nil, 'example_key', function(item) return item ~= nil end, 1, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8568,7 +8568,7 @@ export const PR_BRIDGE_API = [
     "detail": "observa uma chave exata em uma entidade ou em todas as entidades do tipo do escopo. Handlers são liberados no encerramento do recurso.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, watch, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.watch(entity, 'value', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.fivem.vehicleState.watch(PlayerPedId(), nil, 'example_key', function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.vehicleState",
@@ -8577,7 +8577,7 @@ export const PR_BRIDGE_API = [
     "detail": "observa uma chave exata em uma entidade ou em todas as entidades do tipo do escopo. Handlers são liberados no encerramento do recurso.",
     "directory": "pr_bridge/bridge/fivem/vehicleState/shared.lua",
     "tags": "vehicle, state, watch, any, shared, veículo, carro",
-    "example": "pr_lib.fivem.vehicleState.watchAny('value', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.fivem.vehicleState.watchAny(nil, 'example_key', function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.gizmo",
@@ -8586,7 +8586,7 @@ export const PR_BRIDGE_API = [
     "detail": "aguarda a decisão dentro de uma thread. Retorna o resultado no primeiro valor quando confirmado ou no segundo valor quando cancelado.",
     "directory": "pr_bridge/bridge/fivem/gizmo/client.lua",
     "tags": "gizmo, await, client",
-    "example": "pr_lib.gizmo.await(entity, function(...) return true end, 'value', {})"
+    "example": "local result = pr_lib.gizmo.await(PlayerPedId(), function(value) print('Callback:', value) end, nil, {})\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.gizmo",
@@ -8595,7 +8595,7 @@ export const PR_BRIDGE_API = [
     "detail": "encerramento programático da sessão.",
     "directory": "pr_bridge/bridge/fivem/gizmo/client.lua",
     "tags": "gizmo, cancel, client",
-    "example": "local result = pr_lib.gizmo.cancel('value')"
+    "example": "local result = pr_lib.gizmo.cancel('Exemplo do PR Bridge')\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.gizmo",
@@ -8604,7 +8604,7 @@ export const PR_BRIDGE_API = [
     "detail": "encerramento programático da sessão.",
     "directory": "pr_bridge/bridge/fivem/gizmo/client.lua",
     "tags": "gizmo, confirm, client",
-    "example": "pr_lib.gizmo.confirm('value')"
+    "example": "local result = pr_lib.gizmo.confirm('Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.gizmo",
@@ -8613,7 +8613,7 @@ export const PR_BRIDGE_API = [
     "detail": "consulta o estado e o último resultado padronizado. Consulte GIZMO.md para opções, controles, resultado, movimento livre em freecam e testes de compatibilidade.",
     "directory": "pr_bridge/bridge/fivem/gizmo/client.lua",
     "tags": "gizmo, get, result, client",
-    "example": "local result = pr_lib.gizmo.getResult()"
+    "example": "local result = pr_lib.gizmo.getResult()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.gizmo",
@@ -8622,7 +8622,7 @@ export const PR_BRIDGE_API = [
     "detail": "consulta o estado e o último resultado padronizado. Consulte GIZMO.md para opções, controles, resultado, movimento livre em freecam e testes de compatibilidade.",
     "directory": "pr_bridge/bridge/fivem/gizmo/client.lua",
     "tags": "gizmo, is, active, client",
-    "example": "local result = pr_lib.gizmo.isActive()"
+    "example": "local result = pr_lib.gizmo.isActive()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.gizmo",
@@ -8631,7 +8631,7 @@ export const PR_BRIDGE_API = [
     "detail": "mantém a assinatura legada e inicia uma sessão autocontida com NUI Svelte, câmera, bloqueio de controles, precisão, confirmação e cancelamento. O HUD Svelte é informativo e não assume foco. Todos os comandos do modo atual são exibidos no Scaleform inferior não clicável e permanecem funcionais pelos keybinds remapeáveis.",
     "directory": "pr_bridge/bridge/fivem/gizmo/client.lua",
     "tags": "gizmo, start, client",
-    "example": "pr_lib.gizmo.start(entity, function(...) return true end, 'value', {})"
+    "example": "local result = pr_lib.gizmo.start(PlayerPedId(), function(value) print('Callback:', value) end, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.gizmo",
@@ -8640,7 +8640,7 @@ export const PR_BRIDGE_API = [
     "detail": "encerramento programático da sessão.",
     "directory": "pr_bridge/bridge/fivem/gizmo/client.lua",
     "tags": "gizmo, stop, client",
-    "example": "pr_lib.gizmo.stop()"
+    "example": "local result = pr_lib.gizmo.stop()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.gizmo",
@@ -8649,7 +8649,7 @@ export const PR_BRIDGE_API = [
     "detail": "aguarda a decisão dentro de uma thread. Retorna o resultado no primeiro valor quando confirmado ou no segundo valor quando cancelado.",
     "directory": "pr_bridge/bridge/fivem/gizmo/client.lua",
     "tags": "gizmo, use, client",
-    "example": "pr_lib.gizmo.use(args)"
+    "example": "local result = pr_lib.gizmo.use()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "string",
@@ -8658,7 +8658,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “random” por meio da API pública do módulo `string`.",
     "directory": "pr_bridge/bridge/utils/strings.lua",
     "tags": "string, random, shared",
-    "example": "pr_lib.string.random('value', 'value')"
+    "example": "local result = pr_lib.string.random(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "timer",
@@ -8667,7 +8667,7 @@ export const PR_BRIDGE_API = [
     "detail": "Executa os dados ou a operação “timer” por meio da API pública do módulo `utilitários_compartilhados`.",
     "directory": "pr_bridge/bridge/utils/timer.lua",
     "tags": "timer, shared/client/server",
-    "example": "pr_lib.timer('value', 'value', 'value')"
+    "example": "local result = pr_lib.timer(1, function(value) print('Callback:', value) end, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "entities",
@@ -8676,7 +8676,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get closest player” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/compat/entities_client.lua",
     "tags": "entities, get, closest, player, client",
-    "example": "local result = pr_lib.getClosestPlayer(vec3(0.0, 0.0, 0.0), 1, 'value')"
+    "example": "local result = pr_lib.getClosestPlayer(vector3(0.0, 0.0, 0.0), 1, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "entities",
@@ -8685,7 +8685,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get closest vehicle” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/compat/entities_client.lua",
     "tags": "entities, get, closest, vehicle, client, veículo, carro",
-    "example": "local result = pr_lib.getClosestVehicle(vec3(0.0, 0.0, 0.0), 1, entity)"
+    "example": "local result = pr_lib.getClosestVehicle(vector3(0.0, 0.0, 0.0), 1, PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "entities",
@@ -8694,7 +8694,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get nearby players” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/compat/entities_client.lua",
     "tags": "entities, get, nearby, players, client",
-    "example": "local result = pr_lib.getNearbyPlayers(vec3(0.0, 0.0, 0.0), 1, 'value')"
+    "example": "local result = pr_lib.getNearbyPlayers(vector3(0.0, 0.0, 0.0), 1, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "entities",
@@ -8703,7 +8703,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém os dados ou a operação “get nearby vehicles” usando a ponte normalizada do módulo.",
     "directory": "pr_bridge/bridge/compat/entities_client.lua",
     "tags": "entities, get, nearby, vehicles, client, veículo, vehicle, carro",
-    "example": "local result = pr_lib.getNearbyVehicles(vec3(0.0, 0.0, 0.0), 1, entity)"
+    "example": "local result = pr_lib.getNearbyVehicles(vector3(0.0, 0.0, 0.0), 1, PlayerPedId())\nprint('Resultado:', result)"
   },
   {
     "module": "interact",
@@ -8712,7 +8712,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma interação persistente em coordenadas do mundo e a registra no runtime central do PR Bridge.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "local result = pr_lib.interact.AddInteraction({})"
+    "example": "local result = pr_lib.interact.AddInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8721,7 +8721,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma interação ligada a uma entidade local; quando bone é informado, a posição acompanha o osso da entidade.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "local result = pr_lib.interact.AddLocalEntityInteraction({})"
+    "example": "local result = pr_lib.interact.AddLocalEntityInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8730,7 +8730,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma interação ligada a uma entidade de rede usando netId, convertendo entity para network id quando possível.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "local result = pr_lib.interact.AddEntityInteraction({})"
+    "example": "local result = pr_lib.interact.AddEntityInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8739,7 +8739,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma interação ancorada em um bone específico de uma entidade.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "local result = pr_lib.interact.AddEntityBoneInteraction({})"
+    "example": "local result = pr_lib.interact.AddEntityBoneInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8748,7 +8748,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria interações para um ou vários modelos e permite offsets específicos por modelo.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "local result = pr_lib.interact.AddModelInteraction({})"
+    "example": "local result = pr_lib.interact.AddModelInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8757,7 +8757,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções de interação aplicáveis globalmente aos veículos próximos.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "local result = pr_lib.interact.AddGlobalVehicleInteraction({})"
+    "example": "local result = pr_lib.interact.AddGlobalVehicleInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8766,7 +8766,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções de interação aplicáveis globalmente aos outros jogadores próximos.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "local result = pr_lib.interact.AddGlobalPlayerInteraction({})"
+    "example": "local result = pr_lib.interact.AddGlobalPlayerInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8775,7 +8775,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove uma interação pelo id, respeitando o resource proprietário do registro.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.RemoveInteraction('example')"
+    "example": "local result = pr_lib.interact.RemoveInteraction(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8784,7 +8784,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove interações pertencentes ao resource atual que estejam ligadas à entidade informada.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.RemoveInteractionByEntity(entity)"
+    "example": "local result = pr_lib.interact.RemoveInteractionByEntity(PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8793,7 +8793,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove uma opção específica pelo name; remove o registro inteiro se nenhuma opção restar.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.RemoveInteractionOption('example', 'example')"
+    "example": "local result = pr_lib.interact.RemoveInteractionOption(nil, 'example:action')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8802,7 +8802,7 @@ export const PR_BRIDGE_API = [
     "detail": "Substitui a lista de opções de uma interação já registrada.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.UpdateInteraction('example', {})"
+    "example": "local result = pr_lib.interact.UpdateInteraction(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8811,7 +8811,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove interação de entidade local, opcionalmente filtrando também pelo id/nome do registro.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.RemoveLocalEntityInteraction(entity, 'example')"
+    "example": "local result = pr_lib.interact.RemoveLocalEntityInteraction(PlayerPedId(), nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8820,7 +8820,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove interação de entidade de rede pelo netId, opcionalmente filtrando pelo id/nome.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.RemoveEntityInteraction(NetworkGetNetworkIdFromEntity(entity), 'example')"
+    "example": "local result = pr_lib.interact.RemoveEntityInteraction(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8829,7 +8829,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove interações de modelos informados, opcionalmente filtrando pelo id/nome.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.RemoveModelInteraction('prop_tool_bench02', 'example')"
+    "example": "local result = pr_lib.interact.RemoveModelInteraction('prop_ld_flow_bottle', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8838,7 +8838,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove registros globais de veículo pertencentes ao resource atual.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.RemoveGlobalVehicleInteraction('example')"
+    "example": "local result = pr_lib.interact.RemoveGlobalVehicleInteraction(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8847,7 +8847,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove registros globais de jogador pertencentes ao resource atual.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.RemoveGlobalPlayerInteraction('example')"
+    "example": "local result = pr_lib.interact.RemoveGlobalPlayerInteraction(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8856,7 +8856,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ativa ou desativa globalmente o runtime de interact para o jogador local e replica interactionsDisabled no state bag.",
     "directory": "bridge/interact/client.lua; bridge/interact/api.lua; bridge/interact/runtime_client.lua",
     "tags": "interact, nui, world, client",
-    "example": "pr_lib.interact.Disable(true)"
+    "example": "local result = pr_lib.interact.Disable(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8865,7 +8865,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.AddInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "local result = pr_lib.interact.addInteraction({})"
+    "example": "local result = pr_lib.interact.addInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8874,7 +8874,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.AddLocalEntityInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "local result = pr_lib.interact.addLocalEntityInteraction({})"
+    "example": "local result = pr_lib.interact.addLocalEntityInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8883,7 +8883,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.AddEntityInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "local result = pr_lib.interact.addEntityInteraction({})"
+    "example": "local result = pr_lib.interact.addEntityInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8892,7 +8892,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.AddEntityBoneInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "local result = pr_lib.interact.addEntityBoneInteraction({})"
+    "example": "local result = pr_lib.interact.addEntityBoneInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8901,7 +8901,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.AddModelInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "local result = pr_lib.interact.addModelInteraction({})"
+    "example": "local result = pr_lib.interact.addModelInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8910,7 +8910,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.AddGlobalVehicleInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "local result = pr_lib.interact.addGlobalVehicleInteraction({})"
+    "example": "local result = pr_lib.interact.addGlobalVehicleInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8919,7 +8919,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.AddGlobalPlayerInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "local result = pr_lib.interact.addGlobalPlayerInteraction({})"
+    "example": "local result = pr_lib.interact.addGlobalPlayerInteraction({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8928,7 +8928,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.RemoveInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "pr_lib.interact.removeInteraction('example')"
+    "example": "local result = pr_lib.interact.removeInteraction(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8937,7 +8937,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.RemoveInteractionByEntity.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "pr_lib.interact.removeInteractionByEntity(entity)"
+    "example": "local result = pr_lib.interact.removeInteractionByEntity(PlayerPedId())\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8946,7 +8946,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.RemoveInteractionOption.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "pr_lib.interact.removeInteractionOption('example', 'example')"
+    "example": "local result = pr_lib.interact.removeInteractionOption(nil, 'example:action')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8955,7 +8955,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.UpdateInteraction.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "pr_lib.interact.updateInteraction('example', {})"
+    "example": "local result = pr_lib.interact.updateInteraction(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "interact",
@@ -8964,7 +8964,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interact.Disable.",
     "directory": "bridge/interact/client.lua",
     "tags": "interact, alias, client",
-    "example": "pr_lib.interact.disable(true)"
+    "example": "local result = pr_lib.interact.disable(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -8973,7 +8973,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções globais que podem ser exibidas para pickups detectados pelo target nativo.",
     "directory": "bridge/targets/native/client.lua; bridge/targets/native/api.lua",
     "tags": "target, pickup, native, client",
-    "example": "pr_lib.target.addGlobalPickup({})"
+    "example": "local result = pr_lib.target.addGlobalPickup({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -8982,16 +8982,16 @@ export const PR_BRIDGE_API = [
     "detail": "Alias normalizado de pr_lib.target.addGlobalPickup.",
     "directory": "bridge/api_normalizer.lua",
     "tags": "target, alias, client",
-    "example": "pr_lib.target.AddGlobalPickup({})"
+    "example": "local result = pr_lib.target.AddGlobalPickup({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
     "context": "client",
     "signature": "pr_lib.target.removeGlobalPickup(names)",
-    "detail": "Remove opções globais de pickups.",
+    "detail": "Remove opções globais de pickup pelos nomes, dentro do registro do consumidor. Alias RemoveGlobalPickup.",
     "directory": "bridge/targets/native/client.lua; bridge/targets/native/api.lua",
     "tags": "target, pickup, native, client",
-    "example": "pr_lib.target.removeGlobalPickup('example')"
+    "example": "local result = pr_lib.target.removeGlobalPickup(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9000,7 +9000,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias normalizado de pr_lib.target.removeGlobalPickup.",
     "directory": "bridge/api_normalizer.lua",
     "tags": "target, alias, client",
-    "example": "pr_lib.target.RemoveGlobalPickup('example')"
+    "example": "local result = pr_lib.target.RemoveGlobalPickup(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9009,7 +9009,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções por hash/tipo de pickup.",
     "directory": "bridge/targets/native/client.lua; bridge/targets/native/api.lua",
     "tags": "target, pickup, native, client",
-    "example": "pr_lib.target.addPickupType('value', {})"
+    "example": "local result = pr_lib.target.addPickupType('default', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9018,7 +9018,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias normalizado de pr_lib.target.addPickupType.",
     "directory": "bridge/api_normalizer.lua",
     "tags": "target, alias, client",
-    "example": "pr_lib.target.AddPickupType('value', {})"
+    "example": "local result = pr_lib.target.AddPickupType('default', {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9027,7 +9027,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove opções associadas aos tipos de pickup informados.",
     "directory": "bridge/targets/native/client.lua; bridge/targets/native/api.lua",
     "tags": "target, pickup, native, client",
-    "example": "pr_lib.target.removePickupType('value', 'example')"
+    "example": "local result = pr_lib.target.removePickupType('default', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9036,7 +9036,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias normalizado de pr_lib.target.removePickupType.",
     "directory": "bridge/api_normalizer.lua",
     "tags": "target, alias, client",
-    "example": "pr_lib.target.RemovePickupType('value', 'example')"
+    "example": "local result = pr_lib.target.RemovePickupType('default', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9045,7 +9045,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra opções em pickups específicos, normalizando handles/descriptors.",
     "directory": "bridge/targets/native/client.lua; bridge/targets/native/api.lua",
     "tags": "target, pickup, native, client",
-    "example": "pr_lib.target.addPickup('value', {})"
+    "example": "local result = pr_lib.target.addPickup(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9054,16 +9054,16 @@ export const PR_BRIDGE_API = [
     "detail": "Alias normalizado de pr_lib.target.addPickup.",
     "directory": "bridge/api_normalizer.lua",
     "tags": "target, alias, client",
-    "example": "pr_lib.target.AddPickup('value', {})"
+    "example": "local result = pr_lib.target.AddPickup(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
     "context": "client",
     "signature": "pr_lib.target.removePickup(pickups, names)",
-    "detail": "Remove opções de pickups específicos.",
+    "detail": "Remove opções e libera rastreamento quando não há mais opções desse registro. Alias RemovePickup.",
     "directory": "bridge/targets/native/client.lua; bridge/targets/native/api.lua",
     "tags": "target, pickup, native, client",
-    "example": "pr_lib.target.removePickup('value', 'example')"
+    "example": "local result = pr_lib.target.removePickup(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9072,7 +9072,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias normalizado de pr_lib.target.removePickup.",
     "directory": "bridge/api_normalizer.lua",
     "tags": "target, alias, client",
-    "example": "pr_lib.target.RemovePickup('value', 'example')"
+    "example": "local result = pr_lib.target.RemovePickup(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9081,7 +9081,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inspeciona e normaliza uma lista de modelos para uso no target nativo.",
     "directory": "bridge/targets/native/client.lua; bridge/targets/native/api.lua",
     "tags": "target, pickup, native, client",
-    "example": "local result = pr_lib.target.inspectModels('prop_tool_bench02')"
+    "example": "local result = pr_lib.target.inspectModels('prop_ld_flow_bottle')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "target",
@@ -9090,7 +9090,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias normalizado de pr_lib.target.inspectModels.",
     "directory": "bridge/api_normalizer.lua",
     "tags": "target, alias, client",
-    "example": "local result = pr_lib.target.InspectModels('prop_tool_bench02')"
+    "example": "local result = pr_lib.target.InspectModels('prop_ld_flow_bottle')\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9099,7 +9099,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona um ou vários itens ao menu radial raiz ou a um submenu registrado.",
     "directory": "interface/client/modules/radial.lua; interface/client/ui.lua; interface/client/host.lua",
     "tags": "radial, interface, nui, client",
-    "example": "pr_lib.interface.AddRadialItem('value', 'example')"
+    "example": "local result = pr_lib.interface.AddRadialItem({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9108,7 +9108,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interface.AddRadialItem.",
     "directory": "interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.interface.addRadialItem('value', 'example')"
+    "example": "local result = pr_lib.interface.addRadialItem({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9117,7 +9117,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove um item radial pelo id no menu raiz ou submenu informado.",
     "directory": "interface/client/modules/radial.lua; interface/client/ui.lua; interface/client/host.lua",
     "tags": "radial, interface, nui, client",
-    "example": "pr_lib.interface.RemoveRadialItem('example', 'example')"
+    "example": "local result = pr_lib.interface.RemoveRadialItem(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9126,7 +9126,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interface.RemoveRadialItem.",
     "directory": "interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.interface.removeRadialItem('example', 'example')"
+    "example": "local result = pr_lib.interface.removeRadialItem(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9135,7 +9135,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa itens e submenus radiais pertencentes ao resource e fecha a interface ativa.",
     "directory": "interface/client/modules/radial.lua; interface/client/ui.lua; interface/client/host.lua",
     "tags": "radial, interface, nui, client",
-    "example": "pr_lib.interface.ClearRadialItems()"
+    "example": "local result = pr_lib.interface.ClearRadialItems()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9144,7 +9144,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interface.ClearRadialItems.",
     "directory": "interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.interface.clearRadialItems()"
+    "example": "local result = pr_lib.interface.clearRadialItems()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9153,7 +9153,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra um submenu radial identificado por id e uma lista de items.",
     "directory": "interface/client/modules/radial.lua; interface/client/ui.lua; interface/client/host.lua",
     "tags": "radial, interface, nui, client",
-    "example": "local result = pr_lib.interface.RegisterRadial({})"
+    "example": "local result = pr_lib.interface.RegisterRadial({})\nprint('Resultado:', result)"
   },
   {
     "module": "radial",
@@ -9162,7 +9162,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interface.RegisterRadial.",
     "directory": "interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "local result = pr_lib.interface.registerRadial({})"
+    "example": "local result = pr_lib.interface.registerRadial({})\nprint('Resultado:', result)"
   },
   {
     "module": "radial",
@@ -9171,7 +9171,7 @@ export const PR_BRIDGE_API = [
     "detail": "Fecha o menu radial atual e libera o foco NUI.",
     "directory": "interface/client/modules/radial.lua; interface/client/ui.lua; interface/client/host.lua",
     "tags": "radial, interface, nui, client",
-    "example": "pr_lib.interface.HideRadial()"
+    "example": "local result = pr_lib.interface.HideRadial()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9180,7 +9180,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interface.HideRadial.",
     "directory": "interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.interface.hideRadial()"
+    "example": "local result = pr_lib.interface.hideRadial()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9189,7 +9189,7 @@ export const PR_BRIDGE_API = [
     "detail": "Bloqueia/desbloqueia a abertura do menu radial; ao desativar, fecha qualquer menu aberto.",
     "directory": "interface/client/modules/radial.lua; interface/client/ui.lua; interface/client/host.lua",
     "tags": "radial, interface, nui, client",
-    "example": "pr_lib.interface.DisableRadial(true)"
+    "example": "local result = pr_lib.interface.DisableRadial(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9198,7 +9198,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interface.DisableRadial.",
     "directory": "interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.interface.disableRadial(true)"
+    "example": "local result = pr_lib.interface.disableRadial(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9207,7 +9207,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o id do submenu radial atualmente aberto via LocalPlayer.state.",
     "directory": "interface/client/modules/radial.lua; interface/client/ui.lua; interface/client/host.lua",
     "tags": "radial, interface, nui, client",
-    "example": "local result = pr_lib.interface.GetCurrentRadialId()"
+    "example": "local result = pr_lib.interface.GetCurrentRadialId()\nprint('Resultado:', result)"
   },
   {
     "module": "radial",
@@ -9216,7 +9216,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.interface.GetCurrentRadialId.",
     "directory": "interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "local result = pr_lib.interface.getCurrentRadialId()"
+    "example": "local result = pr_lib.interface.getCurrentRadialId()\nprint('Resultado:', result)"
   },
   {
     "module": "radial",
@@ -9225,7 +9225,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona um ou vários itens ao menu radial raiz ou a um submenu registrado. Alias de conveniência no namespace raiz.",
     "directory": "init.lua; interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.addRadialItem('value', 'example')"
+    "example": "local result = pr_lib.addRadialItem({}, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9234,7 +9234,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove um item radial pelo id no menu raiz ou submenu informado. Alias de conveniência no namespace raiz.",
     "directory": "init.lua; interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.removeRadialItem('example', 'example')"
+    "example": "local result = pr_lib.removeRadialItem(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9243,7 +9243,7 @@ export const PR_BRIDGE_API = [
     "detail": "Limpa itens e submenus radiais pertencentes ao resource e fecha a interface ativa. Alias de conveniência no namespace raiz.",
     "directory": "init.lua; interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.clearRadialItems()"
+    "example": "local result = pr_lib.clearRadialItems()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9252,7 +9252,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra um submenu radial identificado por id e uma lista de items. Alias de conveniência no namespace raiz.",
     "directory": "init.lua; interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "local result = pr_lib.registerRadial({})"
+    "example": "local result = pr_lib.registerRadial({})\nprint('Resultado:', result)"
   },
   {
     "module": "radial",
@@ -9261,7 +9261,7 @@ export const PR_BRIDGE_API = [
     "detail": "Fecha o menu radial atual e libera o foco NUI. Alias de conveniência no namespace raiz.",
     "directory": "init.lua; interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.hideRadial()"
+    "example": "local result = pr_lib.hideRadial()\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9270,7 +9270,7 @@ export const PR_BRIDGE_API = [
     "detail": "Bloqueia/desbloqueia a abertura do menu radial; ao desativar, fecha qualquer menu aberto. Alias de conveniência no namespace raiz.",
     "directory": "init.lua; interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "pr_lib.disableRadial(true)"
+    "example": "local result = pr_lib.disableRadial(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "radial",
@@ -9279,7 +9279,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o id do submenu radial atualmente aberto via LocalPlayer.state. Alias de conveniência no namespace raiz.",
     "directory": "init.lua; interface/client/ui.lua",
     "tags": "radial, alias, client",
-    "example": "local result = pr_lib.getCurrentRadialId()"
+    "example": "local result = pr_lib.getCurrentRadialId()\nprint('Resultado:', result)"
   },
   {
     "module": "core",
@@ -9288,7 +9288,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra export(s) no resource consumidor a partir de uma função ou mapa de callbacks.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.addExports('example', function(...) return true end)"
+    "example": "local result = pr_lib.addExports('example:action', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "core",
@@ -9297,7 +9297,7 @@ export const PR_BRIDGE_API = [
     "detail": "Helper de logging padronizado para recursos consumidores.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.logger(source, 'example', 'value', 'value')"
+    "example": "local result = pr_lib.logger(source, 'example:action', 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "core",
@@ -9306,7 +9306,7 @@ export const PR_BRIDGE_API = [
     "detail": "Aguarda uma condição/callback até obter resultado ou atingir timeout.",
     "directory": "init.lua",
     "tags": "",
-    "example": "local result = pr_lib.waitFor(function(...) return true end, 'value', 1)"
+    "example": "local result = pr_lib.waitFor(function(value) print('Callback:', value) end, 'Exemplo do PR Bridge', 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "timer",
@@ -9315,7 +9315,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria um intervalo recorrente e retorna seu identificador.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.setInterval(function(...) return true end, 1, args)"
+    "example": "local result = pr_lib.setInterval(function(value) print('Callback:', value) end, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "timer",
@@ -9324,7 +9324,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cancela um intervalo criado por pr_lib.setInterval.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.clearInterval('example')"
+    "example": "local result = pr_lib.clearInterval(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "points",
@@ -9333,7 +9333,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria um point com onEnter/onExit/nearby e rastreamento de distância.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.points.new({}, 1, {})"
+    "example": "local result = pr_lib.points.new({}, 1, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "points",
@@ -9342,7 +9342,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna os points ativos do resource consumidor.",
     "directory": "init.lua",
     "tags": "",
-    "example": "local result = pr_lib.points.getAllPoints()"
+    "example": "local result = pr_lib.points.getAllPoints()\nprint('Resultado:', result)"
   },
   {
     "module": "points",
@@ -9351,7 +9351,7 @@ export const PR_BRIDGE_API = [
     "detail": "Localiza o point ativo mais próximo, opcionalmente filtrado.",
     "directory": "init.lua",
     "tags": "",
-    "example": "local result = pr_lib.points.getClosestPoint(function(...) return true end)"
+    "example": "local result = pr_lib.points.getClosestPoint(function(item) return item ~= nil end)\nprint('Resultado:', result)"
   },
   {
     "module": "zones",
@@ -9360,7 +9360,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zone esférica baseada no sistema de points.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.zones.sphere({})"
+    "example": "local result = pr_lib.zones.sphere({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "zones",
@@ -9369,7 +9369,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zone poligonal com teste de ponto interno e espessura vertical.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.zones.poly({})"
+    "example": "local result = pr_lib.zones.poly({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "zones",
@@ -9378,7 +9378,7 @@ export const PR_BRIDGE_API = [
     "detail": "Cria uma zone box 3D com rotação.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.zones.box({})"
+    "example": "local result = pr_lib.zones.box({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "locale",
@@ -9387,7 +9387,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna informações de locale disponíveis para o resource consumidor.",
     "directory": "init.lua",
     "tags": "",
-    "example": "local result = pr_lib.getLocales(source)"
+    "example": "local result = pr_lib.getLocales('my_resource')\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9396,7 +9396,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o modo atual do sistema de callback (legacy ou secure).",
     "directory": "init.lua",
     "tags": "",
-    "example": "local result = pr_lib.callback.getMode()"
+    "example": "local result = pr_lib.callback.getMode()\nprint('Resultado:', result)"
   },
   {
     "module": "fivem.raycast",
@@ -9405,7 +9405,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atalho de raycast a partir da câmera usando a camada FiveM do bridge.",
     "directory": "init.lua",
     "tags": "",
-    "example": "pr_lib.raycast.cam('value', 'value', 1)"
+    "example": "local result = pr_lib.raycast.cam(nil, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "fivem.devtools",
@@ -9414,7 +9414,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicia placement de ped com lista de animações/poses para preview e seleção.",
     "directory": "bridge/fivem/devtools/client.lua",
     "tags": "",
-    "example": "pr_lib.devtools.placeAnimatedPed('prop_tool_bench02', 'value', 'value', function(...) return true end, {})"
+    "example": "local result = pr_lib.devtools.placeAnimatedPed('prop_ld_flow_bottle', 1, nil, function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -9423,7 +9423,7 @@ export const PR_BRIDGE_API = [
     "detail": "Normaliza a consulta de dados de veículos por model/hash no framework ativo.",
     "directory": "bridge/framework_normalizer.lua",
     "tags": "",
-    "example": "local result = pr_lib.framework.GetVehiclesByHash('prop_tool_bench02')"
+    "example": "local result = pr_lib.framework.GetVehiclesByHash('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -9432,7 +9432,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna dados normalizados do veículo/modelo no framework ativo.",
     "directory": "bridge/framework_normalizer.lua",
     "tags": "",
-    "example": "local result = pr_lib.framework.GetVehicleData('prop_tool_bench02')"
+    "example": "local result = pr_lib.framework.GetVehicleData('prop_ld_flow_bottle')\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -9441,7 +9441,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera o estado de persistência de uma entidade veículo quando suportado.",
     "directory": "bridge/framework_normalizer.lua",
     "tags": "",
-    "example": "pr_lib.framework.SetVehiclePersistence(entity, true)"
+    "example": "local result = pr_lib.framework.SetVehiclePersistence(PlayerPedId(), false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -9450,7 +9450,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o perfil/identidade de telefone normalizado do jogador.",
     "directory": "bridge/framework_normalizer.lua",
     "tags": "",
-    "example": "local result = pr_lib.framework.GetPhoneProfile(source)"
+    "example": "local result = pr_lib.framework.GetPhoneProfile(source)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -9459,7 +9459,7 @@ export const PR_BRIDGE_API = [
     "detail": "Lê um status normalizado do jogador.",
     "directory": "bridge/framework_normalizer.lua",
     "tags": "",
-    "example": "local result = pr_lib.framework.GetPlayerStatus(source, 'example')"
+    "example": "local result = pr_lib.framework.GetPlayerStatus(source, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "framework",
@@ -9468,7 +9468,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define um status normalizado do jogador.",
     "directory": "bridge/framework_normalizer.lua",
     "tags": "",
-    "example": "pr_lib.framework.SetPlayerStatus(source, 'example', 'value')"
+    "example": "local result = pr_lib.framework.SetPlayerStatus(source, nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "framework",
@@ -9477,16 +9477,16 @@ export const PR_BRIDGE_API = [
     "detail": "Incrementa um status normalizado do jogador.",
     "directory": "bridge/framework_normalizer.lua",
     "tags": "",
-    "example": "pr_lib.framework.AddPlayerStatus(source, 'example', 1)"
+    "example": "local result = pr_lib.framework.AddPlayerStatus(source, nil, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "garage",
     "context": "client",
     "signature": "pr_lib.garage.getProvider()",
-    "detail": "Retorna o provider de garagem detectado/forçado no client.",
+    "detail": "Seleciona provider iniciado entre forge-garage, jg-advancedgarages, qbx_garages e qb-garages; respeita pr_bridge:garage ou auto. Retorna nome ou nil.",
     "directory": "bridge/garages/client.lua",
     "tags": "",
-    "example": "local result = pr_lib.garage.getProvider()"
+    "example": "local result = pr_lib.garage.getProvider()\nprint('Resultado:', result)"
   },
   {
     "module": "garage",
@@ -9495,7 +9495,7 @@ export const PR_BRIDGE_API = [
     "detail": "Inicia criação de garagem de propriedade no provider ativo e entrega o draft/resultado ao callback.",
     "directory": "bridge/garages/client.lua",
     "tags": "",
-    "example": "local result = pr_lib.garage.createPropertyGarage({}, function(...) return true end)"
+    "example": "local result = pr_lib.garage.createPropertyGarage({}, nil)\nprint('Resultado:', result)"
   },
   {
     "module": "garage",
@@ -9504,7 +9504,7 @@ export const PR_BRIDGE_API = [
     "detail": "Confirma um draft de garagem de propriedade e normaliza o resultado.",
     "directory": "bridge/garages/client.lua",
     "tags": "",
-    "example": "pr_lib.garage.commitPropertyGarageDraft({})"
+    "example": "local result = pr_lib.garage.commitPropertyGarageDraft({})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "garage",
@@ -9513,7 +9513,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra a integração client de uma garagem de propriedade no provider ativo.",
     "directory": "bridge/garages/client.lua",
     "tags": "",
-    "example": "local result = pr_lib.garage.registerProperty({})"
+    "example": "local result = pr_lib.garage.registerProperty({})\nprint('Resultado:', result)"
   },
   {
     "module": "garage",
@@ -9522,7 +9522,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove target/zone/registro client criado para uma garagem de propriedade.",
     "directory": "bridge/garages/client.lua",
     "tags": "",
-    "example": "pr_lib.garage.unregisterProperty('value')"
+    "example": "local result = pr_lib.garage.unregisterProperty(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "garage",
@@ -9531,7 +9531,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o provider de garagem detectado/forçado no server.",
     "directory": "bridge/garages/server.lua",
     "tags": "",
-    "example": "local result = pr_lib.garage.getProvider()"
+    "example": "local result = pr_lib.garage.getProvider()\nprint('Resultado:', result)"
   },
   {
     "module": "garage",
@@ -9540,7 +9540,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registra a garagem de propriedade no provider server quando necessário.",
     "directory": "bridge/garages/server.lua",
     "tags": "",
-    "example": "local result = pr_lib.garage.registerProperty({})"
+    "example": "local result = pr_lib.garage.registerProperty({})\nprint('Resultado:', result)"
   },
   {
     "module": "garage",
@@ -9549,7 +9549,7 @@ export const PR_BRIDGE_API = [
     "detail": "Valida server-side se os dados persistidos de garagem pertencem à propriedade/provider esperado.",
     "directory": "bridge/garages/server.lua",
     "tags": "",
-    "example": "pr_lib.garage.validateLink('example', {})"
+    "example": "local result = pr_lib.garage.validateLink(nil, {})\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9558,7 +9558,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna o nome do resource de weather ativo para este adapter.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "local result = pr_lib.weather.GetResourceName()"
+    "example": "local result = pr_lib.weather.GetResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9567,7 +9567,7 @@ export const PR_BRIDGE_API = [
     "detail": "Informa se o provider Renewed-Weathersync está iniciado.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "local result = pr_lib.weather.IsStarted()"
+    "example": "local result = pr_lib.weather.IsStarted()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9576,7 +9576,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a sequência/lista de eventos meteorológicos do provider.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "local result = pr_lib.weather.GetWeatherList()"
+    "example": "local result = pr_lib.weather.GetWeatherList()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9585,7 +9585,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém a previsão semanal exposta pelo provider.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "local result = pr_lib.weather.GetWeeklyForecast()"
+    "example": "local result = pr_lib.weather.GetWeeklyForecast()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9594,7 +9594,7 @@ export const PR_BRIDGE_API = [
     "detail": "Obtém o weather de uma região específica.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "local result = pr_lib.weather.GetRegionalWeather('downtown')"
+    "example": "local result = pr_lib.weather.GetRegionalWeather(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9603,7 +9603,7 @@ export const PR_BRIDGE_API = [
     "detail": "Retorna um snapshot normalizado do estado meteorológico, incluindo lista, weather atual e regiões.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "local result = pr_lib.weather.GetState()"
+    "example": "local result = pr_lib.weather.GetState()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9612,7 +9612,7 @@ export const PR_BRIDGE_API = [
     "detail": "Altera o tipo de weather em um índice/evento, criando ou ajustando a entrada quando necessário.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "pr_lib.weather.SetWeatherType(1, 'CLEAR', {})"
+    "example": "local result = pr_lib.weather.SetWeatherType(1, 'default', false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9621,7 +9621,7 @@ export const PR_BRIDGE_API = [
     "detail": "Atualiza a duração de um evento meteorológico existente.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "pr_lib.weather.SetEventTime(1, 1, {})"
+    "example": "local result = pr_lib.weather.SetEventTime(1, 1, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9630,7 +9630,7 @@ export const PR_BRIDGE_API = [
     "detail": "Adiciona um evento de weather à sequência ativa.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "pr_lib.weather.AddWeatherEvent('CLEAR', 1, 1)"
+    "example": "local result = pr_lib.weather.AddWeatherEvent('default', 1, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9639,7 +9639,7 @@ export const PR_BRIDGE_API = [
     "detail": "Remove um evento meteorológico pelo índice/descritor.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "pr_lib.weather.RemoveWeatherEvent(1, {})"
+    "example": "local result = pr_lib.weather.RemoveWeatherEvent(1, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9648,7 +9648,7 @@ export const PR_BRIDGE_API = [
     "detail": "Define hora e minuto no provider de weather.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "pr_lib.weather.SetTime(1, 1)"
+    "example": "local result = pr_lib.weather.SetTime(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9657,7 +9657,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ajusta a escala de passagem do tempo.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "pr_lib.weather.SetTimeScale(1)"
+    "example": "local result = pr_lib.weather.SetTimeScale(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9666,7 +9666,7 @@ export const PR_BRIDGE_API = [
     "detail": "Ativa ou desativa o congelamento do relógio.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, renewed, server",
-    "example": "pr_lib.weather.SetFreezeTime(true)"
+    "example": "local result = pr_lib.weather.SetFreezeTime(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9675,7 +9675,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.GetResourceName.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "local result = pr_lib.weather.getResourceName()"
+    "example": "local result = pr_lib.weather.getResourceName()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9684,7 +9684,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.IsStarted.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "local result = pr_lib.weather.isStarted()"
+    "example": "local result = pr_lib.weather.isStarted()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9693,7 +9693,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.GetWeatherList.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "local result = pr_lib.weather.getWeatherList()"
+    "example": "local result = pr_lib.weather.getWeatherList()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9702,7 +9702,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.GetState.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "local result = pr_lib.weather.getState()"
+    "example": "local result = pr_lib.weather.getState()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9711,7 +9711,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.SetWeatherType.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "pr_lib.weather.setWeatherType(1, 'CLEAR', {})"
+    "example": "local result = pr_lib.weather.setWeatherType(1, 'default', false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9720,7 +9720,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.SetEventTime.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "pr_lib.weather.setEventTime(1, 1, {})"
+    "example": "local result = pr_lib.weather.setEventTime(1, 1, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9729,7 +9729,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.AddWeatherEvent.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "pr_lib.weather.addWeatherEvent('CLEAR', 1, 1)"
+    "example": "local result = pr_lib.weather.addWeatherEvent('default', 1, 1)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9738,7 +9738,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.RemoveWeatherEvent.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "pr_lib.weather.removeWeatherEvent(1, {})"
+    "example": "local result = pr_lib.weather.removeWeatherEvent(1, false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9747,7 +9747,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.SetTime.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "pr_lib.weather.setTime(1, 1)"
+    "example": "local result = pr_lib.weather.setTime(nil, nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9756,7 +9756,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.SetTimeScale.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "pr_lib.weather.setTimeScale(1)"
+    "example": "local result = pr_lib.weather.setTimeScale(nil)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9765,7 +9765,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.SetFreezeTime.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "pr_lib.weather.setFreezeTime(true)"
+    "example": "local result = pr_lib.weather.setFreezeTime(false)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "weather",
@@ -9774,7 +9774,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.GetWeeklyForecast.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "local result = pr_lib.weather.getWeeklyForecast()"
+    "example": "local result = pr_lib.weather.getWeeklyForecast()\nprint('Resultado:', result)"
   },
   {
     "module": "weather",
@@ -9783,7 +9783,7 @@ export const PR_BRIDGE_API = [
     "detail": "Alias lowercase de pr_lib.weather.GetRegionalWeather.",
     "directory": "bridge/weather/renewed/server.lua",
     "tags": "weather, alias, renewed, server",
-    "example": "local result = pr_lib.weather.getRegionalWeather('downtown')"
+    "example": "local result = pr_lib.weather.getRegionalWeather(nil)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9792,7 +9792,7 @@ export const PR_BRIDGE_API = [
     "detail": "Compatibility call helper with optional per-event delay; awaits when cb is nil/false and triggers asynchronously when cb is a function.",
     "directory": "bridge/callback/secure_client.lua",
     "tags": "callback, secure, client",
-    "example": "pr_lib.callback.call('example:callback', 5000, function(...) print(...) end, args)"
+    "example": "local result = pr_lib.callback.call('example:action', 1, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9801,7 +9801,7 @@ export const PR_BRIDGE_API = [
     "detail": "OX-compatible await helper with client-side per-event cooldown/rate limiting.",
     "directory": "bridge/callback/secure_client.lua",
     "tags": "callback, secure, client",
-    "example": "local result = pr_lib.callback.awaitOx('example:callback', 5000, args)"
+    "example": "local result = pr_lib.callback.awaitOx('example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9810,7 +9810,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registers a secure client callback endpoint that can be invoked by the server and replies through the PR Bridge callback envelope.",
     "directory": "bridge/callback/secure_client.lua",
     "tags": "callback, secure, client",
-    "example": "pr_lib.callback.register('example:callback', function(source, ...) return true end)"
+    "example": "local result = pr_lib.callback.register('example:action', function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9819,7 +9819,7 @@ export const PR_BRIDGE_API = [
     "detail": "OX-compatible server helper that awaits a callback response from the target client.",
     "directory": "bridge/callback/secure_server.lua",
     "tags": "callback, secure, server",
-    "example": "local result = pr_lib.callback.awaitOx('example:callback', source, args)"
+    "example": "local result = pr_lib.callback.awaitOx('example:action', source)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9828,7 +9828,7 @@ export const PR_BRIDGE_API = [
     "detail": "OX-compatible server callback helper; awaits when cb is nil/false or triggers asynchronously with cb.",
     "directory": "bridge/callback/secure_server.lua",
     "tags": "callback, secure, server",
-    "example": "pr_lib.callback.callOx('example:callback', source, function(...) print(...) end, args)"
+    "example": "local result = pr_lib.callback.callOx('example:action', source, function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9837,7 +9837,7 @@ export const PR_BRIDGE_API = [
     "detail": "Registers a secure server callback endpoint. The handler receives source first and is protected by inbound concurrency limits.",
     "directory": "bridge/callback/secure_server.lua",
     "tags": "callback, secure, server",
-    "example": "pr_lib.callback.register('example:callback', function(source, ...) return true end)"
+    "example": "local result = pr_lib.callback.register('example:action', function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9846,7 +9846,7 @@ export const PR_BRIDGE_API = [
     "detail": "Compatibility alias that points to awaitClient.",
     "directory": "bridge/callback/secure_server.lua",
     "tags": "callback, secure, server",
-    "example": "local result = pr_lib.callback.awaitLegacy(source, 'example:callback', 5000, args)"
+    "example": "local result = pr_lib.callback.awaitLegacy(source, 'example:action', 1)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9855,7 +9855,7 @@ export const PR_BRIDGE_API = [
     "detail": "Callable OX-compatible callback facade on the server.",
     "directory": "bridge/callback/secure_server.lua",
     "tags": "callback, secure, server",
-    "example": "pr_lib.callback.ox('example:callback', source, function(...) print(...) end, args)"
+    "example": "local result = pr_lib.callback.ox('example:action', source, function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
   },
   {
     "module": "callback",
@@ -9864,7 +9864,7 @@ export const PR_BRIDGE_API = [
     "detail": "OX-compatible await alias exposed under callback.ox.await.",
     "directory": "bridge/callback/secure_server.lua",
     "tags": "callback, secure, server",
-    "example": "local result = pr_lib.callback.ox.await('example:callback', source, args)"
+    "example": "local result = pr_lib.callback.ox.await('example:action', source)\nprint('Resultado:', result)"
   },
   {
     "module": "callback",
@@ -9873,68 +9873,1134 @@ export const PR_BRIDGE_API = [
     "detail": "Callable callback facade; dispatches through the secure server trigger contract.",
     "directory": "bridge/callback/secure_server.lua",
     "tags": "callback, secure, server",
-    "example": "pr_lib.callback('value', 'value', 'value', args)"
+    "example": "local result = pr_lib.callback(nil, nil, nil)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "jsonDraft",
+    "context": "server",
+    "signature": "pr_lib.jsonDraft(value, branches?)",
+    "detail": "Cria cópia profunda do valor, ou copia somente as ramificações selecionadas; não salva. Útil para validar uma edição antes de publicar o estado.",
+    "directory": "bridge/persistence.lua",
+    "tags": "jsonDraft, server, persistência json protegida, json, draft",
+    "example": "local result = pr_lib.jsonDraft({}, {})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "withJsonLock",
+    "context": "server",
+    "signature": "pr_lib.withJsonLock(path, action, ...)",
+    "detail": "Executa action com lock local do arquivo. É reentrante na mesma corrotina; concorrência retorna false, \"busy\". Libera o lock mesmo em erro. Não é lock entre recursos.",
+    "directory": "bridge/persistence.lua",
+    "tags": "withJsonLock, server, persistência json protegida, with, json, lock",
+    "example": "local result = pr_lib.withJsonLock('@my_resource/data/config.json', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "wrapJsonMutations",
+    "context": "server",
+    "signature": "pr_lib.wrapJsonMutations(path, service, methods)",
+    "detail": "Substitui os métodos nomeados do serviço por wrappers de withJsonLock. methods é uma lista de nomes de funções existentes.",
+    "directory": "bridge/persistence.lua",
+    "tags": "wrapJsonMutations, server, persistência json protegida, wrap, json, mutations",
+    "example": "local result = pr_lib.wrapJsonMutations('@my_resource/data/config.json', {}, {})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "loadJsonRecovery",
+    "context": "server",
+    "signature": "pr_lib.loadJsonRecovery(path)",
+    "detail": "Carrega JSON primário válido ou o arquivo .bak; recuperação retorna também \"recovered_backup\". Se ambos estiverem corrompidos, lança erro e não sobrescreve com defaults.",
+    "directory": "bridge/persistence.lua",
+    "tags": "loadJsonRecovery, server, persistência json protegida, load, json, recovery",
+    "example": "local result = pr_lib.loadJsonRecovery('@my_resource/data/config.json')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "saveJsonRecovery",
+    "context": "server",
+    "signature": "pr_lib.saveJsonRecovery(path, value, options?)",
+    "detail": "Salva com lock, validação de JSON e backup. options.backup=\"on_failure\" reduz backups em rotinas frequentes. Retorna sucesso e detalhes ou false e motivo. Não promete gravação atômica contra queda de energia.",
+    "directory": "bridge/persistence.lua",
+    "tags": "saveJsonRecovery, server, persistência json protegida, save, json, recovery",
+    "example": "local result = pr_lib.saveJsonRecovery('@my_resource/data/config.json', {}, {})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "saveJsonBatch",
+    "context": "server",
+    "signature": "pr_lib.saveJsonBatch(changes)",
+    "detail": "Recebe tabela path→value, trava os arquivos em ordem e tenta restaurar os anteriores se uma gravação posterior falhar. Retorna false, \"reconciliation_required\" se a restauração falhar. Não é transação de banco.",
+    "directory": "bridge/persistence.lua",
+    "tags": "saveJsonBatch, server, persistência json protegida, save, json, batch",
+    "example": "local result = pr_lib.saveJsonBatch({})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "recordJsonIncident",
+    "context": "server",
+    "signature": "pr_lib.recordJsonIncident(path, key, details)",
+    "detail": "Registra diagnóstico excepcional em path .. \".incidents.json\", utilizando recuperação JSON; retorna sucesso/motivo e não envia dados financeiros aos clientes.",
+    "directory": "bridge/persistence.lua",
+    "tags": "recordJsonIncident, server, persistência json protegida, record, json, incident",
+    "example": "local result = pr_lib.recordJsonIncident('@my_resource/data/config.json', 'example_key', {})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.getMode()",
+    "detail": "Retorna production, development ou test; lê pr_bridge:environment na inicialização e usa production por padrão.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, get, mode",
+    "example": "local result = pr_lib.environment.getMode()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.isProduction()",
+    "detail": "Retorna se o ambiente inicializado é production.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, is, production",
+    "example": "local result = pr_lib.environment.isProduction()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.isDevelopment()",
+    "detail": "Retorna se o ambiente inicializado é development.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, is, development",
+    "example": "local result = pr_lib.environment.isDevelopment()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.isTest()",
+    "detail": "Retorna se o ambiente inicializado é test.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, is, test",
+    "example": "local result = pr_lib.environment.isTest()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.normalizeBoolean(value, defaultValue?)",
+    "detail": "Normaliza boolean ou texto true/1/yes/on e false/0/no/off; valores desconhecidos usam o default booleano.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, normalize, boolean",
+    "example": "local result = pr_lib.environment.normalizeBoolean({}, nil)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.getCallbackMode()",
+    "detail": "Retorna secure ou legacy conforme pr_bridge:callback:secure; padrão legacy.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, get, callback, mode",
+    "example": "local result = pr_lib.environment.getCallbackMode()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.isSecureCallbackEnabled()",
+    "detail": "Retorna se o transporte reforçado foi habilitado pela convar na inicialização.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, is, secure, callback, enabled",
+    "example": "local result = pr_lib.environment.isSecureCallbackEnabled()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.getDeveloperAce()",
+    "detail": "Retorna o nome da ACE pr_bridge.developer.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, get, developer, ace",
+    "example": "local result = pr_lib.environment.getDeveloperAce()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.getAdminAce()",
+    "detail": "Retorna o nome da ACE forge-core.admin.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, get, admin, ace",
+    "example": "local result = pr_lib.environment.getAdminAce()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.hasDeveloperAccess(playerSource)",
+    "detail": "No servidor, permite console (source 0) ou jogador com ACE de desenvolvedor/admin; no cliente sempre retorna false.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, has, developer, access",
+    "example": "local result = pr_lib.environment.hasDeveloperAccess(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.canUseDeveloperTools(playerSource)",
+    "detail": "Só permite no servidor, fora de production e com hasDeveloperAccess aprovado.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, can, use, developer, tools",
+    "example": "local result = pr_lib.environment.canUseDeveloperTools(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "environment",
+    "context": "client/server",
+    "signature": "pr_lib.environment.getCallbackLimits()",
+    "detail": "Retorna timeout, maxPending, maxPendingPerPlayer e maxInboundPerPlayer, com limites mínimos e valores definidos nas convars pr_bridge:callback:*.",
+    "directory": "bridge/environment.lua",
+    "tags": "environment, client/server, ambiente, permissões e callbacks, get, callback, limits",
+    "example": "local result = pr_lib.environment.getCallbackLimits()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "cache",
+    "context": "client/server",
+    "signature": "pr_lib.cache.GetResourceState(resource, key)",
+    "detail": "Consulta o export GetCachedState(key) de um recurso iniciado e retorna cópia defensiva de record.data; recurso parado, export ausente ou registro inválido retornam nil. Aceita chamada com ponto ou dois-pontos.",
+    "directory": "bridge/cache/resources.lua",
+    "tags": "cache, client/server, cache entre recursos, get, resource, state",
+    "example": "local result = pr_lib.cache.GetResourceState('my_resource', 'example_key')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "cache",
+    "context": "client/server",
+    "signature": "pr_lib.cache.OnResourceState(resource, key, callback)",
+    "detail": "Escuta pr_bridge:resourceState:changed e entrega cópia defensiva dos dados desse domínio. Retorna função para cancelar a assinatura. Não faz snapshot inicial nem cria replicação automática.",
+    "directory": "bridge/cache/resources.lua",
+    "tags": "cache, client/server, cache entre recursos, on, resource, state",
+    "example": "local result = pr_lib.cache.OnResourceState('my_resource', 'example_key', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "settings",
+    "context": "client/server",
+    "signature": "pr_lib.settings.get(domain, fallback?)",
+    "detail": "Retorna dados locais de locale ou interface, ou fallback. A tabela é referência interna somente para leitura; consumidores externos devem preferir cache.GetResourceState.",
+    "directory": "bridge/settings.lua",
+    "tags": "settings, client/server, configuração global em memória, get",
+    "example": "local result = pr_lib.settings.get(nil, nil)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "settings",
+    "context": "client/server",
+    "signature": "pr_lib.settings.snapshot(domain)",
+    "detail": "Retorna cópia defensiva do registro completo { epoch, revision, data } ou nil.",
+    "directory": "bridge/settings.lua",
+    "tags": "settings, client/server, configuração global em memória, snapshot",
+    "example": "local result = pr_lib.settings.snapshot(nil)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "settings",
+    "context": "server",
+    "signature": "pr_lib.settings.publish(domain, data)",
+    "detail": "Publica locale ou interface com revisão/geração, atualiza cache e envia mudança aos clientes. Não existe no objeto settings de recursos consumidores; não substitui validação administrativa nem persistência.",
+    "directory": "bridge/settings.lua",
+    "tags": "settings, server, publicação de configuração global, publish",
+    "example": "local result = pr_lib.settings.publish(nil, {})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "player",
+    "context": "client",
+    "signature": "pr_lib.player.new()",
+    "detail": "Cria facade com métodos player:get(field), player:set(field, value) e player:setr(field, value). Campos de inventário são lidos do provider ox_inventory e escritos por SetPlayerState; outros campos usam cache local.",
+    "directory": "bridge/cache/player_client.lua",
+    "tags": "player, client, estado local do jogador, new",
+    "example": "local result = pr_lib.player.new()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "cache",
+    "context": "client",
+    "signature": "player:get(field)",
+    "detail": "Retorna campo do provider de inventário ou do cache local, conforme o campo solicitado.",
+    "directory": "bridge/cache/player_client.lua",
+    "tags": "cache, client, métodos da instância de estado local, get",
+    "example": "local player = pr_lib.player.new()\nlocal result = player:get(nil)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "cache",
+    "context": "client",
+    "signature": "player:set(field, value)",
+    "detail": "Delega campos de inventário a ox_inventory:SetPlayerState e demais campos ao cache local. Provider parado retorna false.",
+    "directory": "bridge/cache/player_client.lua",
+    "tags": "cache, client, métodos da instância de estado local, set",
+    "example": "local player = pr_lib.player.new()\nlocal result = player:set(nil, {})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "cache",
+    "context": "client",
+    "signature": "player:setr(field, value)",
+    "detail": "Alias de set na facade: não garante replicação pela rede.",
+    "directory": "bridge/cache/player_client.lua",
+    "tags": "cache, client, métodos da instância de estado local, setr",
+    "example": "local player = pr_lib.player.new()\nlocal result = player:setr(nil, {})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "framework",
+    "context": "client/server",
+    "signature": "pr_lib.framework.GetVehiclesByHash(model?)",
+    "detail": "Retorna definição por hash/nome de modelo ou catálogo completo quando sem argumento. QBX consulta o catálogo autoritativo qbx_core; QB usa Shared.Vehicles; outros adapters têm fallback vazio.",
+    "directory": "bridge/framework_normalizer.lua",
+    "tags": "framework, client/server, framework: identidade, catálogo e sessão, get, vehicles, by, hash",
+    "example": "local result = pr_lib.framework.GetVehiclesByHash('prop_ld_flow_bottle')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "framework",
+    "context": "server",
+    "signature": "pr_lib.framework.GetOfflinePlayer(identifier)",
+    "detail": "Consulta jogador offline através de qbx_core:GetOfflinePlayer(identifier), sem fingir que ele está conectado.",
+    "directory": "bridge/frameworks/qbx/server.lua",
+    "tags": "framework, server, framework qbx: jogador offline, get, offline, player",
+    "example": "local result = pr_lib.framework.GetOfflinePlayer('license:example')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "framework",
+    "context": "client",
+    "signature": "pr_lib.framework.IsSessionReady()",
+    "detail": "Consulta qbx_core:IsPlayerLoaded(). IsPlayerLoaded mantém o contrato de personagem autenticado; IsSessionReady distingue a sessão pronta no mundo.",
+    "directory": "bridge/frameworks/qbx/client.lua",
+    "tags": "framework, client, framework qbx: prontidão do mundo, is, session, ready",
+    "example": "local result = pr_lib.framework.IsSessionReady()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "phone",
+    "context": "server",
+    "signature": "pr_lib.phone.GetActiveContext(source)",
+    "detail": "Obtém getActivePhoneContext do forge-npwd para source válido. Retorna tabela ou nil quando indisponível; não consulta aparelho aleatório pelo dono do personagem.",
+    "directory": "bridge/phones/default/server.lua",
+    "tags": "phone, server, telefone ativo: forge npwd, get, active, context",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.GetActiveContext(source)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "phone",
+    "context": "server",
+    "signature": "pr_lib.phone.GetActiveOwnerIdentifier(source)",
+    "detail": "Retorna ownerIdentifier do aparelho atualmente ativo ou nil.",
+    "directory": "bridge/phones/default/server.lua",
+    "tags": "phone, server, telefone ativo: forge npwd, get, active, owner, identifier",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.GetActiveOwnerIdentifier(source)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "phone",
+    "context": "server",
+    "signature": "pr_lib.phone.GetActiveDeviceId(source)",
+    "detail": "Retorna deviceId do aparelho atualmente ativo ou nil.",
+    "directory": "bridge/phones/default/server.lua",
+    "tags": "phone, server, telefone ativo: forge npwd, get, active, device, id",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.phone.GetActiveDeviceId(source)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "devtools",
+    "context": "client",
+    "signature": "pr_lib.devtools.placeAnimatedPed(modelName, maxSlots, animations, cb, options?)",
+    "detail": "Posiciona NPC com cenário ou animação selecionável; retorna pontos com x/y/z/heading e animation/animationLabel. Usa referência da superfície, calibra origem e preserva pose. Guias visuais ficam desligadas por padrão. Alias PlaceAnimatedPed.",
+    "directory": "bridge/fivem/devtools/client.lua",
+    "tags": "devtools, client, posicionador: npc animado, place, animated, ped",
+    "example": "local result = pr_lib.devtools.placeAnimatedPed('prop_ld_flow_bottle', 1, nil, function(value) print('Callback:', value) end, {})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "client",
+    "signature": "pr_lib.weather.GetSnapshot()",
+    "detail": "Consulta GetSnapshot do provider; retorna sucesso da chamada e resultado.",
+    "directory": "bridge/weather/renewed/client.lua",
+    "tags": "weather, client, clima renewed: consultas no cliente, get, snapshot",
+    "example": "local result = pr_lib.weather.GetSnapshot()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "client",
+    "signature": "pr_lib.weather.GetCurrentRegion()",
+    "detail": "Consulta região atual do player no provider; retorna sucesso e resultado.",
+    "directory": "bridge/weather/renewed/client.lua",
+    "tags": "weather, client, clima renewed: consultas no cliente, get, current, region",
+    "example": "local result = pr_lib.weather.GetCurrentRegion()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "client",
+    "signature": "pr_lib.weather.GetRegionFromCoords(coords)",
+    "detail": "Consulta a região de coordenadas específicas; retorna sucesso e resultado.",
+    "directory": "bridge/weather/renewed/client.lua",
+    "tags": "weather, client, clima renewed: consultas no cliente, get, region, from, coords",
+    "example": "local result = pr_lib.weather.GetRegionFromCoords(vector3(0.0, 0.0, 0.0))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "client",
+    "signature": "pr_lib.weather.GetRegionalWeather()",
+    "detail": "Consulta clima da região atual pelo export GetCurrentRegionWeather; retorna sucesso e resultado.",
+    "directory": "bridge/weather/renewed/client.lua",
+    "tags": "weather, client, clima renewed: consultas no cliente, get, regional",
+    "example": "local result = pr_lib.weather.GetRegionalWeather()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "client",
+    "signature": "pr_lib.weather.OnChange(fn)",
+    "detail": "Registra handler em pr_bridge:weather:changed e retorna handle; encerrar com RemoveEventHandler(handle). Não faz snapshot inicial.",
+    "directory": "bridge/weather/renewed/client.lua",
+    "tags": "weather, client, clima renewed: consultas no cliente, on, change",
+    "example": "local result = pr_lib.weather.OnChange(function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "server",
+    "signature": "pr_lib.weather.SetWeatherType(index, weatherType, match?)",
+    "detail": "Altera evento por índice ou correspondência; cria evento quando necessário. Retorna sucesso/resultado ou false/motivo.",
+    "directory": "bridge/weather/renewed/server.lua",
+    "tags": "weather, server, clima renewed: administração no servidor, set, type",
+    "example": "local result = pr_lib.weather.SetWeatherType(1, 'default', false)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "server",
+    "signature": "pr_lib.weather.SetEventTime(index, duration, match?)",
+    "detail": "Normaliza duração entre 1 e 1440, resolve índice/correspondência e tenta alterar ou recriar evento.",
+    "directory": "bridge/weather/renewed/server.lua",
+    "tags": "weather, server, clima renewed: administração no servidor, set, event, time",
+    "example": "local result = pr_lib.weather.SetEventTime(1, 1, false)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "server",
+    "signature": "pr_lib.weather.AddWeatherEvent(weatherType, duration, index?)",
+    "detail": "Cria evento com duração normalizada; retorna sucesso/resultado ou false/motivo.",
+    "directory": "bridge/weather/renewed/server.lua",
+    "tags": "weather, server, clima renewed: administração no servidor, add, event",
+    "example": "local result = pr_lib.weather.AddWeatherEvent('default', 1, 1)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "weather",
+    "context": "server",
+    "signature": "pr_lib.weather.RemoveWeatherEvent(index, match?)",
+    "detail": "Resolve evento e remove; quando não encontrado retorna true, \"already_removed\".",
+    "directory": "bridge/weather/renewed/server.lua",
+    "tags": "weather, server, clima renewed: administração no servidor, remove, event",
+    "example": "local result = pr_lib.weather.RemoveWeatherEvent(1, false)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "doorlock",
+    "context": "client",
+    "signature": "doorlock.snapshot()",
+    "detail": "Consulta ox_doorlock:getDoors via callback com timeout de 15000ms.",
+    "directory": "bridge/doorlock/client.lua",
+    "tags": "doorlock, client, portas: módulo opt-in no cliente, snapshot",
+    "example": "local doorlock = pr_lib.loadModule('@pr_bridge/bridge/doorlock/client')\nlocal result = doorlock.snapshot()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "doorlock",
+    "context": "client",
+    "signature": "doorlock.ensureRegistration(ids)",
+    "detail": "Agenda registro de portas tradicionais no DoorSystem; aguarda física e preserva mudanças de estado recebidas durante a consulta. Portas slide/rotate ficam com o provider.",
+    "directory": "bridge/doorlock/client.lua",
+    "tags": "doorlock, client, portas: módulo opt-in no cliente, ensure, registration",
+    "example": "local doorlock = pr_lib.loadModule('@pr_bridge/bridge/doorlock/client')\nlocal result = doorlock.ensureRegistration(nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "doorlock",
+    "context": "server",
+    "signature": "doorlock.getByName(name)",
+    "detail": "Consulta getDoorFromName do ox_doorlock; retorna resultado ou nil/motivo.",
+    "directory": "bridge/doorlock/server.lua",
+    "tags": "doorlock, server, portas: módulo opt-in no servidor, get, by, name",
+    "example": "local doorlock = pr_lib.loadModule('@pr_bridge/bridge/doorlock/server')\nlocal result = doorlock.getByName('example:action')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "doorlock",
+    "context": "server",
+    "signature": "doorlock.catalog()",
+    "detail": "Consulta getAllDoors do ox_doorlock.",
+    "directory": "bridge/doorlock/server.lua",
+    "tags": "doorlock, server, portas: módulo opt-in no servidor, catalog",
+    "example": "local doorlock = pr_lib.loadModule('@pr_bridge/bridge/doorlock/server')\nlocal result = doorlock.catalog()\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "doorlock",
+    "context": "server",
+    "signature": "doorlock.ensure(name, definition, group, access?)",
+    "detail": "Reutiliza porta do mesmo grupo ou cria com geometria validada; mantém transformações/tipo já salvos. Detecta provider carregando registro do banco e evita duplicação por nome.",
+    "directory": "bridge/doorlock/server.lua",
+    "tags": "doorlock, server, portas: módulo opt-in no servidor, ensure",
+    "example": "local doorlock = pr_lib.loadModule('@pr_bridge/bridge/doorlock/server')\nlocal result = doorlock.ensure('example:action', {}, nil, nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "doorlock",
+    "context": "server",
+    "signature": "doorlock.setState(name, locked)",
+    "detail": "Altera estado como evento local do servidor e confirma resultado no provider; retorna false/motivo se não aplicado. Não substituir a ACL do consumidor.",
+    "directory": "bridge/doorlock/server.lua",
+    "tags": "doorlock, server, portas: módulo opt-in no servidor, set, state",
+    "example": "local doorlock = pr_lib.loadModule('@pr_bridge/bridge/doorlock/server')\nlocal result = doorlock.setState('example:action', false)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "emotes",
+    "context": "client",
+    "signature": "emotes.play(command)",
+    "detail": "Executa comando de emote no scully_emotemenu quando iniciado; retorna boolean.",
+    "directory": "bridge/emotes/client.lua",
+    "tags": "emotes, client, emotes: módulo opt-in, play",
+    "example": "local emotes = pr_lib.loadModule('@pr_bridge/bridge/emotes/client')\nlocal result = emotes.play('example:action')\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "emotes",
+    "context": "client",
+    "signature": "emotes.beginSession(models)",
+    "detail": "Registra ped, modelos permitidos e objetos já existentes antes da animação, para limpeza delimitada.",
+    "directory": "bridge/emotes/client.lua",
+    "tags": "emotes, client, emotes: módulo opt-in, begin, session",
+    "example": "local emotes = pr_lib.loadModule('@pr_bridge/bridge/emotes/client')\nlocal result = emotes.beginSession('prop_ld_flow_bottle')\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "emotes",
+    "context": "client",
+    "signature": "emotes.finishSession(session)",
+    "detail": "Finaliza uma vez. Se session.emoteStarted, cancela o emote; remove somente objetos novos dos modelos da sessão que ainda estão anexados ao ped. Não apaga objetos arbitrários do mundo.",
+    "directory": "bridge/emotes/client.lua",
+    "tags": "emotes, client, emotes: módulo opt-in, finish, session",
+    "example": "local emotes = pr_lib.loadModule('@pr_bridge/bridge/emotes/client')\nlocal result = emotes.finishSession(nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "prison",
+    "context": "server",
+    "signature": "prison.isAvailable()",
+    "detail": "Retorna se xt-prison está iniciado.",
+    "directory": "bridge/prison/server.lua",
+    "tags": "prison, server, prisão: módulo opt-in, is, available",
+    "example": "local prison = pr_lib.loadModule('@pr_bridge/bridge/prison/server')\nlocal result = prison.isAvailable()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "prison",
+    "context": "server",
+    "signature": "prison.getStatus(src)",
+    "detail": "Delega a GetPrisonStatus; retorna resultado/motivo ou nil, \"prison_unavailable\".",
+    "directory": "bridge/prison/server.lua",
+    "tags": "prison, server, prisão: módulo opt-in, get, status",
+    "example": "local prison = pr_lib.loadModule('@pr_bridge/bridge/prison/server')\nlocal source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = prison.getStatus(source)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "prison",
+    "context": "server",
+    "signature": "prison.jail(src, sentence)",
+    "detail": "Delega a JailPlayer; validação de autorização/sentença continua no consumidor e provider.",
+    "directory": "bridge/prison/server.lua",
+    "tags": "prison, server, prisão: módulo opt-in, jail",
+    "example": "local prison = pr_lib.loadModule('@pr_bridge/bridge/prison/server')\nlocal source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = prison.jail(source, nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "prison",
+    "context": "server",
+    "signature": "prison.release(src)",
+    "detail": "Delega a ReleasePlayer, propagando resultado/motivo.",
+    "directory": "bridge/prison/server.lua",
+    "tags": "prison, server, prisão: módulo opt-in, release",
+    "example": "local prison = pr_lib.loadModule('@pr_bridge/bridge/prison/server')\nlocal source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = prison.release(source)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getVehicleDefinition(model)",
+    "detail": "Aceita nome/hash/tabela com modelo e consulta catálogo QBX/QB; retorna definição ou nil.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, vehicle, definition",
+    "example": "local result = pr_lib.police.getVehicleDefinition('prop_ld_flow_bottle')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.registerCallback(name, handler)",
+    "detail": "Delega o registro a pr_lib.callback.register.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, register, callback",
+    "example": "local result = pr_lib.police.registerCallback('example:action', function(value) print('Callback:', value) end)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.callback(name, ...)",
+    "detail": "Consulta pr_lib.callback.await com timeout fixo de 10000ms.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, callback",
+    "example": "local result = pr_lib.police.callback('example:action')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getIdentifier(source?)",
+    "detail": "Retorna citizenid do PlayerData; source é usado somente no servidor.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, identifier",
+    "example": "local result = pr_lib.police.getIdentifier(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getPlayerName(source?)",
+    "detail": "Monta nome completo a partir de charinfo. Alias getName.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, player, name",
+    "example": "local result = pr_lib.police.getPlayerName(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getJob(source?)",
+    "detail": "Retorna tabela job ou tabela vazia.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, job",
+    "example": "local result = pr_lib.police.getJob(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getJobName(source?)",
+    "detail": "Retorna job.name.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, job, name",
+    "example": "local result = pr_lib.police.getJobName(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getJobType(source?)",
+    "detail": "Retorna job.type.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, job, type",
+    "example": "local result = pr_lib.police.getJobType(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getJobDuty(source?)",
+    "detail": "Retorna se job.onduty é true.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, job, duty",
+    "example": "local result = pr_lib.police.getJobDuty(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getJobData(source?, key?)",
+    "detail": "Servidor: source/key; cliente: key. Sem key retorna job inteiro; caso contrário retorna seu campo.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, job, data",
+    "example": "local result = pr_lib.police.getJobData(GetPlayerServerId(PlayerId()), 'example_key')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.isBoss(source?)",
+    "detail": "Retorna se job.isboss é true.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, is, boss",
+    "example": "local result = pr_lib.police.isBoss(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getJobGradeName(source?)",
+    "detail": "Retorna nome do grau, inclusive tabela job.grade; fallback de catálogo no servidor.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, job, grade, name",
+    "example": "local result = pr_lib.police.getJobGradeName(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.getJobGradePay(source?)",
+    "detail": "Retorna job.payment ou 0.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, get, job, grade, pay",
+    "example": "local result = pr_lib.police.getJobGradePay(GetPlayerServerId(PlayerId()))\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.debug(...)",
+    "detail": "Log com tag do recurso; só escreve quando Config.Debug está habilitado.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, debug",
+    "example": "local result = pr_lib.police.debug()\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.info(...)",
+    "detail": "Log informativo com tag do recurso.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, info",
+    "example": "local result = pr_lib.police.info()\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.warn(...)",
+    "detail": "Log de aviso com tag do recurso.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, warn",
+    "example": "local result = pr_lib.police.warn()\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client/server",
+    "signature": "pr_lib.police.error(...)",
+    "detail": "Log de erro com tag do recurso; não lança exceção.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client/server, compatibilidade policial: compartilhado, error",
+    "example": "local result = pr_lib.police.error()\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getPlayer(source)",
+    "detail": "Aceita objeto de player ou source e consulta framework.GetPlayer.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, player",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.police.getPlayer(source)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getPlayerByIdentifier(identifier)",
+    "detail": "Procura jogador por identificador; fallback offline usa qbx_core.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, player, by, identifier",
+    "example": "local result = pr_lib.police.getPlayerByIdentifier('license:example')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getPlayerData(source)",
+    "detail": "Retorna PlayerData do objeto/source/identificador ou tabela vazia.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, player, data",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.police.getPlayerData(source)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getAllPlayers()",
+    "detail": "Retorna lista de sources numéricos conectados.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, all, players",
+    "example": "local result = pr_lib.police.getAllPlayers()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getPlayerNameByIdentifier(identifier)",
+    "detail": "Retorna nome completo do jogador online/offline encontrado.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, player, name, by, identifier",
+    "example": "local result = pr_lib.police.getPlayerNameByIdentifier('license:example')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getMetadata(source, key)",
+    "detail": "Retorna campo de PlayerData.metadata.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, metadata",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.police.getMetadata(source, 'example_key')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getCharInfo(source, key)",
+    "detail": "Retorna campo de PlayerData.charinfo.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, char, info",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.police.getCharInfo(source, 'example_key')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.addMoney(source, account, amount, reason?)",
+    "detail": "Delega a framework.addPlayerMoney; conta padrão cash.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, add, money",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.police.addMoney(source, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.removeMoney(source, account, amount, reason?)",
+    "detail": "Delega a framework.removePlayerMoney; conta padrão cash.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, remove, money",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.police.removeMoney(source, 'cash', 1, 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getSharedJob(name)",
+    "detail": "Consulta catálogo de empregos pelo export qbx_core:GetJobs.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, shared, job",
+    "example": "local result = pr_lib.police.getSharedJob('example:action')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getSharedJobData(name, key)",
+    "detail": "Retorna campo do emprego compartilhado.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, shared, job, data",
+    "example": "local result = pr_lib.police.getSharedJobData('example:action', 'example_key')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getSharedJobGrade(name, grade)",
+    "detail": "Retorna grau com chave numérica ou string no catálogo QBX.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, shared, job, grade",
+    "example": "local result = pr_lib.police.getSharedJobGrade('example:action', 1)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getSharedJobGradeData(name, grade, key)",
+    "detail": "Retorna campo do grau compartilhado.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, shared, job, grade, data",
+    "example": "local result = pr_lib.police.getSharedJobGradeData('example:action', 1, 'example_key')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getJobCount(name)",
+    "detail": "Conta jogadores em serviço com job.name correspondente.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, job, count",
+    "example": "local result = pr_lib.police.getJobCount('example:action')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.getJobTypeCount(name)",
+    "detail": "Conta jogadores em serviço com job.type correspondente.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, get, job, type, count",
+    "example": "local result = pr_lib.police.getJobTypeCount('example:action')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "server",
+    "signature": "pr_lib.police.notify(source, message, kind?, duration?)",
+    "detail": "Envia evento de notificação do consumidor para o cliente indicado.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, server, compatibilidade policial: servidor, notify",
+    "example": "local source = source -- ID do jogador no servidor (obtido do evento/comando)\nlocal result = pr_lib.police.notify(source, 'Exemplo do PR Bridge', nil, 1)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.getPlayer()",
+    "detail": "Retorna PlayerPedId, não o objeto PlayerData do servidor.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, get, player",
+    "example": "local result = pr_lib.police.getPlayer()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.getPlayerData()",
+    "detail": "Retorna dados do personagem local através de framework.GetPlayerData, ou tabela vazia.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, get, player, data",
+    "example": "local result = pr_lib.police.getPlayerData()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.getMetadata(key)",
+    "detail": "Retorna campo de PlayerData.metadata do personagem local.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, get, metadata",
+    "example": "local result = pr_lib.police.getMetadata('example_key')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.getCharInfo(key)",
+    "detail": "Retorna campo de PlayerData.charinfo do personagem local.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, get, char, info",
+    "example": "local result = pr_lib.police.getCharInfo('example_key')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.notify(message, kind?, duration?)",
+    "detail": "Exibe notificação via menus.notify ou pr_lib.Notify, normalizando info para inform.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, notify",
+    "example": "local result = pr_lib.police.notify('Exemplo do PR Bridge', nil, 1)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.isDead()",
+    "detail": "Considera isdead/inlaststand e natives de morte/saúde do ped.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, is, dead",
+    "example": "local result = pr_lib.police.isDead()\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.addKeybind(key, command, description)",
+    "detail": "Registra mapeamento de teclado para comando.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, add, keybind",
+    "example": "local result = pr_lib.police.addKeybind('example_key', 'example:action', 'Exemplo do PR Bridge')\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.requestModel(model)",
+    "detail": "Solicita modelo por pr_lib.requestModel protegido e retorna se carregou.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, request, model",
+    "example": "local result = pr_lib.police.requestModel('prop_ld_flow_bottle')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "police",
+    "context": "client",
+    "signature": "pr_lib.police.requestAnim(dict)",
+    "detail": "Solicita dicionário por pr_lib.requestAnimDict e retorna se carregou.",
+    "directory": "bridge/compat/police.lua",
+    "tags": "police, client, compatibilidade policial: cliente, request, anim",
+    "example": "local result = pr_lib.police.requestAnim(nil)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.number(value)",
+    "detail": "Converte número finito; NaN e infinitos retornam nil.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, number",
+    "example": "local result = PRProgression.number({})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.round(value)",
+    "detail": "Arredonda número em quatro casas decimais.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, round",
+    "example": "local result = PRProgression.round({})\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.copy(value)",
+    "detail": "Copia profundamente tabelas.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, copy",
+    "example": "local result = PRProgression.copy({})\nprint('Resultado:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.session(values, token, now)",
+    "detail": "Cria ledger do servidor com cópia de valores, token único, budgets, ack e revisão inicial.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, session",
+    "example": "local result = PRProgression.session(nil, 'example_token', nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.change(session, name, delta, maximum)",
+    "detail": "Aplica alteração limitada, marca dirty/revisão e retorna delta realmente aplicado.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, change",
+    "example": "local result = PRProgression.change(nil, 'example:action', nil, 1)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.packet(session)",
+    "detail": "Cria snapshot { token, revision, values, ack } com cópias defensivas.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, packet",
+    "example": "local result = PRProgression.packet(nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.accept(session, packet, resolve, now)",
+    "detail": "Valida lote inteiro antes de alterar: sessão, contadores, regras, direção e orçamento. Contadores cumulativos tornam retries idempotentes; retorna sucesso e alterações ou false/motivo.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, accept",
+    "example": "local result = PRProgression.accept(nil, nil, nil, nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.client()",
+    "detail": "Cria ledger do cliente com valores, counters, ack e revisão -1.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, client",
+    "example": "local result = PRProgression.client()\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.receive(client, packet, maximum)",
+    "detail": "Recebe snapshot, rejeita revisão antiga e reaplica alterações locais ainda não reconhecidas. maximum(name) informa o limite de cada atributo.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, receive",
+    "example": "local result = PRProgression.receive(nil, nil, 1)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.clientChange(client, name, delta, maximum)",
+    "detail": "Aplica previsão local com limite e soma counters cumulativos; sem token retorna false, \"not_loaded\".",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, client, change",
+    "example": "local result = PRProgression.clientChange(nil, 'example:action', nil, 1)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "progression.lua",
+    "context": "shared",
+    "signature": "PRProgression.snapshot(client)",
+    "detail": "Retorna { token, counters } ou nil quando não há sessão carregada.",
+    "directory": "shared/progression.lua",
+    "tags": "progression.lua, shared, progressão: utilitário compartilhado opt-in, snapshot",
+    "example": "local result = PRProgression.snapshot(nil)\nprint('Resultado:', result)"
+  },
+  {
+    "module": "addExports",
+    "context": "client/server",
+    "signature": "pr_lib.addExports(name, callback?)",
+    "detail": "Registra export no recurso consumidor; aceita mapa nome→função, nome/função, função/nome, função inferível ou nome global. Retorna true ou false/motivo. Aliases addExport/AddExport/AddExports.",
+    "directory": "init.lua",
+    "tags": "addExports, client/server, entradas públicas antes ausentes do índice, add, exports",
+    "example": "local result = pr_lib.addExports('example:action', function(value) print('Callback:', value) end)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "getLocales",
+    "context": "client/server",
+    "signature": "pr_lib.getLocales(invokingResource?)",
+    "detail": "Retorna getAll() da instância locale do consumidor ou do recurso explicitado.",
+    "directory": "init.lua",
+    "tags": "getLocales, client/server, entradas públicas antes ausentes do índice, get, locales",
+    "example": "local result = pr_lib.getLocales('my_resource')\nprint('Resultado:', result)"
+  },
+  {
+    "module": "logger",
+    "context": "client/server",
+    "signature": "pr_lib.logger(source, event, message, tag?)",
+    "detail": "Imprime log com nome do recurso, evento e tag opcional; source é parâmetro de compatibilidade e não altera o texto.",
+    "directory": "init.lua",
+    "tags": "logger, client/server, entradas públicas antes ausentes do índice",
+    "example": "local result = pr_lib.logger(GetPlayerServerId(PlayerId()), 'example:action', 'Exemplo do PR Bridge', nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "waitFor",
+    "context": "client/server",
+    "signature": "pr_lib.waitFor(callback, message?, timeout?)",
+    "detail": "Consulta callback até resultado não-nil; timeout padrão 1000ms. No timeout lança message se fornecido, ou retorna false.",
+    "directory": "init.lua",
+    "tags": "waitFor, client/server, entradas públicas antes ausentes do índice, wait, for",
+    "example": "local result = pr_lib.waitFor(function(value) print('Callback:', value) end, 'Exemplo do PR Bridge', 1)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "setInterval",
+    "context": "client/server",
+    "signature": "pr_lib.setInterval(callback, interval?, ...)",
+    "detail": "Cria intervalo local e retorna id; se callback for id numérico, altera atraso do intervalo existente. Pausa entre execuções e encerra no recurso.",
+    "directory": "init.lua",
+    "tags": "setInterval, client/server, entradas públicas antes ausentes do índice, set, interval",
+    "example": "local result = pr_lib.setInterval(function(value) print('Callback:', value) end, nil)\nprint('Retorno da operação:', result)"
+  },
+  {
+    "module": "locale.lua",
+    "context": "client/server",
+    "signature": "lang:getAll()",
+    "detail": "Retorna tabela das frases da instância locale; permite encaminhar as traduções para a NUI do consumidor.",
+    "directory": "bridge/locale.lua",
+    "tags": "locale.lua, client/server, locale: snapshot das traduções, get, all",
+    "example": "local lang = pr_lib.locale(GetCurrentResourceName())\nlocal result = lang:getAll()\nprint('Resultado:', result)"
   }
 ];
 export const PR_BRIDGE_MODULES = [
-  "core",
-  "locale",
-  "cache",
-  "debug",
-  "events",
-  "framework",
-  "inventory",
-  "notification",
-  "alert",
-  "menu",
-  "interface",
-  "textui_adapter",
-  "input",
-  "target",
-  "phone",
-  "progressbar",
-  "minigame",
-  "weather",
-  "database",
-  "fuel",
-  "vehicle_key",
-  "banking",
-  "callback",
   "ace",
+  "addExports",
   "addcommand",
   "addkeybind",
-  "translator",
-  "github",
-  "utils",
-  "math",
-  "table",
-  "ids",
-  "fivem.raycast",
-  "fivem.net",
-  "fivem.ui",
-  "fivem.dui",
-  "fivem.tuning",
-  "fivem.drawtext",
-  "fivem.vehicleProperties",
-  "fivem.streaming",
-  "fivem.objects",
-  "fivem.vehicleCache",
+  "alert",
+  "banking",
+  "cache",
+  "callback",
+  "core",
+  "database",
+  "debug",
+  "devtools",
+  "doorlock",
+  "emotes",
+  "entities",
+  "environment",
+  "events",
+  "fivem.aliases",
   "fivem.blips",
+  "fivem.devtools",
+  "fivem.drawtext",
+  "fivem.dui",
+  "fivem.gizmo",
   "fivem.identifiers",
   "fivem.instructionalButtons",
-  "fivem.devtools",
-  "fivem.aliases",
+  "fivem.net",
+  "fivem.objects",
+  "fivem.raycast",
+  "fivem.streaming",
+  "fivem.tuning",
+  "fivem.ui",
+  "fivem.vehicleCache",
+  "fivem.vehicleProperties",
   "fivem.vehicleState",
-  "fivem.gizmo",
-  "string",
-  "timer",
-  "entities",
+  "framework",
+  "fuel",
+  "garage",
+  "getLocales",
+  "github",
+  "ids",
+  "input",
   "interact",
-  "radial",
+  "interface",
+  "inventory",
+  "jsonDraft",
+  "loadJsonRecovery",
+  "locale",
+  "locale.lua",
+  "logger",
+  "math",
+  "menu",
+  "minigame",
+  "notification",
+  "phone",
+  "player",
   "points",
-  "zones",
-  "garage"
+  "police",
+  "prison",
+  "progressbar",
+  "progression.lua",
+  "radial",
+  "recordJsonIncident",
+  "saveJsonBatch",
+  "saveJsonRecovery",
+  "setInterval",
+  "settings",
+  "string",
+  "table",
+  "target",
+  "textui_adapter",
+  "timer",
+  "translator",
+  "utils",
+  "vehicle_key",
+  "waitFor",
+  "weather",
+  "withJsonLock",
+  "wrapJsonMutations",
+  "zones"
 ];
-export const PR_BRIDGE_API_COUNT = 1097;
-export const PR_BRIDGE_SOURCE_VERSION = "1.3.1";
-export const PR_BRIDGE_SOURCE_REVISION = "93e638b3060e647d3d20030f068d65c37ad269d1";
+export const PR_BRIDGE_API_COUNT = 1213;
+export const PR_BRIDGE_SOURCE_VERSION = "1.4.8";
+export const PR_BRIDGE_SOURCE_REVISION = "59fbcb60eddeb15aac35b62061c5ef5c330623ae";
