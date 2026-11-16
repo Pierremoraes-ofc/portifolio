@@ -294,5 +294,51 @@ export function localizedExample(entry, locale) {
       + "local result = pr_lib.framework.GetPlayer(playerSource)\n"
       + "print('" + safePrintLabel('player', locale) + ":', result)";
   }
+
+  // Explicit examples for APIs with documented multi-value or callable returns.
+  if (entry.signature === 'pr_lib.loadFile(resource, fileName, env, optional)') {
+    code = "local chunk = pr_lib.loadFile('my_resource', 'modules/example.lua', nil, true)\n"
+      + "print('" + safePrintLabel('function', locale) + ":', chunk)\n"
+      + "if chunk then\n"
+      + "    local moduleValue = chunk()\n"
+      + "    print('" + safePrintLabel('module', locale) + ":', moduleValue)\n"
+      + "end";
+  }
+  if (/^pr_lib\.(saveJson|writeJson)\(path, value, options\)$/.test(entry.signature)) {
+    const func = entry.signature.split('(')[0];
+    code = "local saved, details = " + func + "('@my_resource/data/config', { enabled = true })\n"
+      + "print('" + (pt ? 'Gravação concluída' : 'Save succeeded') + ":', saved)\n"
+      + "print('" + (pt ? 'Detalhes ou erro' : 'Details or error') + ":', details)";
+  }
+  if (/^pr_lib\.(updateJson|mergeJson)\(path, changes, options\)$/.test(entry.signature)) {
+    const func = entry.signature.split('(')[0];
+    code = "local success, updated, details = " + func + "('@my_resource/data/config', { enabled = true })\n"
+      + "print('" + (pt ? 'Atualização concluída' : 'Update succeeded') + ":', success)\n"
+      + "print('" + (pt ? 'Dados atualizados ou motivo de erro' : 'Updated data or error') + ":', updated)\n"
+      + "print('" + (pt ? 'Detalhes da gravação' : 'Save details') + ":', details)";
+  }
+  if (entry.signature === 'pr_lib.jsonExists(path)') {
+    code = "local exists = pr_lib.jsonExists('@my_resource/data/config.json')\n"
+      + "print('" + safePrintLabel('boolean', locale) + ":', exists)";
+  }
+  if (/^pr_lib\.cache\.GetResourceState\(/.test(entry.signature)) {
+    code = "local state = pr_lib.cache.GetResourceState('my_resource', 'status')\n"
+      + "print('" + safePrintLabel('table', locale) + ":', state and json.encode(state) or 'nil')";
+  }
+  if (/^pr_lib\.cache\.OnResourceState\(/.test(entry.signature)) {
+    code = "local unsubscribe = pr_lib.cache.OnResourceState('my_resource', 'status', function(newValue, oldValue)\n"
+      + "    print('" + (pt ? 'Novo estado' : 'New state') + ":', newValue)\n"
+      + "end)\n"
+      + "print('" + safePrintLabel('callback', locale) + ":', unsubscribe)\n"
+      + "-- " + (pt ? 'Chame unsubscribe() quando não precisar mais do listener, conforme o contrato.' : 'Call unsubscribe() when the listener is no longer needed, as supported by the API.') ;
+  }
+  if (/^pr_lib\.frameworkRouting\.select\(/.test(entry.signature)) {
+    code = "local route = pr_lib.frameworkRouting.select({ 'qb', 'esx' })\n"
+      + "print('" + (pt ? 'Framework selecionado' : 'Selected framework') + ":', route)";
+  }
+  if (/^pr_lib\.environment\.getMode\(/.test(entry.signature)) {
+    code = "local mode = pr_lib.environment.getMode()\n"
+      + "print('" + (pt ? 'Modo do ambiente' : 'Environment mode') + ":', mode)";
+  }
   return code;
 }
