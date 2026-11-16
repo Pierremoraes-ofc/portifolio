@@ -627,7 +627,7 @@ export default function PrBridgeLibrary({ locale = 'pt-BR' }) {
                 <div className="bridge-api-meta">
                   <div>
                     <span>{pt ? 'Parâmetros' : 'Parameters'}</span>
-                    <div>{parsed.args.length ? parsed.args.map((arg) => <code key={arg} title={describeParameter(arg, entry.context, pt)}>{arg}</code>) : <em>{pt ? 'Sem parâmetros' : 'No parameters'}</em>}</div>
+                    <div className="bridge-api-parameters">{parsed.args.length ? parsed.args.map((arg, argIndex) => <div className="bridge-api-param" key={`${arg}-${argIndex}`}><code>{arg}</code><span>{describeParameter(arg, entry.context, pt)}</span></div>) : <em>{pt ? 'Sem parâmetros' : 'No parameters'}</em>}</div>
                   </div>
                   <div>
                     <span>{pt ? 'Retorno' : 'Return'}</span>
