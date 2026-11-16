@@ -71,6 +71,39 @@ export const ANIMATE_CONFIG_DOC = {
       ]
     },
     {
+      "id": "gallery",
+      "title": {
+        "pt": "Demonstrações e capturas",
+        "en": "Screenshots and demonstrations"
+      },
+      "text": {
+        "pt": "Capturas reais do PR Animate Config, exibindo a interface original do FiveM: editor de animações e props, seleção visual de ossos, prévia com chroma key, edição com gizmo 3D e exportação de configurações. Clique em uma imagem para abrir em tamanho maior.",
+        "en": "Original PR Animate Config screenshots from FiveM, showing the animation and prop editor, visual bone selection, chroma-key preview, 3D gizmo editing and configuration exports. Click a screenshot to view it full-size."
+      },
+      "gallery": [
+        [
+          "Editor de animações e conexão de props",
+          "./animate-config/capture-01.png"
+        ],
+        [
+          "Seleção visual de ossos",
+          "./animate-config/capture-02.png"
+        ],
+        [
+          "Prévia com chroma key verde",
+          "./animate-config/capture-03.png"
+        ],
+        [
+          "Edição de posicionamento com gizmo 3D",
+          "./animate-config/capture-04.png"
+        ],
+        [
+          "Gerador de configurações Lua, JSON e Scully",
+          "./animate-config/capture-05.png"
+        ]
+      ]
+    },
+    {
       "id": "requirements",
       "title": {
         "pt": "Requisitos e instalação",
