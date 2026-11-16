@@ -1076,3 +1076,14 @@ footer{display:flex;justify-content:space-between;padding-top:30px;color:#4d4d56
 
 .sidebar-support-official:empty,
 .support-footer-official:empty{display:none!important}
+
+/* PR Bridge API catalog: accessible Lua tokens and progressive results */
+.bridge-lua-comment { color: #8793a1; }
+.bridge-lua-string { color: #a8d7a3; }
+.bridge-lua-number { color: #dfa4f6; }
+.bridge-lua-keyword { color: #78b6f2; }
+.bridge-lua-builtin { color: #e3bb78; }
+.bridge-api-more { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: center; padding: 26px 0; color: var(--text-muted, #969da8); }
+.bridge-api-more button { border: 1px solid var(--line, #3a414b); background: transparent; color: inherit; border-radius: 8px; padding: 11px 18px; cursor: pointer; }
+.bridge-api-more button:hover { border-color: #72a9e7; color: #ffffff; }
+.bridge-api-meta a code { color: #8fbef5; }
